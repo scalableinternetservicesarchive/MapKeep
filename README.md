@@ -2,12 +2,10 @@ MapKeep
 =======
 
 * A location-based note taking application.
-* https://www.pivotaltracker.com/n/projects/1321084
-=======
+* [PivotalTracker](https://www.pivotaltracker.com/n/projects/1321084)
 
-Members
+Team Members
 =======
-Anthony Miyaguchi
-![anthony]
-[anthony]: https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/anthony_miyaguchi.jpg
+Anthony Miyaguchi([@acmiyaguchi](https://github.com/acmiyaguchi))
+![anthony]: https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/anthony_miyaguchi.jpg
 
