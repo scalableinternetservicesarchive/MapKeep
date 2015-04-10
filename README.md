@@ -7,6 +7,6 @@ Members
 =======
 Anthony Miyaguchi
 ![anthony]
-[anthony]: https://github.com/acmiyaguchi/MapKeep/raw/photos/res/photos/anthony_miyaguchi.jpg
+[anthony]: https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/anthony_miyaguchi.jpg
 
 
