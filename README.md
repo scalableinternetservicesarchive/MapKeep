@@ -7,8 +7,10 @@ MapKeep
 Team Members
 =======
 Anthony Miyaguchi([@acmiyaguchi](https://github.com/acmiyaguchi))
+
 ![anthony](https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/anthony_miyaguchi.jpg)
 
 Tania DePasquale
+
 ![tania]
 [tania]: https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/tania_depasquale.jpg
