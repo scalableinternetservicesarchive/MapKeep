@@ -11,5 +11,5 @@ Anthony Miyaguchi
 [anthony]: https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/anthony_miyaguchi.jpg
 
 Tania DePasquale
-![tania =200]
+![tania]
 [tania]: https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/tania_depasquale.jpg
