@@ -13,5 +13,19 @@
  *= require_tree .
  *= require_self
  *= require foundation_and_overrides
-
  */
+
+@import "foundation_and_overrides";
+
+.alert-success {
+  background-color: #92CCA6;
+  height: $topbar-height;
+  line-height: $topbar-height;
+  margin-top: -$topbar-height;
+  margin-bottom: $topbar-height/2;
+  text-align: center;
+}
+
+.alert-danger {
+  background-color: red;
+}
