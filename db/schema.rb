@@ -18,14 +18,12 @@ ActiveRecord::Schema.define(version: 20150414213457) do
     t.text     "body"
     t.decimal  "latitude"
     t.decimal  "longitude"
-    t.integer  "user_id_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer  "user_id"
   end
 
   add_index "notes", ["user_id"], name: "index_notes_on_user_id"
-  add_index "notes", ["user_id_id"], name: "index_notes_on_user_id_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false
