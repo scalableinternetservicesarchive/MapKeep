@@ -11,7 +11,31 @@
     </div>
   <% end %>
 
+  <div class="field">
+    <%= f.label :title %><br>
+    <%= f.text_field :title %>
+  </div>
+
+  <div class="field">
+    <%= f.label :body %><br>
+    <%= f.text_area :body, rows: 10 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :latitude %><br>
+    <%= f.text_field :latitude %>
+  </div>
+
+  <div class="field">
+    <%= f.label :longitude %><br>
+    <%= f.text_field :longitude %>
+  </div>
+
   <div class="actions">
     <%= f.submit %>
   </div>
+<% end %>
+
+<% if @note.new_record? %>
+  <%= javascript_include_tag 'geolocation' %>
 <% end %>
