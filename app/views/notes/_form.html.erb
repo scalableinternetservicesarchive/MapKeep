@@ -31,11 +31,11 @@
     <%= f.text_field :longitude %>
   </div>
 
-  <% if @note.new_record? %>
-    <%= javascript_include_tag 'geolocation' %>
-  <% end %>
-
   <div class="actions">
     <%= f.submit %>
   </div>
+<% end %>
+
+<% if @note.new_record? %>
+  <%= javascript_include_tag 'geolocation' %>
 <% end %>
