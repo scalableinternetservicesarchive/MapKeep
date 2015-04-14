@@ -1,32 +1,93 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>MapsKeep</title>
-  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
-  <%= csrf_meta_tags %>
-</head>
-<body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<div>
-<% if user_signed_in? %>
-        Logged in as <strong><%= current_user.email %></strong>.
-    <%= link_to 'Edit profile', edit_user_registration_path %> |
-    <%= link_to "Logout", destroy_user_session_path, method: :delete  %>
-<% else %>
-        <%= link_to "Sign up", new_user_registration_path  %> |
-    <%= link_to "Login", new_user_session_path  %>
-<% end %>
-</div>
+    <title><%= content_for?(:title) ? yield(:title) : "foundation-rails" %></title>
 
-<% if notice %>
-    <p class="alert alert-sucess"><%= notice %></p>
-<% end %>
-<% if alert %>
-    <p class="alert alert-danger"><%= alert %></p>
-<% end %>
+    <%= stylesheet_link_tag    "application" %>
+    <%= javascript_include_tag "vendor/modernizr" %>
+    <%= javascript_include_tag "application", 'data-turbolinks-track' => true %>
+    <%= csrf_meta_tags %>
+  </head>
 
-<%= yield %>
+  <body>
+    <% if notice %>
+      <p class="alert alert-sucess"><%= notice %></p>
+    <% end %>
+    <% if alert %>
+      <p class="alert alert-danger"><%= alert %></p>
+    <% end %>
 
-</body>
+    <div class="row">
+      <div class="large-12 columns">
+        <div class="panel">
+          <h1>MapKeep</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="large-3 columns ">
+        <div class="panel">
+          <a href="#"><img src="http://placehold.it/300x240&text=[img]"/></a>
+          <% if user_signed_in? %>
+            <h5>Logged in as <strong><%= current_user.email %></strong>.</h5>
+            <%= link_to 'Edit profile', edit_user_registration_path %> |
+            <%= link_to "Logout", destroy_user_session_path, method: :delete  %>
+          <% else %>
+            <%= link_to "Sign up", new_user_registration_path  %> |
+            <%= link_to "Login", new_user_session_path  %>
+          <% end %>
+
+          <div class="section-container vertical-nav" data-section data-options="deep_linking: false; one_up: true">
+            <section class="section">
+              <h5 class="title"><a href="#">Section 1</a></h5>
+            </section>
+            <section class="section">
+              <h5 class="title"><a href="#">Section 2</a></h5>
+            </section>
+            <section class="section">
+              <h5 class="title"><a href="#">Section 3</a></h5>
+            </section>
+            <section class="section">
+              <h5 class="title"><a href="#">Section 4</a></h5>
+            </section>
+            <section class="section">
+              <h5 class="title"><a href="#">Section 5</a></h5>
+            </section>
+            <section class="section">
+              <h5 class="title"><a href="#">Section 6</a></h5>
+            </section>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="large-7 columns">
+        <div class="row">
+          <%= yield %>
+        </div>
+      </div>
+      <div class="large-2 columns"></div>
+    </div>
+
+    <footer class="row">
+      <div class="large-12 columns">
+        <hr/>
+        <div class="row">
+          <div class="large-5 columns">
+            <p>© Copyright no one at all. Go to town.</p>
+          </div>
+          <div class="large-7 columns">
+            <ul class="inline-list right">
+              <li><a href="#">Section 1</a></li>
+              <li><a href="#">Section 2</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
 </html>
