@@ -22,22 +22,23 @@
         <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
       </ul>
       <section class="top-bar-section">
-          <ul class="right">
-            <% if user_signed_in? %>
-            <li class="has-dropdown">    
-            <%= link_to current_user.email, 'javascript:;' %>
-                <ul class="dropdown">
-                    <li><%= link_to 'Edit profile', edit_user_registration_path %></li>
-                    <li><%= link_to "Logout", destroy_user_session_path, method: :delete %></li>
-                </ul>
-            </li>
-          <% else %>
-            <li><%= link_to "Sign up", new_user_registration_path  %></li>
-            <li><%= link_to "Login", new_user_session_path  %></li>
-          <% end %>
-          </ul>
-  </section>
+        <ul class="right">
+          <% if user_signed_in? %>
+          <li class="has-dropdown">
+          <%= link_to current_user.email, 'javascript:;' %>
+              <ul class="dropdown">
+                  <li><%= link_to 'Edit profile', edit_user_registration_path %></li>
+                  <li><%= link_to "Logout", destroy_user_session_path, method: :delete %></li>
+              </ul>
+          </li>
+        <% else %>
+          <li><%= link_to "Sign up", new_user_registration_path  %></li>
+          <li><%= link_to "Login", new_user_session_path  %></li>
+        <% end %>
+        </ul>
+      </section>
     </nav>
+
     <% if notice %>
       <div class="alert alert-success"><%= notice %></div>
     <% end %>
@@ -45,11 +46,27 @@
       <div class="alert alert-danger"><%= alert %></div>
     <% end %>
 
-      <div class="large-7 columns">
+    <div class="row">
+      <div class="large-7 large-push-3 columns">
         <div class="row">
           <%= yield %>
         </div>
       </div>
+
+      <div class="large-3 large-pull-7 columns">
+        Stuff
+        <ul class="side-nav">
+          <li><%= link_to 'Notes', notes_path %></li>
+          <li><%= link_to 'Albums', albums_path %></li>
+        </ul>
+        Albums
+        <ul class="side-nav">
+        <% current_user.albums.each do |album| %>
+          <li><%= link_to album.title, album %></li>
+        <% end %>
+        </ul>
+      </div>
+
       <div class="large-2 columns"></div>
     </div>
 

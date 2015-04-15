@@ -13,7 +13,7 @@
 <p>
   <strong>Notes:</strong>
   <% @album.notes.each do |note| %>
-    <%= note.title %>,
+    <%= link_to note.title, note %><%= ', ' unless note == @album.notes.last %>
   <% end %>
 </p>
 
