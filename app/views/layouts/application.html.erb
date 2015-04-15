@@ -59,11 +59,13 @@
           <li><%= link_to 'Notes', notes_path %></li>
           <li><%= link_to 'Albums', albums_path %></li>
         </ul>
-        Albums
-        <ul class="side-nav">
-        <% current_user.albums.each do |album| %>
-          <li><%= link_to album.title, album %></li>
-        <% end %>
+        <% unless current_user.nil? %>
+          Albums
+          <ul class="side-nav">
+          <% current_user.albums.each do |album| %>
+            <li><%= link_to album.title, album %></li>
+          <% end %>
+        <%end %>
         </ul>
       </div>
 
