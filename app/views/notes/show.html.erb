@@ -19,5 +19,12 @@
   <%= @note.longitude %>
 </p>
 
+<p>
+  <strong>Albums:</strong>
+  <% @note.albums.each do |album| %>
+    <%= album.title %>,
+  <% end %>
+</p>
+
 <%= link_to 'Edit', edit_note_path(@note) %> |
 <%= link_to 'Back', notes_path %>
