@@ -13,7 +13,7 @@
   </head>
 
   <body>
-    <nav class="top-bar" data-topbar="" role="navigation">
+    <nav class="top-bar" data-topbar data-no-turbolink role="navigation">
       <ul class="title-area">
         <li class="name">
           <h1><a href="/">MapKeep</a></h1>
@@ -21,6 +21,22 @@
         <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
         <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
       </ul>
+      <section class="top-bar-section">
+          <ul class="right">
+            <% if user_signed_in? %>
+            <li class="has-dropdown">    
+            <%= link_to current_user.email, 'javascript:;' %>
+                <ul class="dropdown">
+                    <li><%= link_to 'Edit profile', edit_user_registration_path %></li>
+                    <li><%= link_to "Logout", destroy_user_session_path, method: :delete %></li>
+                </ul>
+            </li>
+          <% else %>
+            <li><%= link_to "Sign up", new_user_registration_path  %></li>
+            <li><%= link_to "Login", new_user_session_path  %></li>
+          <% end %>
+          </ul>
+  </section>
     </nav>
     <% if notice %>
       <div class="alert alert-success"><%= notice %></div>
@@ -28,30 +44,6 @@
     <% if alert %>
       <div class="alert alert-danger"><%= alert %></div>
     <% end %>
-
-    <div class="row">
-      <div class="large-3 columns ">
-        <div class="panel">
-          <a href="#"><img src="http://placehold.it/300x240&text=[img]"/></a>
-          <% if user_signed_in? %>
-            <h5>Logged in as <strong><%= current_user.email %></strong>.</h5>
-            <%= link_to 'Edit profile', edit_user_registration_path %> |
-            <%= link_to "Logout", destroy_user_session_path, method: :delete  %>
-          <% else %>
-            <%= link_to "Sign up", new_user_registration_path  %> |
-            <%= link_to "Login", new_user_session_path  %>
-          <% end %>
-          <hr />
-          <div class="section-container vertical-nav" data-section data-options="deep_linking: false; one_up: true">
-            <section class="section">
-              <h5 class="title"><a href="#">Album 1</a></h5>
-            </section>
-            <section class="section">
-              <h5 class="title"><a href="#">Album 2</a></h5>
-            </section>
-          </div>
-        </div>
-      </div>
 
       <div class="large-7 columns">
         <div class="row">
