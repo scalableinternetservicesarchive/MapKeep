@@ -3,6 +3,7 @@ require 'test_helper'
 class NotesControllerTest < ActionController::TestCase
   setup do
     @note = notes(:one)
+    sign_in users(:one)
   end
 
   test "should get index" do
@@ -18,7 +19,7 @@ class NotesControllerTest < ActionController::TestCase
 
   test "should create note" do
     assert_difference('Note.count') do
-      post :create, note: {  }
+      post :create, note: @note.as_json
     end
 
     assert_redirected_to note_path(assigns(:note))
@@ -35,7 +36,7 @@ class NotesControllerTest < ActionController::TestCase
   end
 
   test "should update note" do
-    patch :update, id: @note, note: {  }
+    patch :update, id: @note, note: @note.as_json
     assert_redirected_to note_path(assigns(:note))
   end
 
