@@ -2,14 +2,8 @@
 
 one:
   title: MyString
-  body: MyString
-  latitude: 9.99
-  longitude: 9.99
-  user_id: 1
+  description: MyText
 
 two:
   title: MyString
-  body: MyString
-  latitude: 9.99
-  longitude: 9.99
-  user_id: 1
+  description: MyText

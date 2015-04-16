@@ -1,0 +1,35 @@
+<%= form_for(@album) do |f| %>
+  <% if @album.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@album.errors.count, "error") %> prohibited this album from being saved:</h2>
+
+      <ul>
+      <% @album.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :title %><br>
+    <%= f.text_field :title %>
+  </div>
+  <div class="field">
+    <%= f.label :description %><br>
+    <%= f.text_area :description %>
+  </div>
+
+  <h4>Notes to include...</h4>
+  <% current_user.notes.each do |note| %>
+    <div>
+      <%= check_box_tag :note_ids, note.id, @album.notes.include?(note), :name => 'album[note_ids][]' -%>
+      <%= label_tag :note_ids, note.title -%>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.hidden_field :user_id, :value => current_user.id %>
+    <%= f.submit 'Submit', :class => 'button' %>
+  </div>
+<% end %>
