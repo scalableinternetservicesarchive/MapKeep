@@ -29,6 +29,8 @@ class NotesController < ApplicationController
 
     respond_to do |format|
       if @note.save
+        @form_id = params[:form_id]
+        format.js
         format.html { redirect_to @note, notice: 'Note was successfully created.' }
         format.json { render :show, status: :created, location: @note }
       else
@@ -70,6 +72,7 @@ class NotesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def note_params
-      params.require(:note).permit(:title, :body, :latitude, :longitude, :user_id, { :album_ids => [] })
+      params.require(:note).permit(:title, :body, :latitude, :longitude,
+                                   :user_id, { :album_ids => [] }, :form_id)
     end
 end

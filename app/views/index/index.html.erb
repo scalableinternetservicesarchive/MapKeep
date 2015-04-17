@@ -1,0 +1,7 @@
+<div id="map-canvas"></div>
+<%= javascript_include_tag 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBTrBJkp-8i6MZKKotUoTnzoUiXV_zlIVg' %>
+<%= javascript_include_tag 'geolocation' %>
+<%= javascript_tag do %>
+  MAPKEEP.init(<%= raw @notes.to_json %>, '<%= session[:_csrf_token] %>');
+  google.maps.event.addDomListener(window, 'load', MAPKEEP.initMap);
+<% end %>
