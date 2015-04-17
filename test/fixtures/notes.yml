@@ -1,15 +1,13 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
+all_fields:
   title: MyString
   body: MyString
   latitude: 9.99
   longitude: 9.99
   user_id: 1
 
-two:
+no_coords:
   title: MyString
   body: MyString
-  latitude: 9.99
-  longitude: 9.99
   user_id: 1
