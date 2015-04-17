@@ -14,3 +14,6 @@ Tania DePasquale
 
 ![tania]
 [tania]: https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/tania_depasquale.jpg
+
+Stephen Hernandez ([@smhernandez](https://github.com/smhernandez))
+![stephen](https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/stephen_hernandez.jpg)
