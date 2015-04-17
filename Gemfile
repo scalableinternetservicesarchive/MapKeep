@@ -28,7 +28,6 @@ gem 'devise'
 
 # Gem for Foundation
 gem 'foundation-rails'
-gem 'gmaps4rails'
 
 gem 'jquery-turbolinks'
 
