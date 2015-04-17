@@ -1,0 +1,38 @@
+// Place all the styles related to the index controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+@import "foundation_and_overrides";
+
+.index {
+  $topbar-margin-bottom: 0;
+
+  #main {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: $topbar-height;
+  }
+
+  #map-canvas {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #sidebar {
+    margin-top: $topbar-height/2;
+  }
+
+  .full {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .alert {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}

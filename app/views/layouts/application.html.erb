@@ -12,7 +12,7 @@
     <%= csrf_meta_tags %>
   </head>
 
-  <body>
+  <body class="<%= controller.controller_name %>">
     <nav class="top-bar" data-topbar data-no-turbolink role="navigation">
       <ul class="title-area">
         <li class="name">
@@ -39,21 +39,15 @@
       </section>
     </nav>
 
-    <% if notice %>
-      <div class="alert alert-success"><%= notice %></div>
-    <% end %>
-    <% if alert %>
-      <div class="alert alert-danger"><%= alert %></div>
-    <% end %>
+    <div id="main">
+      <% if notice %>
+        <div class="alert alert-success"><%= notice %></div>
+      <% end %>
+      <% if alert %>
+        <div class="alert alert-danger"><%= alert %></div>
+      <% end %>
 
-    <div class="row">
-      <div class="large-7 large-push-3 columns">
-        <div class="row">
-          <%= yield %>
-        </div>
-      </div>
-
-      <div class="large-3 large-pull-7 columns">
+      <div id="sidebar" class="large-2 columns">
         Stuff
         <ul class="side-nav">
           <li><%= link_to 'Notes', notes_path %></li>
@@ -69,24 +63,9 @@
         </ul>
       </div>
 
-      <div class="large-2 columns"></div>
-    </div>
-
-    <footer class="row">
-      <div class="large-12 columns">
-        <hr/>
-        <div class="row">
-          <div class="large-5 columns">
-            <p>© Copyright no one at all. Go to town.</p>
-          </div>
-          <div class="large-7 columns">
-            <ul class="inline-list right">
-              <li><a href="#">Section 1</a></li>
-              <li><a href="#">Section 2</a></li>
-            </ul>
-          </div>
-        </div>
+      <div class="large-10 columns full">
+        <%= yield %>
       </div>
-    </footer>
+    </div>
   </body>
 </html>

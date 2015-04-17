@@ -81,7 +81,7 @@ $include-html-global-classes: $include-html-classes;
 
 // $row-width: rem-calc(1000);
 // $total-columns: 12;
-// $column-gutter: rem-calc(30);
+$column-gutter: rem-calc(30);
 
 // $last-child-float: $opposite-direction;
 
@@ -1387,7 +1387,7 @@ $font-family-sans-serif: "Open Sans", Roboto, Arial, sans-serif;
 
 // Height and margin
 $topbar-height: rem-calc(45);
-$topbar-margin-bottom: rem-calc(45);
+$topbar-margin-bottom: $topbar-height/2;
 
 // Controlling the styles for the title in the top bar
 // $topbar-title-weight: $font-weight-normal;
