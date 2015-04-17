@@ -8,10 +8,10 @@ MAPKEEP.init = function(notes, auth) {
 };
 
 MAPKEEP.initMap = function() {
-  // For now, center around first note
+  // For now, center around first note || UCLA
   var center = MAPKEEP.notes.length > 0 ?
     new google.maps.LatLng(MAPKEEP.notes[0].latitude, MAPKEEP.notes[0].longitude) :
-    new google.maps.LatLng(30, -90);
+    new google.maps.LatLng(34.0722, -118.4441);
 
   var mapOptions = {
       center: center,
@@ -66,10 +66,17 @@ MAPKEEP.dropPin = function() {
     '</form>'
   });
 
+  // Show info window after pin drops down
+  setTimeout(function() {
+    infoWindow.open(MAPKEEP.map, marker);
+  }, 500);
+
+  // Open info window on click
   google.maps.event.addListener(marker, 'click', function() {
     infoWindow.open(MAPKEEP.map, marker);
   });
 
+  // Update coords on pin drag
   google.maps.event.addListener(marker, 'dragend', function() {
     var form = $('#i' + MAPKEEP.infoWindows.length);
     form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
