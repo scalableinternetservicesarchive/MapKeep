@@ -77,8 +77,9 @@ MAPKEEP.dropPin = function() {
   });
 
   // Update coords on pin drag
+  var len = MAPKEEP.infoWindows.length;
   google.maps.event.addListener(marker, 'dragend', function() {
-    var form = $('#i' + MAPKEEP.infoWindows.length);
+    var form = $('#i' + len);
     form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
     form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
   });
