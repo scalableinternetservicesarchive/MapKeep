@@ -1,43 +1,51 @@
-var map;
-$('#create_note').click(dropPin);
+var MAPKEEP = MAPKEEP || {};
 
-function initialize() {
+MAPKEEP.init = function(notes) {
+  MAPKEEP.notes = notes;
+  $('#create_note').click(MAPKEEP.dropPin);
+};
+
+MAPKEEP.initMap = function() {
+  var center = MAPKEEP.notes.length > 0 ?
+    new google.maps.LatLng(MAPKEEP.notes[0].latitude, MAPKEEP.notes[0].longitude) :
+    new google.maps.LatLng(30, -90);
+
   var mapOptions = {
-      center: new google.maps.LatLng(notes[0].latitude, notes[0].longitude),
+      center: center,
       zoom: 10
   };
 
-  map = new google.maps.Map(document.getElementById('map-canvas'),
+  MAPKEEP.map = new google.maps.Map(document.getElementById('map-canvas'),
       mapOptions);
 
-  for (var i = 0; i < notes.length; i++) {
-    var title = notes[i].title;
+  for (var i = 0; i < MAPKEEP.notes.length; i++) {
+    var title = MAPKEEP.notes[i].title;
     var infowindow = new google.maps.InfoWindow({
-      content: '<h3>' + title + '</h3>' + notes[i].body + '<br/><button class="button tiny">Edit</button>'
+      content: '<h3>' + title + '</h3>' + MAPKEEP.notes[i].body + '<br/><button class="button tiny right">Edit</button>'
     });
     var marker = new google.maps.Marker({
-      position: new google.maps.LatLng(notes[i].latitude, notes[i].longitude),
-      map: map,
+      position: new google.maps.LatLng(MAPKEEP.notes[i].latitude, MAPKEEP.notes[i].longitude),
+      map: MAPKEEP.map,
       title: title,
       draggable: true
     });
     google.maps.event.addListener(marker, 'click', function() {
-      infowindow.open(map, marker);
+      infowindow.open(MAPKEEP.map, marker);
     });
   }
-}
+};
 
-function dropPin() {
+MAPKEEP.dropPin = function() {
   var infowindow = new google.maps.InfoWindow({
     content: ''
   });
   var marker = new google.maps.Marker({
-    position: map.center,
-    map: map,
+    position: MAPKEEP.map.center,
+    map: MAPKEEP.map,
     draggable: true,
     animation: google.maps.Animation.DROP
   });
   google.maps.event.addListener(marker, 'click', function() {
-    infowindow.open(map, marker);
+    infowindow.open(MAPKEEP.map, marker);
   });
-}
+};
