@@ -66,9 +66,19 @@ MAPKEEP.dropPin = function() {
     '</form>'
   });
 
-  MAPKEEP.infoWindows.push(infoWindow);
-
   google.maps.event.addListener(marker, 'click', function() {
     infoWindow.open(MAPKEEP.map, marker);
   });
+
+  google.maps.event.addListener(marker, 'dragend', function() {
+    var form = $('#i' + MAPKEEP.infoWindows.length);
+    form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
+    form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
+  });
+
+  MAPKEEP.infoWindows.push(infoWindow);
+};
+
+MAPKEEP.toggleForm = function(formId) {
+
 };

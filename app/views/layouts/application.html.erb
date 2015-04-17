@@ -23,7 +23,7 @@
       </ul>
       <section class="top-bar-section">
         <ul class="right">
-          <% if user_signed_in? %>
+        <% if user_signed_in? %>
           <li class="has-dropdown">
           <%= link_to current_user.email, 'javascript:;' %>
               <ul class="dropdown">
