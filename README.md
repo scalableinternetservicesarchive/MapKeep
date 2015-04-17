@@ -18,3 +18,7 @@ Tania DePasquale
 Stephen Hernandez ([@smhernandez](https://github.com/smhernandez))
 
 ![stephen](https://github.com/scalableinternetservices/MapKeep/raw/master/res/photos/stephen_hernandez.jpg)
+
+Michael Xiang
+
+![michael](/res/photos/michael_xiang.jpg)
