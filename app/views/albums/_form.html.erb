@@ -23,13 +23,12 @@
   <h4>Notes to include...</h4>
   <% current_user.notes.each do |note| %>
     <div>
-      <%= check_box_tag :note_ids, note.id, @album.notes.include?(note), :name => 'album[note_ids][]' -%>
-      <%= label_tag :note_ids, note.title -%>
+      <%= check_box_tag 'note' + note.id.to_s, note.id, @album.notes.include?(note), :name => 'album[note_ids][]' -%>
+      <%= label_tag 'note' + note.id.to_s, note.title -%>
     </div>
   <% end %>
 
   <div class="actions">
-    <%= f.hidden_field :user_id, :value => current_user.id %>
     <%= f.submit 'Submit', :class => 'button' %>
   </div>
 <% end %>

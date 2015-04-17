@@ -34,13 +34,12 @@
   <h4>Albums to include in...</h4>
   <% current_user.albums.each do |album| %>
     <div>
-      <%= check_box_tag :album_ids, album.id, @note.albums.include?(album), :name => 'note[album_ids][]' -%>
-      <%= label_tag :album_ids, album.title %>
+      <%= check_box_tag 'album' + album.id.to_s, album.id, @note.albums.include?(album), :name => 'note[album_ids][]' -%>
+      <%= label_tag 'album' + album.id.to_s, album.title %>
     </div>
   <% end -%>
 
   <div class="actions">
-    <%= f.hidden_field :user_id, :value => current_user.id %>
     <%= f.submit 'Submit', :class => 'button' %>
   </div>
 <% end %>
