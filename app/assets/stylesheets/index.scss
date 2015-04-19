@@ -20,6 +20,20 @@
       max-width: none;
     }
 
+    input {
+      margin: 0;
+    }
+
+    input[readonly], textarea[readonly] {
+      background:none;
+      border: none;
+      box-shadow: none;
+    }
+
+    textarea {
+      resize: none;
+    }
+
     .button {
       margin-bottom: 0;
     }

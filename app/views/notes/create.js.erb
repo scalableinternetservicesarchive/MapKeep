@@ -1,2 +1,11 @@
-alert('Note saved successfully!');
-console.log('id', '<%= @form_id %>');
+$(function() {
+  alert('Note saved successfully!');
+  var form = $('#' + '<%= @form_id %>');
+  var title = form.find('input[type!="hidden"]');
+  var button = form.find('button');
+
+  title.attr('readonly', 'readonly');
+  title.css('background', 'none');
+  form.find('textarea').attr('readonly', 'readonly');
+  button.html('Edit');
+});
