@@ -38,6 +38,8 @@ MAPKEEP.addInfoWindowToNote = function(note, marker) {
     content:  MAPKEEP.createNoteForm(marker, true, note)
   });
 
+  MAPKEEP.ct++;
+
   google.maps.event.addListener(marker, 'click',
     MAPKEEP.openWindow(infoWindow, marker));
 };
@@ -95,26 +97,81 @@ MAPKEEP.openWindow = function(infoWindow, marker) {
  */
 MAPKEEP.createNoteForm = function(marker, readonly, note) {
   readonly = readonly ? 'readonly' : '';
-  var title = '<input type="text" name="note[title]" placeholder="Title" ' + readonly;
-  var body = '<textarea rows="4" name="note[body]" ' + readonly +
-             ' placeholder="Write anything you want about this location!">';
-  var buttonText = readonly ? 'Edit' : 'Save';
-  var formAction = readonly ? '/notes/' + note.id : '/notes';
-  var patch = readonly ? '<input type="hidden" name="_method" value="patch">' : '';
+  var formId = 'i' + MAPKEEP.ct;
+
+  var title = $('<input/>')
+    .attr('name', 'note[title]')
+    .attr('placeholder', 'Title')
+    .attr('value', readonly ? note.title : '')
+    .attr('type', 'text');
+
+  var submit = $('<button/>')
+    .text(readonly ? 'Edit' : 'Save')
+    .addClass('button tiny right')
+    .attr('id', 'bi' + MAPKEEP.ct)
+    .attr('type', 'submit');
+
+  var textarea = $('<textarea/>')
+    .attr('name', 'note[body]')
+    .attr('rows', '4')
+    .attr('placeholder', 'Write anything you want about this location!')
+    .text(readonly ? note.body : '');
+
+  var form = $('<form/>')
+    .addClass('new_note')
+    .attr('id', formId)
+    .attr('action', readonly ? '/notes/' + note.id : '/notes')
+    .attr('method', 'post')
+    .attr('data-remote', 'true')
+    .attr('accept-charset', 'UTF-8')
+    .append(title)
+    .append($('<br/>'))
+    .append(textarea)
+    .append('<input name="note[latitude]" type="hidden" value="' + marker.position.lat() + '"/>')
+    .append('<input name="note[longitude]" type="hidden" value="' + marker.position.lng() + '"/>')
+    .append('<input name="authenticity_token" type="hidden" value=' + MAPKEEP.authToken + ' />')
+    .append('<input name="form_id" type="hidden" value=' + formId + ' />')
+    .append(submit);
 
   if (readonly) {
-    title += ' value="' + note.title + '"';
-    body += note.body;
+    textarea.attr('readonly', 'readonly');
+    title.attr('readonly', 'readonly');
+    form.append('<input type="hidden" name="_method" value="patch">');
+    MAPKEEP.addEditClick(formId);
   }
 
-  return  '<form class="new_note" action="' + formAction + '" id="i' + MAPKEEP.ct + '"' +
-            'accept-charset="UTF-8" method="post" data-remote="true">' + patch +
-            title + ' /><br/>' + body + '</textarea>' +
-            '<input name="note[latitude]" type="hidden" value="' + marker.position.lat() + '"/>' +
-            '<input name="note[longitude]" type="hidden" value="' + marker.position.lng() + '"/>' +
-            '<input name="authenticity_token" type="hidden" value=' + MAPKEEP.authToken + ' />' +
-            '<input name="form_id" type="hidden" value=i' + MAPKEEP.ct + ' />' +
-            '<button class="button tiny right" type="submit">' + buttonText + '</button>' +
-          '</form>';
+  return  form[0];
 };
 
+// Clicking edit toggles the form and prevents form submission
+MAPKEEP.addEditClick = function(formId) {
+  $('#map-canvas').on('click', '#b' + formId, function() {
+    MAPKEEP.toggleForm(formId);
+    return false;
+  });
+};
+
+// Toggles between editable and readonly note
+MAPKEEP.toggleForm = function(formId) {
+  var form = $('#' + formId);
+  var title = form.find('input[type!="hidden"]');
+  var textarea = form.find('textarea');
+  var submit = form.find('button');
+
+  if (submit.text() == 'Edit') {
+    // Make fields editable
+    title.removeAttr('readonly');
+    textarea.removeAttr('readonly');
+    // Remove submit blocking
+    $('#map-canvas').off('click', '#b' + formId);
+    submit.text('Save');
+  }  else {
+    // Make fields readonly
+    title.attr('readonly', 'readonly');
+    title.css('background', 'none');
+    textarea.attr('readonly', 'readonly');
+    // Prevent submit, only toggle form
+    MAPKEEP.addEditClick(formId);
+    submit.text('Edit');
+  }
+};

@@ -1,11 +1,6 @@
 $(function() {
   alert('Note saved successfully!');
-  var form = $('#' + '<%= @form_id %>');
-  var title = form.find('input[type!="hidden"]');
-  var button = form.find('button');
-
-  title.attr('readonly', 'readonly');
-  title.css('background', 'none');
-  form.find('textarea').attr('readonly', 'readonly');
-  button.html('Edit');
+  $('#<%= @form_id %>').append('<input type="hidden" name="_method" value="patch">');
+  $('#<%= @form_id %>').attr('action', '/notes/' + <%= @note.id %>);
+  MAPKEEP.toggleForm('<%= @form_id %>');
 });
