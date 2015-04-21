@@ -33,6 +33,11 @@ MAPKEEP.initMap = function() {
   }
 };
 
+/**
+ * Adds info window representing note to specified marker
+ * @param note For info
+ * @param marker To add window to
+ */
 MAPKEEP.addInfoWindowToNote = function(note, marker) {
   var infoWindow = new google.maps.InfoWindow({
     content:  MAPKEEP.createNoteForm(marker, true, note)
@@ -44,6 +49,9 @@ MAPKEEP.addInfoWindowToNote = function(note, marker) {
   MAPKEEP.ct++;
 };
 
+/**
+ * Drops pin in center of map with editable form
+ */
 MAPKEEP.dropPin = function() {
   var marker = new google.maps.Marker({
     position: MAPKEEP.map.center,
@@ -62,7 +70,7 @@ MAPKEEP.dropPin = function() {
   });
 
   // Show info window after pin drops down
-  setTimeout(MAPKEEP.openWindow(infoWindow, marker), 500);
+  setTimeout(MAPKEEP.openWindow(infoWindow, marker, true), 500);
 
   // Open info window on click
   google.maps.event.addListener(marker, 'click',
@@ -77,8 +85,13 @@ MAPKEEP.dropPin = function() {
   });
 };
 
-// Close last info window and open new one
-MAPKEEP.openWindow = function(infoWindow, marker) {
+/**
+ * Creates function to close last info window and open new one
+ * @param infoWindow To open
+ * @param marker To open info window at
+ * @returns {Function}
+ */
+MAPKEEP.openWindow = function(infoWindow, marker, newNote) {
   var ct = MAPKEEP.ct;
   return function() {
     if (MAPKEEP.lastWindow) {
@@ -86,8 +99,10 @@ MAPKEEP.openWindow = function(infoWindow, marker) {
     }
     infoWindow.open(MAPKEEP.map, marker);
     MAPKEEP.lastWindow = infoWindow;
-    // force form to be readonly
-    MAPKEEP.toggleForm('i' + ct, true);
+    // force form to be readonly if not a new note
+    if (!newNote) {
+      MAPKEEP.toggleForm('i' + ct, true);
+    }
   }
 };
 
@@ -145,7 +160,10 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
   return  form[0];
 };
 
-// Clicking edit toggles the form and prevents form submission
+/**
+ * Clicking edit toggles the form and prevents form submission
+ * @param formId To add click function to (button inside)
+ */
 MAPKEEP.addEditClick = function(formId) {
   $('#map-canvas').on('click', '#b' + formId, function() {
     MAPKEEP.toggleForm(formId);
@@ -171,7 +189,7 @@ MAPKEEP.toggleForm = function(formId, readonly) {
     // Remove submit blocking
     $('#map-canvas').off('click', '#b' + formId);
     submit.text('Save');
-  }  else {
+  }  else if (submit.text() == 'Save') {
     // Make fields readonly
     title.attr('readonly', 'readonly');
     title.css('background', 'none');
