@@ -38,10 +38,10 @@ MAPKEEP.addInfoWindowToNote = function(note, marker) {
     content:  MAPKEEP.createNoteForm(marker, true, note)
   });
 
-  MAPKEEP.ct++;
-
   google.maps.event.addListener(marker, 'click',
     MAPKEEP.openWindow(infoWindow, marker));
+
+  MAPKEEP.ct++;
 };
 
 MAPKEEP.dropPin = function() {
@@ -57,7 +57,7 @@ MAPKEEP.dropPin = function() {
   });
 
   // Cancel note if user closes info window before saving
-  google.maps.event.addListener(infoWindow,'closeclick', function(){
+  google.maps.event.addListener(infoWindow,'closeclick', function() {
     marker.setMap(null);
   });
 
@@ -79,17 +79,19 @@ MAPKEEP.dropPin = function() {
 
 // Close last info window and open new one
 MAPKEEP.openWindow = function(infoWindow, marker) {
+  var ct = MAPKEEP.ct;
   return function() {
     if (MAPKEEP.lastWindow) {
       MAPKEEP.lastWindow.close();
     }
     infoWindow.open(MAPKEEP.map, marker);
     MAPKEEP.lastWindow = infoWindow;
+    // force form to be readonly
+    MAPKEEP.toggleForm('i' + ct, true);
   }
 };
 
 /**
- * TODO: make jquery elements, edit button should toggle form, then become submit
  * @param marker The note belongs to for coordinates
  * @param readonly Whether or not this is a new note (readonly means it is an existing note)
  * @param note Note to use title and body for if existing
@@ -151,14 +153,18 @@ MAPKEEP.addEditClick = function(formId) {
   });
 };
 
-// Toggles between editable and readonly note
-MAPKEEP.toggleForm = function(formId) {
+/**
+ * Toggles form readonly status
+ * @param formId Form to toggle
+ * @param readonly Whether to force readonly status
+ */
+MAPKEEP.toggleForm = function(formId, readonly) {
   var form = $('#' + formId);
   var title = form.find('input[type!="hidden"]');
   var textarea = form.find('textarea');
   var submit = form.find('button');
 
-  if (submit.text() == 'Edit') {
+  if (submit.text() == 'Edit' && !readonly) {
     // Make fields editable
     title.removeAttr('readonly');
     textarea.removeAttr('readonly');
