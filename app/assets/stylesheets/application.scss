@@ -17,6 +17,10 @@
 
 @import "foundation_and_overrides";
 
+.top-bar .name h1 {
+  font-family: 'Lobster', cursive;
+}
+
 .alert {
   height: $topbar-height;
   line-height: $topbar-height;
@@ -32,4 +36,3 @@
 .alert-danger {
   background-color: #FF7878;
 }
-
