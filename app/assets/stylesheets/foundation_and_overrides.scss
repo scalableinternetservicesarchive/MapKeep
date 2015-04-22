@@ -1378,7 +1378,7 @@ $font-family-sans-serif: "Open Sans", Roboto, Arial, sans-serif;
 
 // 34. Top Bar
 // - - - - - - - - - - - - - - - - - - - - - - - - -
-
+@import url(http://fonts.googleapis.com/css?family=Lobster);
 // $include-html-top-bar-classes: $include-html-classes;
 
 // Background color for the top bar
@@ -1391,7 +1391,7 @@ $topbar-margin-bottom: $topbar-height/2;
 
 // Controlling the styles for the title in the top bar
 // $topbar-title-weight: $font-weight-normal;
-// $topbar-title-font-size: rem-calc(17);
+$topbar-title-font-size: rem-calc(25);
 
 // Set the link colors and styles for top-level nav
 // $topbar-link-color: $white;

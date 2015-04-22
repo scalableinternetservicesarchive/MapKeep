@@ -2,7 +2,7 @@ require 'test_helper'
 
 class NotesControllerTest < ActionController::TestCase
   setup do
-    @note = notes(:one)
+    @note = notes(:all_fields)
     sign_in users(:one)
   end
 
