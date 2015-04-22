@@ -60,9 +60,8 @@ MAPKEEP.dropPin = function() {
     animation: google.maps.Animation.DROP
   });
 
-  var form = MAPKEEP.createNoteForm(marker, false);
   var infoWindow = new google.maps.InfoWindow({
-    content: form
+    content: MAPKEEP.createNoteForm(marker, false)
   });
 
   // Cancel note if user closes info window before saving
