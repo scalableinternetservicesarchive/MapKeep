@@ -60,13 +60,22 @@ MAPKEEP.dropPin = function() {
     animation: google.maps.Animation.DROP
   });
 
+  var form = MAPKEEP.createNoteForm(marker, false);
   var infoWindow = new google.maps.InfoWindow({
-    content: MAPKEEP.createNoteForm(marker, false)
+    content: form
   });
 
   // Cancel note if user closes info window before saving
-  google.maps.event.addListener(infoWindow,'closeclick', function() {
-    marker.setMap(null);
+  var listener = google.maps.event.addListener(infoWindow,'closeclick',
+    function() {
+      marker.setMap(null);
+    });
+
+  // Clear listener when user clicks save
+  var ct = MAPKEEP.ct;
+  $('#map-canvas').on('click', '#bi' + ct, function() {
+    google.maps.event.removeListener(listener);
+    $('#map-canvas').off('click', '#bi' + ct);
   });
 
   // Show info window after pin drops down
