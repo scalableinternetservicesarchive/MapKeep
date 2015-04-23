@@ -3,5 +3,7 @@
 <%= javascript_include_tag 'geolocation' %>
 <%= javascript_tag do %>
   MAPKEEP.init(<%= raw @notes.to_json %>, '<%= session[:_csrf_token] %>');
-  google.maps.event.addDomListener(window, 'load', getPosInit);
+  google.maps.event.addDomListener(window, 'load', function() {
+    MAPKEEP.initMap('<%= @location.lat %>', '<%= @location.lng %>');
+  });
 <% end %>
