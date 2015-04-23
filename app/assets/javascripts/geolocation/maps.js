@@ -10,8 +10,8 @@ MAPKEEP.init = function(notes, auth) {
 
 MAPKEEP.initMap = function() {
   // For now, center around first note || UCLA
-  var center = MAPKEEP.notes.length > 0 ?
-    new google.maps.LatLng(MAPKEEP.notes[0].latitude, MAPKEEP.notes[0].longitude) :
+  var center = MAPKEEP.currentPos ?
+    new google.maps.LatLng(MAPKEEP.currentPos.latitude, MAPKEEP.currentPos.longitude) :
     new google.maps.LatLng(34.0722, -118.4441);
 
   var mapOptions = {
