@@ -1,10 +1,11 @@
-navigator.geolocation.getCurrentPosition(
-  function(pos) {
-    $('#note_latitude').val(pos.coords.latitude);
-    $('#note_longitude').val(pos.coords.longitude);
-    MAPKEEP.currentPos = pos.coords;
-  },
-  function(err) {
-    alert("Couldn't receive location!");
-  }
-);
+function getPosInit() {
+  navigator.geolocation.getCurrentPosition(
+    function (pos) {
+      MAPKEEP.initMap(pos.coords);
+    },
+    function (err) {
+      alert("Couldn't receive location!");
+      MAPKEEP.initMap();
+    }
+  );
+}

@@ -8,10 +8,10 @@ MAPKEEP.init = function(notes, auth) {
   $('#create_note').click(MAPKEEP.dropPin);
 };
 
-MAPKEEP.initMap = function() {
+MAPKEEP.initMap = function(coords) {
   // For now, center around first note || UCLA
-  var center = MAPKEEP.currentPos ?
-    new google.maps.LatLng(MAPKEEP.currentPos.latitude, MAPKEEP.currentPos.longitude) :
+  var center = coords ?
+    new google.maps.LatLng(coords.latitude, coords.longitude) :
     new google.maps.LatLng(34.0722, -118.4441);
 
   var mapOptions = {
