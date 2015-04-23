@@ -9,8 +9,8 @@ MAPKEEP.init = function(notes, auth) {
 };
 
 MAPKEEP.initMap = function(lat, lng) {
-  // For now, center around first note || UCLA
-  console.log(lat, lng);
+  // For now, center around ip location || UCLA
+  MAPKEEP.userLoc = new google.maps.LatLng(lat, lng);
   var center = lat && lng ?
     new google.maps.LatLng(lat, lng) :
     new google.maps.LatLng(34.0722, -118.4441);
