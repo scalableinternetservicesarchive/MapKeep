@@ -45,8 +45,9 @@ MAPKEEP.addInfoWindowToNote = function(note, marker) {
     content:  MAPKEEP.createNoteForm(marker, true, note)
   });
 
+  var ct = MAPKEEP.ct;
   google.maps.event.addListener(marker, 'click', function() {
-    MAPKEEP.openWindow(infoWindow, marker);
+    MAPKEEP.openWindow(infoWindow, marker, ct);
   });
 
   MAPKEEP.ct++;
@@ -83,14 +84,14 @@ MAPKEEP.dropPin = function() {
 
   // Show info window after pin drops down
   setTimeout(function() {
-    MAPKEEP.openWindow(infoWindow, marker, true);
+    MAPKEEP.openWindow(infoWindow, marker, ct, true);
     var form = $('#i' + ct);
     form.find('input[name=note\\[title\\]]').focus();
   }, 500);
 
   // Open info window on click
   google.maps.event.addListener(marker, 'click', function() {
-    MAPKEEP.openWindow(infoWindow, marker)
+    MAPKEEP.openWindow(infoWindow, marker, ct);
   });
 
   MAPKEEP.ct++;
@@ -103,7 +104,7 @@ MAPKEEP.dropPin = function() {
  * @param newNote Whether or not new note
  * @returns {Function}
  */
-MAPKEEP.openWindow = function(infoWindow, marker, newNote) {
+MAPKEEP.openWindow = function(infoWindow, marker, ct, newNote) {
   if (MAPKEEP.lastWindow) {
     MAPKEEP.lastWindow.close();
   }
@@ -111,7 +112,7 @@ MAPKEEP.openWindow = function(infoWindow, marker, newNote) {
   MAPKEEP.lastWindow = infoWindow;
   // force form to be readonly if not a new note
   if (!newNote) {
-    MAPKEEP.toggleForm('i' + MAPKEEP.ct, true);
+    MAPKEEP.toggleForm('i' + ct, true);
   }
 };
 
