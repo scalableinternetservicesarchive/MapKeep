@@ -1,3 +1,5 @@
 $(function() {
   alert('Note deleted successfully!');
+  MAPKEEP.markers['<%= @form_id %>'].setMap(null);
+  MAPKEEP.lastWindow.close();
 });

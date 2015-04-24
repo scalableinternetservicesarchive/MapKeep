@@ -1,6 +1,7 @@
 var MAPKEEP = MAPKEEP || {};
 MAPKEEP.ct = 0;
 MAPKEEP.lastWindow = null;
+MAPKEEP.markers = {};
 
 MAPKEEP.init = function(notes, auth) {
   MAPKEEP.notes = notes;
@@ -45,7 +46,7 @@ MAPKEEP.addInfoWindowToNote = function(note, marker) {
   });
 
   google.maps.event.addListener(marker, 'click', function() {
-    MAPKEEP.openWindow(infoWindow, marker, false, MAPKEEP.ct);
+    MAPKEEP.openWindow(infoWindow, marker);
   });
 
   MAPKEEP.ct++;
@@ -82,22 +83,14 @@ MAPKEEP.dropPin = function() {
 
   // Show info window after pin drops down
   setTimeout(function() {
-    MAPKEEP.openWindow(infoWindow, marker, true, ct);
+    MAPKEEP.openWindow(infoWindow, marker, true);
     var form = $('#i' + ct);
     form.find('input[name=note\\[title\\]]').focus();
   }, 500);
 
   // Open info window on click
   google.maps.event.addListener(marker, 'click', function() {
-    MAPKEEP.openWindow(infoWindow, marker, false, ct)
-  });
-
-  // Update coords on pin drag
-  google.maps.event.addListener(marker, 'dragend', function() {
-    var form = $('#i' + ct);
-    form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
-    form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
-    console.log('dragged', ct);
+    MAPKEEP.openWindow(infoWindow, marker)
   });
 
   MAPKEEP.ct++;
@@ -110,7 +103,7 @@ MAPKEEP.dropPin = function() {
  * @param newNote Whether or not new note
  * @returns {Function}
  */
-MAPKEEP.openWindow = function(infoWindow, marker, newNote, ct) {
+MAPKEEP.openWindow = function(infoWindow, marker, newNote) {
   if (MAPKEEP.lastWindow) {
     MAPKEEP.lastWindow.close();
   }
@@ -118,7 +111,7 @@ MAPKEEP.openWindow = function(infoWindow, marker, newNote, ct) {
   MAPKEEP.lastWindow = infoWindow;
   // force form to be readonly if not a new note
   if (!newNote) {
-    MAPKEEP.toggleForm('i' + ct, true);
+    MAPKEEP.toggleForm('i' + MAPKEEP.ct, true);
   }
 };
 
@@ -181,6 +174,17 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
     MAPKEEP.addEditClick(formId);
   }
 
+  // Save marker for deletion
+  MAPKEEP.markers[formId] = marker;
+
+  // Update coords on pin drag
+  // TODO: make dragging only possible on new notes and notes in edit mode
+  google.maps.event.addListener(marker, 'dragend', function() {
+    var form = $('#' + formId);
+    form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
+    form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
+  });
+
   return  form[0];
 };
 
@@ -226,5 +230,6 @@ MAPKEEP.toggleForm = function(formId, readonly) {
     MAPKEEP.addEditClick(formId);
     submit.text('Edit');
     deleteButton.addClass('hide');
+    deleteButton.removeClass('button');
   }
 };
