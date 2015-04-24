@@ -1,5 +1,6 @@
 <h1>Listing Albums</h1>
 
+<% unless @albums.empty? %>
 <table>
   <thead>
     <tr>
@@ -21,6 +22,10 @@
     <% end %>
   </tbody>
 </table>
+<% else %>
+  Nothing yet!
+  <br>
+<% end %>
 
 <br>
 
