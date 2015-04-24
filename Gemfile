@@ -26,10 +26,11 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use devise to handle user authentication
 gem 'devise'
 
-# Gem for Foundation
+# Gem for Foundation and turbolinks fix
 gem 'foundation-rails'
-
 gem 'jquery-turbolinks'
+
+gem 'geokit-rails'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'

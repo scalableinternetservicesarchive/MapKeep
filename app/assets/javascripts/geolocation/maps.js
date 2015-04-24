@@ -8,10 +8,11 @@ MAPKEEP.init = function(notes, auth) {
   $('#create_note').click(MAPKEEP.dropPin);
 };
 
-MAPKEEP.initMap = function() {
-  // For now, center around first note || UCLA
-  var center = MAPKEEP.notes.length > 0 ?
-    new google.maps.LatLng(MAPKEEP.notes[0].latitude, MAPKEEP.notes[0].longitude) :
+MAPKEEP.initMap = function(lat, lng) {
+  // For now, center around ip location || UCLA
+  MAPKEEP.userLoc = new google.maps.LatLng(lat, lng);
+  var center = lat && lng ?
+    new google.maps.LatLng(lat, lng) :
     new google.maps.LatLng(34.0722, -118.4441);
 
   var mapOptions = {
@@ -65,8 +66,16 @@ MAPKEEP.dropPin = function() {
   });
 
   // Cancel note if user closes info window before saving
-  google.maps.event.addListener(infoWindow,'closeclick', function() {
-    marker.setMap(null);
+  var listener = google.maps.event.addListener(infoWindow,'closeclick',
+    function() {
+      marker.setMap(null);
+    });
+
+  // Clear listener when user clicks save
+  var ct = MAPKEEP.ct;
+  $('#map-canvas').on('click', '#bi' + ct, function() {
+    google.maps.event.removeListener(listener);
+    $('#map-canvas').off('click', '#bi' + ct);
   });
 
   // Show info window after pin drops down

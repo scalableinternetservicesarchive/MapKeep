@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150415040531) do
+ActiveRecord::Schema.define(version: 20150423225007) do
 
   create_table "albums", force: :cascade do |t|
     t.string   "title"
@@ -33,10 +33,10 @@ ActiveRecord::Schema.define(version: 20150415040531) do
   create_table "notes", force: :cascade do |t|
     t.string   "title"
     t.text     "body"
-    t.decimal  "latitude"
-    t.decimal  "longitude"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.decimal  "latitude",   precision: 9, scale: 6
+    t.decimal  "longitude",  precision: 9, scale: 6
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
     t.integer  "user_id"
   end
 
