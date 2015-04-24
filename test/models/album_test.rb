@@ -2,27 +2,20 @@ require 'test_helper'
 
 class AlbumTest < ActiveSupport::TestCase
 
-  test 'needs non-empty fields' do
-    album = albums(:all_fields)
+  test 'has valid factory' do
+    assert build(:album).valid?
+  end
 
-    album.title = ''
-    assert album.invalid?
+  test 'needs non-empty title' do
+    assert build(:album, title: '').invalid?
+  end
 
-    album.title = 'title'
-    album.description = ''
-    assert album.invalid?
-
-    album.description = 'desc'
-    assert album.valid?
+  test 'needs non-empty description' do
+    assert build(:album, description: '').invalid?
   end
 
   test 'needs valid user id' do
-    album = albums(:all_fields)
-
-    album.user_id = 'user'
-    assert album.invalid?
-
-    album.user_id = 1
-    assert album.valid?
+    assert build(:album, user_id: 'user').invalid?
+    assert build(:album, user_id: 1).valid?
   end
 end

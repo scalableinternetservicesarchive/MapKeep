@@ -17,7 +17,7 @@ class NoteTest < ActiveSupport::TestCase
     assert build(:note, user_id: 'user').invalid?
   end
 
-  test 'requires none-mpty title' do
+  test 'requires none-empty title' do
     assert build(:note, title: '').invalid?
   end
 
