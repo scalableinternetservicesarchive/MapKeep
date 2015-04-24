@@ -21,7 +21,7 @@
   font-family: 'Lobster', cursive;
 }
 
-.alert {
+.notice {
   height: $topbar-height;
   line-height: $topbar-height;
   margin-top: -$topbar-height/2;
@@ -29,10 +29,10 @@
   text-align: center;
 }
 
-.alert-success {
+.notice-success {
   background-color: #92CCA6;
 }
 
-.alert-danger {
+.notice-danger {
   background-color: #FF7878;
 }

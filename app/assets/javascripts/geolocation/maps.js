@@ -1,6 +1,7 @@
 var MAPKEEP = MAPKEEP || {};
 MAPKEEP.ct = 0;
 MAPKEEP.lastWindow = null;
+MAPKEEP.markers = {};
 
 MAPKEEP.init = function(notes, auth) {
   MAPKEEP.notes = notes;
@@ -44,8 +45,10 @@ MAPKEEP.addInfoWindowToNote = function(note, marker) {
     content:  MAPKEEP.createNoteForm(marker, true, note)
   });
 
-  google.maps.event.addListener(marker, 'click',
-    MAPKEEP.openWindow(infoWindow, marker));
+  var ct = MAPKEEP.ct;
+  google.maps.event.addListener(marker, 'click', function() {
+    MAPKEEP.openWindow(infoWindow, marker, ct);
+  });
 
   MAPKEEP.ct++;
 };
@@ -54,6 +57,8 @@ MAPKEEP.addInfoWindowToNote = function(note, marker) {
  * Drops pin in center of map with editable form
  */
 MAPKEEP.dropPin = function() {
+  var ct = MAPKEEP.ct;
+
   var marker = new google.maps.Marker({
     position: MAPKEEP.map.center,
     map: MAPKEEP.map,
@@ -72,46 +77,42 @@ MAPKEEP.dropPin = function() {
     });
 
   // Clear listener when user clicks save
-  var ct = MAPKEEP.ct;
   $('#map-canvas').on('click', '#bi' + ct, function() {
     google.maps.event.removeListener(listener);
     $('#map-canvas').off('click', '#bi' + ct);
   });
 
   // Show info window after pin drops down
-  setTimeout(MAPKEEP.openWindow(infoWindow, marker, true), 500);
+  setTimeout(function() {
+    MAPKEEP.openWindow(infoWindow, marker, ct, true);
+    var form = $('#i' + ct);
+    form.find('input[name=note\\[title\\]]').focus();
+  }, 500);
 
   // Open info window on click
-  google.maps.event.addListener(marker, 'click',
-    MAPKEEP.openWindow(infoWindow, marker));
-
-  // Update coords on pin drag
-  var len = MAPKEEP.ct++;
-  google.maps.event.addListener(marker, 'dragend', function() {
-    var form = $('#i' + len);
-    form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
-    form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
+  google.maps.event.addListener(marker, 'click', function() {
+    MAPKEEP.openWindow(infoWindow, marker, ct);
   });
+
+  MAPKEEP.ct++;
 };
 
 /**
- * Creates function to close last info window and open new one
+ * Close last info window and open new one
  * @param infoWindow To open
  * @param marker To open info window at
+ * @param newNote Whether or not new note
  * @returns {Function}
  */
-MAPKEEP.openWindow = function(infoWindow, marker, newNote) {
-  var ct = MAPKEEP.ct;
-  return function() {
-    if (MAPKEEP.lastWindow) {
-      MAPKEEP.lastWindow.close();
-    }
-    infoWindow.open(MAPKEEP.map, marker);
-    MAPKEEP.lastWindow = infoWindow;
-    // force form to be readonly if not a new note
-    if (!newNote) {
-      MAPKEEP.toggleForm('i' + ct, true);
-    }
+MAPKEEP.openWindow = function(infoWindow, marker, ct, newNote) {
+  if (MAPKEEP.lastWindow) {
+    MAPKEEP.lastWindow.close();
+  }
+  infoWindow.open(MAPKEEP.map, marker);
+  MAPKEEP.lastWindow = infoWindow;
+  // force form to be readonly if not a new note
+  if (!newNote) {
+    MAPKEEP.toggleForm('i' + ct, true);
   }
 };
 
@@ -137,6 +138,14 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
     .attr('id', 'bi' + MAPKEEP.ct)
     .attr('type', 'submit');
 
+  var deleteButton = $('<button/>')
+    .text('Delete')
+    .addClass('alert tiny left hide')
+    .attr('type', 'submit')
+    .click(function() {
+      form.find('input[name=_method]').val('delete');
+    });
+
   var textarea = $('<textarea/>')
     .attr('name', 'note[body]')
     .attr('rows', '4')
@@ -157,7 +166,7 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
     .append('<input name="note[longitude]" type="hidden" value="' + marker.position.lng() + '"/>')
     .append('<input name="authenticity_token" type="hidden" value=' + MAPKEEP.authToken + ' />')
     .append('<input name="form_id" type="hidden" value=' + formId + ' />')
-    .append(submit);
+    .append(submit).append(deleteButton);
 
   if (readonly) {
     textarea.attr('readonly', 'readonly');
@@ -165,6 +174,17 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
     form.append('<input type="hidden" name="_method" value="patch">');
     MAPKEEP.addEditClick(formId);
   }
+
+  // Save marker for deletion
+  MAPKEEP.markers[formId] = marker;
+
+  // Update coords on pin drag
+  // TODO: make dragging only possible on new notes and notes in edit mode
+  google.maps.event.addListener(marker, 'dragend', function() {
+    var form = $('#' + formId);
+    form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
+    form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
+  });
 
   return  form[0];
 };
@@ -189,7 +209,8 @@ MAPKEEP.toggleForm = function(formId, readonly) {
   var form = $('#' + formId);
   var title = form.find('input[type!="hidden"]');
   var textarea = form.find('textarea');
-  var submit = form.find('button');
+  var submit = form.find('button').not('.alert');
+  var deleteButton = form.find('button.alert');
 
   if (submit.text() == 'Edit' && !readonly) {
     // Make fields editable
@@ -198,6 +219,9 @@ MAPKEEP.toggleForm = function(formId, readonly) {
     // Remove submit blocking
     $('#map-canvas').off('click', '#b' + formId);
     submit.text('Save');
+    deleteButton.removeClass('hide');
+    deleteButton.addClass('button');
+
   }  else if (submit.text() == 'Save') {
     // Make fields readonly
     title.attr('readonly', 'readonly');
@@ -206,5 +230,7 @@ MAPKEEP.toggleForm = function(formId, readonly) {
     // Prevent submit, only toggle form
     MAPKEEP.addEditClick(formId);
     submit.text('Edit');
+    deleteButton.addClass('hide');
+    deleteButton.removeClass('button');
   }
 };
