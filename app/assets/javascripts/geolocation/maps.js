@@ -125,6 +125,14 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
   readonly = readonly ? 'readonly' : '';
   var formId = 'i' + MAPKEEP.ct;
 
+  var format = $('<form/>')
+    .addClass('new_note')
+    .attr('id', formId)
+    .attr('action', readonly ? '/notes/' + note.id : '/notes')
+    .attr('method', 'post')
+    .attr('data-remote', 'true')
+    .attr('accept-charset', 'UTF-8');
+
   var title = $('<input/>')
     .attr('name', 'note[title]')
     .attr('placeholder', 'Title')
@@ -140,19 +148,17 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
   var textarea = $('<textarea/>')
     .attr('name', 'note[body]')
     .attr('rows', '4')
-    .attr('placeholder', 'Write anything you want about this location!')
+    .attr('placeholder', 'Write anything you want about this location.')
     .text(readonly ? note.body : '');
 
-  var form = $('<form/>')
-    .addClass('new_note')
-    .attr('id', formId)
-    .attr('action', readonly ? '/notes/' + note.id : '/notes')
-    .attr('method', 'post')
-    .attr('data-remote', 'true')
-    .attr('accept-charset', 'UTF-8')
+  var description = $('<i/>')
+    .text('Move the marker!');
+
+  var form = format
     .append(title)
     .append($('<br/>'))
     .append(textarea)
+    .append(description)
     .append('<input name="note[latitude]" type="hidden" value="' + marker.position.lat() + '"/>')
     .append('<input name="note[longitude]" type="hidden" value="' + marker.position.lng() + '"/>')
     .append('<input name="authenticity_token" type="hidden" value=' + MAPKEEP.authToken + ' />')
