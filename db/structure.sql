@@ -61,16 +61,18 @@ DROP TABLE IF EXISTS `notes`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `notes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) DEFAULT NULL,
-  `body` varchar(255) DEFAULT NULL,
-  `latlng` point NOT NULL,
+  `title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `body` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `latitude` double DEFAULT NULL,
+  `longitude` double DEFAULT NULL,
+  `latlon` point NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  SPATIAL KEY `index_notes_on_latlng` (`latlng`),
+  SPATIAL KEY `index_notes_on_latlon` (`latlon`),
   KEY `index_notes_on_user_id` (`user_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1000001 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -122,7 +124,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-04-26 10:54:08
+-- Dump completed on 2015-04-26 11:26:00
 INSERT INTO schema_migrations (version) VALUES ('20150412000202');
 
 INSERT INTO schema_migrations (version) VALUES ('20150413214220');
@@ -137,23 +139,7 @@ INSERT INTO schema_migrations (version) VALUES ('20150415040158');
 
 INSERT INTO schema_migrations (version) VALUES ('20150415040531');
 
-INSERT INTO schema_migrations (version) VALUES ('20150423220506');
-
 INSERT INTO schema_migrations (version) VALUES ('20150423225007');
 
-INSERT INTO schema_migrations (version) VALUES ('20150425201100');
-
-INSERT INTO schema_migrations (version) VALUES ('20150425230806');
-
-INSERT INTO schema_migrations (version) VALUES ('20150425231842');
-
-INSERT INTO schema_migrations (version) VALUES ('20150425232842');
-
-INSERT INTO schema_migrations (version) VALUES ('20150425233457');
-
-INSERT INTO schema_migrations (version) VALUES ('20150425233838');
-
-INSERT INTO schema_migrations (version) VALUES ('20150426002952');
-
-INSERT INTO schema_migrations (version) VALUES ('20150427002952');
+INSERT INTO schema_migrations (version) VALUES ('20150427002954');
 

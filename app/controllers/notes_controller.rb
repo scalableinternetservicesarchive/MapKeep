@@ -24,10 +24,10 @@ class NotesController < ApplicationController
   # POST /notes
   # POST /notes.json
   def create
-    @note = Note.create(note_params)
+    @note = Note.new(note_params)
     @note.user_id = current_user.id
-
-    query = 'INSERT INTO notes VALUES (?, ?, ?, ?, ?, NOW(), NOW(), ?, ?)'
+    @note.latlon = RGeo::Geographic.spherical_factory(:srid => 4326).point(
+        note_params[:longitude], note_params[:latitude])
 
     respond_to do |format|
       if @note.save
@@ -46,7 +46,8 @@ class NotesController < ApplicationController
   # PATCH/PUT /notes/1.json
   def update
     respond_to do |format|
-      if @note.update(note_params)
+      if @note.update(note_params.merge(latlon: RGeo::Geographic.spherical_factory(:srid => 4326).point(
+                                            note_params[:longitude], note_params[:latitude])))
         @form_id = params[:form_id]
         format.js
         format.html { redirect_to @note, notice: 'Note was successfully updated.' }

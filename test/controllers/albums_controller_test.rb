@@ -1,9 +1,12 @@
 require 'test_helper'
 
 class AlbumsControllerTest < ActionController::TestCase
+  include FactoryGirl::Syntax::Methods
+
   setup do
-    @album = albums(:all_fields)
-    sign_in users(:one)
+    @user = create(:user)
+    sign_in @user
+    @album = create(:album, user_id: @user.id)
   end
 
   test "should get index" do
@@ -19,7 +22,7 @@ class AlbumsControllerTest < ActionController::TestCase
 
   test "should create album" do
     assert_difference('Album.count') do
-      post :create, album: { description: @album.description, title: @album.title }
+      post :create, album: @album.as_json
     end
 
     assert_redirected_to album_path(assigns(:album))
