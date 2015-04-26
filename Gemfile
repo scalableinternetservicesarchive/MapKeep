@@ -31,6 +31,7 @@ gem 'foundation-rails'
 gem 'jquery-turbolinks'
 
 gem 'geokit-rails'
+gem 'mysql2'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
