@@ -33,6 +33,10 @@ gem 'jquery-turbolinks'
 gem 'geokit-rails'
 gem 'mysql2'
 
+gem 'rgeo'
+gem 'rgeo-activerecord'
+gem 'activerecord-mysql2spatial-adapter', :git => 'https://github.com/fjl82/activerecord-mysql2spatial-adapter.git'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

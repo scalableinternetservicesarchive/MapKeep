@@ -27,6 +27,8 @@ class NotesController < ApplicationController
     @note = Note.create(note_params)
     @note.user_id = current_user.id
 
+    query = 'INSERT INTO notes VALUES (?, ?, ?, ?, ?, NOW(), NOW(), ?, ?)'
+
     respond_to do |format|
       if @note.save
         @form_id = params[:form_id]

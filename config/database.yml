@@ -1,5 +1,5 @@
 default: &default
-  adapter: mysql2
+  adapter: mysql2spatial
   encoding: utf8
   username: root
   password:

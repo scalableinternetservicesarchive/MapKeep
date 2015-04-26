@@ -11,17 +11,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150426002952) do
+ActiveRecord::Schema.define(version: 20150427002952) do
 
-  create_table "albums", force: :cascade do |t|
-    t.string   "title",       limit: 255
-    t.text     "description", limit: 65535
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
-    t.integer  "user_id",     limit: 4
-  end
-
-  add_index "albums", ["user_id"], name: "index_albums_on_user_id", using: :btree
+# Could not dump table "albums" because of following NoMethodError
+#   undefined method `using' for #<RGeo::ActiveRecord::SpatialIndexDefinition:0x007f8f123bc6f0>
 
   create_table "collections", force: :cascade do |t|
     t.integer  "album_id",   limit: 4
@@ -30,37 +23,11 @@ ActiveRecord::Schema.define(version: 20150426002952) do
     t.datetime "updated_at"
   end
 
-  create_table "notes", force: :cascade do |t|
-    t.string   "title",      limit: 255
-    t.string   "body",       limit: 255
-    t.decimal  "latitude",               precision: 9, scale: 6
-    t.decimal  "longitude",              precision: 9, scale: 6
-    t.datetime "created_at",                                     null: false
-    t.datetime "updated_at",                                     null: false
-    t.integer  "user_id",    limit: 4
-    t.integer  "pt",         limit: 4,                           null: false
-  end
+# Could not dump table "notes" because of following NoMethodError
+#   undefined method `any?' for true:TrueClass
 
-  add_index "notes", ["pt"], name: "pt", length: {"pt"=>32}, type: :spatial
-  add_index "notes", ["user_id"], name: "index_notes_on_user_id", using: :btree
-
-  create_table "users", force: :cascade do |t|
-    t.string   "email",                  limit: 255, default: "", null: false
-    t.string   "encrypted_password",     limit: 255, default: "", null: false
-    t.string   "reset_password_token",   limit: 255
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          limit: 4,   default: 0,  null: false
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
-    t.string   "current_sign_in_ip",     limit: 255
-    t.string   "last_sign_in_ip",        limit: 255
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
-  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
+# Could not dump table "users" because of following NoMethodError
+#   undefined method `using' for #<RGeo::ActiveRecord::SpatialIndexDefinition:0x007f8f12416e70>
 
   add_foreign_key "albums", "users"
 end
