@@ -53,6 +53,19 @@ CREATE TABLE `collections` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `error_msg`
+--
+
+DROP TABLE IF EXISTS `error_msg`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `error_msg` (
+  `error_msg` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`error_msg`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `notes`
 --
 
@@ -72,8 +85,31 @@ CREATE TABLE `notes` (
   PRIMARY KEY (`id`),
   SPATIAL KEY `index_notes_on_latlon` (`latlon`),
   KEY `index_notes_on_user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=302 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_ALL_TABLES' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER insert_note
+                BEFORE INSERT
+                ON notes
+                FOR EACH ROW
+                BEGIN
+                  IF (SELECT COUNT(*) FROM users WHERE id=new.user_id)=0
+                  THEN INSERT error_msg VALUES ('Foreign Key Constraint Violated!');
+                  END IF;
+                END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `schema_migrations`
@@ -112,7 +148,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_users_on_email` (`email`),
   UNIQUE KEY `index_users_on_reset_password_token` (`reset_password_token`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -124,7 +160,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-04-26 11:26:00
+-- Dump completed on 2015-04-26 13:19:53
 INSERT INTO schema_migrations (version) VALUES ('20150412000202');
 
 INSERT INTO schema_migrations (version) VALUES ('20150413214220');
@@ -142,4 +178,8 @@ INSERT INTO schema_migrations (version) VALUES ('20150415040531');
 INSERT INTO schema_migrations (version) VALUES ('20150423225007');
 
 INSERT INTO schema_migrations (version) VALUES ('20150427002954');
+
+INSERT INTO schema_migrations (version) VALUES ('20150427002955');
+
+INSERT INTO schema_migrations (version) VALUES ('20150427002956');
 
