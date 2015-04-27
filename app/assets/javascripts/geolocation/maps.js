@@ -224,6 +224,7 @@ mapkeep.prototype.formSubmitted = function(formId, noteId) {
   form.append('<input type="hidden" name="_method" value="patch">');
   form.attr('action', '/notes/' + noteId);
   form.removeClass('new_note');
+  this.toggleForm(formId);
 };
 
 /**
