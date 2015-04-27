@@ -184,7 +184,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     .text(readonly ? note.body : '');
 
   var form = $('<form/>')
-    .addClass('new_note')
+    .addClass(readonly ? '' : 'new_note')
     .attr('id', formId.substr(1)) // remove # sign here
     .attr('action', readonly ? '/notes/' + note.id : '/notes')
     .attr('method', 'post')
