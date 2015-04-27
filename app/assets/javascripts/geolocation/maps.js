@@ -23,6 +23,11 @@ var mapkeep = function(notes, auth) {
   $('#create_note').click(this.dropPin.bind(this));
 };
 
+/**
+ * Initializes map at input coordinates with user notes
+ * @param lat
+ * @param lng
+ */
 mapkeep.prototype.initMap = function(lat, lng) {
   // For now, center around ip location || UCLA
   this.userLoc = new google.maps.LatLng(lat, lng);
@@ -120,7 +125,6 @@ mapkeep.prototype.dropPin = function() {
  * @param marker To open info window at
  * @param ct Form identifier
  * @param newNote Whether or not new note
- * @returns {Function}
  */
 mapkeep.prototype.openWindow = function(infoWindow, marker, ct, newNote) {
   if (this.lastWindow) {
