@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class NotesControllerTest < ActionController::TestCase
-  include FactoryGirl::Syntax::Methods
 
   setup do
     @user = create(:user)

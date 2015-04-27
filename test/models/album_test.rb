@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class AlbumTest < ActiveSupport::TestCase
-  include FactoryGirl::Syntax::Methods
 
   test 'has valid factory' do
     assert build(:album).valid?
