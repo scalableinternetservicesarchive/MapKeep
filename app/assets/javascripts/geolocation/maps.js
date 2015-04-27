@@ -79,6 +79,8 @@ mapkeep.prototype.addInfoWindowToNote = function(note, marker) {
  */
 mapkeep.prototype.dropPin = function() {
   var ct = this.ct;
+  var formId = getFormId(ct);
+  var buttonId = getButtonId(formId);
 
   var marker = new google.maps.Marker({
     position: this.map.center,
@@ -98,16 +100,16 @@ mapkeep.prototype.dropPin = function() {
     });
 
   // Clear listener when user clicks save
-  $('#map-canvas').on('click', '#bi' + ct, function() {
+  $('#map-canvas').on('click', buttonId, function() {
     google.maps.event.removeListener(listener);
-    $('#map-canvas').off('click', '#bi' + ct);
+    $('#map-canvas').off('click', buttonId);
   });
 
   // Show info window after pin drops down
   var self = this;
   setTimeout(function() {
     self.openWindow(infoWindow, marker, ct, true);
-    var form = $('#i' + ct);
+    var form = $(formId);
     form.find('input[name=note\\[title\\]]').focus();
   }, 500);
 
@@ -133,8 +135,9 @@ mapkeep.prototype.openWindow = function(infoWindow, marker, ct, newNote) {
   infoWindow.open(this.map, marker);
   this.lastWindow = infoWindow;
   // force form to be readonly if not a new note
-  if (!newNote && !$('#i' + ct).hasClass('new_note')) {
-    this.toggleForm('i' + ct, true);
+  var formId = getFormId(ct);
+  if (!newNote && !$(formId).hasClass('new_note')) {
+    this.toggleForm(formId, true);
   }
 };
 
@@ -152,7 +155,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
       .val(value);
   }
 
-  var formId = 'i' + this.ct;
+  var formId = getFormId(this.ct);
 
   var title = $('<input/>')
     .attr('name', 'note[title]')
@@ -163,7 +166,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
   var submit = $('<button/>')
     .text(readonly ? 'Edit' : 'Save')
     .addClass('button tiny right')
-    .attr('id', 'bi' + this.ct)
+    .attr('id', getButtonId(formId).substr(1)) // remove # sign here
     .attr('type', 'submit');
 
   var deleteButton = $('<button/>')
@@ -182,7 +185,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
 
   var form = $('<form/>')
     .addClass('new_note')
-    .attr('id', formId)
+    .attr('id', formId.substr(1)) // remove # sign here
     .attr('action', readonly ? '/notes/' + note.id : '/notes')
     .attr('method', 'post')
     .attr('data-remote', 'true')
@@ -210,12 +213,12 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
   // Update coords on pin drag
   // TODO: make dragging only possible on new notes and notes in edit mode
   google.maps.event.addListener(marker, 'dragend', function() {
-    var form = $('#' + formId);
+    var form = $(formId);
     form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
     form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
   });
 
-  return  form[0];
+  return form[0];
 };
 
 /**
@@ -237,7 +240,7 @@ mapkeep.prototype.formSubmitted = function(formId, noteId) {
  */
 mapkeep.prototype.addEditClick = function(formId) {
   var self = this;
-  $('#map-canvas').on('click', '#b' + formId, function() {
+  $('#map-canvas').on('click', getButtonId(formId), function() {
     self.toggleForm(formId);
     return false;
   });
@@ -249,7 +252,7 @@ mapkeep.prototype.addEditClick = function(formId) {
  * @param readonly Whether to force readonly status
  */
 mapkeep.prototype.toggleForm = function(formId, readonly) {
-  var form = $('#' + formId);
+  var form = $(formId);
   var title = form.find('input[type!="hidden"]');
   var textarea = form.find('textarea');
   var submit = form.find('button').not('.alert');
@@ -260,7 +263,7 @@ mapkeep.prototype.toggleForm = function(formId, readonly) {
     title.removeAttr('readonly');
     textarea.removeAttr('readonly');
     // Remove submit blocking
-    $('#map-canvas').off('click', '#b' + formId);
+    $('#map-canvas').off('click', getButtonId(formId));
     submit.text('Save');
     deleteButton.removeClass('hide');
     deleteButton.addClass('button');
@@ -277,3 +280,11 @@ mapkeep.prototype.toggleForm = function(formId, readonly) {
     deleteButton.removeClass('button');
   }
 };
+
+function getFormId(ct) {
+  return '#i' + ct;
+}
+
+function getButtonId(formId) {
+  return '#b' + formId.substr(1);
+}
