@@ -1,6 +1,9 @@
 $(function() {
   alert('Note saved successfully!');
-  $('#<%= @form_id %>').append('<input type="hidden" name="_method" value="patch">');
-  $('#<%= @form_id %>').attr('action', '/notes/' + <%= @note.id %>);
+  // Change form to update format
+  var form = $('#<%= @form_id %>');
+  form.append('<input type="hidden" name="_method" value="patch">');
+  form.attr('action', '/notes/' + <%= @note.id %>);
+  form.removeClass('new_note');
   MAPKEEP.toggleForm('<%= @form_id %>');
 });

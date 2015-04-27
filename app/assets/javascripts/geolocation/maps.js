@@ -1,11 +1,12 @@
 var MAPKEEP = MAPKEEP || {};
-MAPKEEP.ct = 0;
-MAPKEEP.lastWindow = null;
-MAPKEEP.markers = {};
 
 MAPKEEP.init = function(notes, auth) {
   MAPKEEP.notes = notes;
   MAPKEEP.authToken = auth;
+  MAPKEEP.ct = 0;
+  MAPKEEP.lastWindow = null;
+  MAPKEEP.markers = {};
+
   $('#create_note').click(MAPKEEP.dropPin);
 };
 
@@ -21,12 +22,14 @@ MAPKEEP.initMap = function(lat, lng) {
       zoom: 10
   };
 
-  MAPKEEP.map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  MAPKEEP.map = new google.maps.Map(
+    document.getElementById('map-canvas'), mapOptions);
 
   // Draw notes on map
   for (var i = 0; i < MAPKEEP.notes.length; i++) {
     var marker = new google.maps.Marker({
-      position: new google.maps.LatLng(MAPKEEP.notes[i].latitude, MAPKEEP.notes[i].longitude),
+      position: new google.maps.LatLng(
+        MAPKEEP.notes[i].latitude, MAPKEEP.notes[i].longitude),
       map: MAPKEEP.map,
       title: MAPKEEP.notes[i].title,
       draggable: true
@@ -101,6 +104,7 @@ MAPKEEP.dropPin = function() {
  * Close last info window and open new one
  * @param infoWindow To open
  * @param marker To open info window at
+ * @param ct Form identifier
  * @param newNote Whether or not new note
  * @returns {Function}
  */
@@ -111,19 +115,25 @@ MAPKEEP.openWindow = function(infoWindow, marker, ct, newNote) {
   infoWindow.open(MAPKEEP.map, marker);
   MAPKEEP.lastWindow = infoWindow;
   // force form to be readonly if not a new note
-  if (!newNote) {
+  if (!newNote && !$('#i' + ct).hasClass('new_note')) {
     MAPKEEP.toggleForm('i' + ct, true);
   }
 };
 
 /**
  * @param marker The note belongs to for coordinates
- * @param readonly Whether or not this is a new note (readonly means it is an existing note)
+ * @param readonly Whether or not this is a new note
  * @param note Note to use title and body for if existing
  * @returns {string}
  */
 MAPKEEP.createNoteForm = function(marker, readonly, note) {
-  readonly = readonly ? 'readonly' : '';
+  function hiddenInput(name, value) {
+    return $('<input/>')
+      .attr('name', name)
+      .attr('type', 'hidden')
+      .val(value);
+  }
+
   var formId = 'i' + MAPKEEP.ct;
 
   var title = $('<input/>')
@@ -162,16 +172,17 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
     .append(title)
     .append($('<br/>'))
     .append(textarea)
-    .append('<input name="note[latitude]" type="hidden" value="' + marker.position.lat() + '"/>')
-    .append('<input name="note[longitude]" type="hidden" value="' + marker.position.lng() + '"/>')
-    .append('<input name="authenticity_token" type="hidden" value=' + MAPKEEP.authToken + ' />')
-    .append('<input name="form_id" type="hidden" value=' + formId + ' />')
-    .append(submit).append(deleteButton);
+    .append(hiddenInput('note[latitude]', marker.position.lat()))
+    .append(hiddenInput('note[longitude]', marker.position.lng()))
+    .append(hiddenInput('authenticity_token', MAPKEEP.authToken))
+    .append(hiddenInput('form_id', formId))
+    .append(submit)
+    .append(deleteButton);
 
   if (readonly) {
     textarea.attr('readonly', 'readonly');
     title.attr('readonly', 'readonly');
-    form.append('<input type="hidden" name="_method" value="patch">');
+    form.append(hiddenInput('_method', 'patch'));
     MAPKEEP.addEditClick(formId);
   }
 
