@@ -1,18 +1,31 @@
-var MAPKEEP = MAPKEEP || {};
+/**
+ * Constructor for mapkeep application
+ * @param notes
+ * @param auth
+ * @constructor
+ */
+var mapkeep = function(notes, auth) {
+  /** Notes belonging to current user */
+  this.notes = notes;
+  /** For valid form submission */
+  this.authToken = auth;
+  /** Form identifier */
+  this.ct = 0;
+  /** Last open info window */
+  this.lastWindow = null;
+  /** Markers corresponding to note location */
+  this.markers = {};
+  /** The google map object */
+  this.map = null;
+  /** The user's current location */
+  this.userLoc = null;
 
-MAPKEEP.init = function(notes, auth) {
-  MAPKEEP.notes = notes;
-  MAPKEEP.authToken = auth;
-  MAPKEEP.ct = 0;
-  MAPKEEP.lastWindow = null;
-  MAPKEEP.markers = {};
-
-  $('#create_note').click(MAPKEEP.dropPin);
+  $('#create_note').click(this.dropPin.bind(this));
 };
 
-MAPKEEP.initMap = function(lat, lng) {
+mapkeep.prototype.initMap = function(lat, lng) {
   // For now, center around ip location || UCLA
-  MAPKEEP.userLoc = new google.maps.LatLng(lat, lng);
+  this.userLoc = new google.maps.LatLng(lat, lng);
   var center = lat && lng ?
     new google.maps.LatLng(lat, lng) :
     new google.maps.LatLng(34.0722, -118.4441);
@@ -22,19 +35,19 @@ MAPKEEP.initMap = function(lat, lng) {
       zoom: 10
   };
 
-  MAPKEEP.map = new google.maps.Map(
+  this.map = new google.maps.Map(
     document.getElementById('map-canvas'), mapOptions);
 
   // Draw notes on map
-  for (var i = 0; i < MAPKEEP.notes.length; i++) {
+  for (var i = 0; i < this.notes.length; i++) {
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(
-        MAPKEEP.notes[i].latitude, MAPKEEP.notes[i].longitude),
-      map: MAPKEEP.map,
-      title: MAPKEEP.notes[i].title,
+        this.notes[i].latitude, this.notes[i].longitude),
+      map: this.map,
+      title: this.notes[i].title,
       draggable: true
     });
-    MAPKEEP.addInfoWindowToNote(MAPKEEP.notes[i], marker);
+    this.addInfoWindowToNote(this.notes[i], marker);
   }
 };
 
@@ -43,34 +56,34 @@ MAPKEEP.initMap = function(lat, lng) {
  * @param note For info
  * @param marker To add window to
  */
-MAPKEEP.addInfoWindowToNote = function(note, marker) {
+mapkeep.prototype.addInfoWindowToNote = function(note, marker) {
   var infoWindow = new google.maps.InfoWindow({
-    content:  MAPKEEP.createNoteForm(marker, true, note)
+    content:  this.createNoteForm(marker, true, note)
   });
 
-  var ct = MAPKEEP.ct;
+  var ct = this.ct, self = this;
   google.maps.event.addListener(marker, 'click', function() {
-    MAPKEEP.openWindow(infoWindow, marker, ct);
+    self.openWindow(infoWindow, marker, ct);
   });
 
-  MAPKEEP.ct++;
+  this.ct++;
 };
 
 /**
  * Drops pin in center of map with editable form
  */
-MAPKEEP.dropPin = function() {
-  var ct = MAPKEEP.ct;
+mapkeep.prototype.dropPin = function() {
+  var ct = this.ct;
 
   var marker = new google.maps.Marker({
-    position: MAPKEEP.map.center,
-    map: MAPKEEP.map,
+    position: this.map.center,
+    map: this.map,
     draggable: true,
     animation: google.maps.Animation.DROP
   });
 
   var infoWindow = new google.maps.InfoWindow({
-    content: MAPKEEP.createNoteForm(marker, false)
+    content: this.createNoteForm(marker, false)
   });
 
   // Cancel note if user closes info window before saving
@@ -86,18 +99,19 @@ MAPKEEP.dropPin = function() {
   });
 
   // Show info window after pin drops down
+  var self = this;
   setTimeout(function() {
-    MAPKEEP.openWindow(infoWindow, marker, ct, true);
+    self.openWindow(infoWindow, marker, ct, true);
     var form = $('#i' + ct);
     form.find('input[name=note\\[title\\]]').focus();
   }, 500);
 
   // Open info window on click
   google.maps.event.addListener(marker, 'click', function() {
-    MAPKEEP.openWindow(infoWindow, marker, ct);
+    self.openWindow(infoWindow, marker, ct);
   });
 
-  MAPKEEP.ct++;
+  this.ct++;
 };
 
 /**
@@ -108,15 +122,15 @@ MAPKEEP.dropPin = function() {
  * @param newNote Whether or not new note
  * @returns {Function}
  */
-MAPKEEP.openWindow = function(infoWindow, marker, ct, newNote) {
-  if (MAPKEEP.lastWindow) {
-    MAPKEEP.lastWindow.close();
+mapkeep.prototype.openWindow = function(infoWindow, marker, ct, newNote) {
+  if (this.lastWindow) {
+    this.lastWindow.close();
   }
-  infoWindow.open(MAPKEEP.map, marker);
-  MAPKEEP.lastWindow = infoWindow;
+  infoWindow.open(this.map, marker);
+  this.lastWindow = infoWindow;
   // force form to be readonly if not a new note
   if (!newNote && !$('#i' + ct).hasClass('new_note')) {
-    MAPKEEP.toggleForm('i' + ct, true);
+    this.toggleForm('i' + ct, true);
   }
 };
 
@@ -126,7 +140,7 @@ MAPKEEP.openWindow = function(infoWindow, marker, ct, newNote) {
  * @param note Note to use title and body for if existing
  * @returns {string}
  */
-MAPKEEP.createNoteForm = function(marker, readonly, note) {
+mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
   function hiddenInput(name, value) {
     return $('<input/>')
       .attr('name', name)
@@ -134,7 +148,7 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
       .val(value);
   }
 
-  var formId = 'i' + MAPKEEP.ct;
+  var formId = 'i' + this.ct;
 
   var title = $('<input/>')
     .attr('name', 'note[title]')
@@ -145,7 +159,7 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
   var submit = $('<button/>')
     .text(readonly ? 'Edit' : 'Save')
     .addClass('button tiny right')
-    .attr('id', 'bi' + MAPKEEP.ct)
+    .attr('id', 'bi' + this.ct)
     .attr('type', 'submit');
 
   var deleteButton = $('<button/>')
@@ -174,7 +188,7 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
     .append(textarea)
     .append(hiddenInput('note[latitude]', marker.position.lat()))
     .append(hiddenInput('note[longitude]', marker.position.lng()))
-    .append(hiddenInput('authenticity_token', MAPKEEP.authToken))
+    .append(hiddenInput('authenticity_token', this.authToken))
     .append(hiddenInput('form_id', formId))
     .append(submit)
     .append(deleteButton);
@@ -183,11 +197,11 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
     textarea.attr('readonly', 'readonly');
     title.attr('readonly', 'readonly');
     form.append(hiddenInput('_method', 'patch'));
-    MAPKEEP.addEditClick(formId);
+    this.addEditClick(formId);
   }
 
   // Save marker for deletion
-  MAPKEEP.markers[formId] = marker;
+  this.markers[formId] = marker;
 
   // Update coords on pin drag
   // TODO: make dragging only possible on new notes and notes in edit mode
@@ -201,12 +215,25 @@ MAPKEEP.createNoteForm = function(marker, readonly, note) {
 };
 
 /**
+ * Updates format of form to update (patch) vs create
+ * @param formId
+ * @param noteId
+ */
+mapkeep.prototype.formSubmitted = function(formId, noteId) {
+  var form = $(formId);
+  form.append('<input type="hidden" name="_method" value="patch">');
+  form.attr('action', '/notes/' + noteId);
+  form.removeClass('new_note');
+};
+
+/**
  * Clicking edit toggles the form and prevents form submission
  * @param formId To add click function to (button inside)
  */
-MAPKEEP.addEditClick = function(formId) {
+mapkeep.prototype.addEditClick = function(formId) {
+  var self = this;
   $('#map-canvas').on('click', '#b' + formId, function() {
-    MAPKEEP.toggleForm(formId);
+    self.toggleForm(formId);
     return false;
   });
 };
@@ -216,7 +243,7 @@ MAPKEEP.addEditClick = function(formId) {
  * @param formId Form to toggle
  * @param readonly Whether to force readonly status
  */
-MAPKEEP.toggleForm = function(formId, readonly) {
+mapkeep.prototype.toggleForm = function(formId, readonly) {
   var form = $('#' + formId);
   var title = form.find('input[type!="hidden"]');
   var textarea = form.find('textarea');
@@ -239,7 +266,7 @@ MAPKEEP.toggleForm = function(formId, readonly) {
     title.css('background', 'none');
     textarea.attr('readonly', 'readonly');
     // Prevent submit, only toggle form
-    MAPKEEP.addEditClick(formId);
+    this.addEditClick(formId);
     submit.text('Edit');
     deleteButton.addClass('hide');
     deleteButton.removeClass('button');
