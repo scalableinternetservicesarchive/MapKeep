@@ -21,7 +21,7 @@ class AlbumsControllerTest < ActionController::TestCase
 
   test "should create album" do
     assert_difference('Album.count') do
-      post :create, album: @album.as_json
+      post :create, album: { description: @album.description, title: @album.title }
     end
 
     assert_redirected_to album_path(assigns(:album))
