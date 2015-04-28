@@ -32,13 +32,16 @@
 
   #close-overlay {
     display: block;
+    margin-top: -0.5em;
   }
 
   #overlay {
     background: white;
+    font-size: 1.5em;
+    line-height: 2;
     margin: 1em;
     padding: 1em;
-    width: 25em;
+    width: 20em;
 
     input {
       margin: 0;
@@ -56,6 +59,15 @@
 
     .button {
       margin-bottom: 0;
+    }
+
+    .group {
+      margin-right: 0.25em;
+      margin-left: 0.25em;
+    }
+
+    .alert, .secondary {
+      cursor: pointer;
     }
   }
 

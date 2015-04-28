@@ -6,7 +6,11 @@
 <%= javascript_include_tag 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBTrBJkp-8i6MZKKotUoTnzoUiXV_zlIVg' %>
 <%= javascript_include_tag 'geolocation' %>
 <%= javascript_tag do %>
-  var app = new mapkeep(<%= raw @notes.to_json %>, '<%= session[:_csrf_token] %>');
+  var app = new mapkeep(
+      <%= raw @notes.to_json(:include => :albums) %>,
+      <%= raw current_user.albums.to_json %>,
+      '<%= session[:_csrf_token] %>'
+  );
   google.maps.event.addDomListener(window, 'load', function() {
     app.initMap('<%= @location.lat %>', '<%= @location.lng %>');
   });

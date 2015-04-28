@@ -1,12 +1,16 @@
+// TODO: reuse form elements
+
 /**
  * Constructor for mapkeep application
  * @param notes
+ * @param albums
  * @param auth
  * @constructor
  */
-var mapkeep = function(notes, auth) {
-  /** Notes belonging to current user */
+var mapkeep = function(notes, albums, auth) {
+  /** Notes and albums belonging to current user */
   this.notes = notes;
+  this.albums = albums;
   /** For valid form submission */
   this.authToken = auth;
   /** Form identifier */
@@ -144,9 +148,12 @@ mapkeep.prototype.openWindow = function(infoWindow, marker, ct, newNote) {
   var overlay = $('#overlay');
   overlay.find('form').remove();
   overlay.append(this.forms[formId]).removeClass('hide');
+  overlay.find('.group').removeClass('hide');
   if (!newNote && !$(formId).hasClass('new_note')) {
     this.toggleForm(formId, true);
   }
+
+  $(document).foundation();
 };
 
 /**
@@ -175,7 +182,20 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     .text(readonly ? 'Edit' : 'Save')
     .addClass('button tiny right')
     .attr('id', getButtonId(formId).substr(1)) // remove # sign here
-    .attr('type', 'submit');
+    .attr('type', 'submit')
+    .click(function() {
+      // TODO: fix this and only run when saving
+      var albumIds = $(formId).find('input[name=note\\[album_ids\\]\\[\\]]');
+      var idsString = '';
+      var albums = $('#overlay').find('.label').not('.alert');
+      albums.each(function(x, al) {
+        var album = $(al);
+        if (album.is(':visible')) {
+          idsString += $(al).attr('value') + ',';
+        }
+      });
+      albumIds.val(idsString);
+    });
 
   var deleteButton = $('<button/>')
     .text('Delete')
@@ -187,7 +207,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
 
   var textarea = $('<textarea/>')
     .attr('name', 'note[body]')
-    .attr('rows', '4')
+    .attr('rows', '10')
     .attr('placeholder', 'Write anything you want about this location!')
     .text(readonly ? note.body : '');
 
@@ -201,10 +221,12 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     .append(title)
     .append($('<br/>'))
     .append(textarea)
+    .append(this.createAlbumHtml(note, formId))
     .append(hiddenInput('note[latitude]', marker.position.lat()))
     .append(hiddenInput('note[longitude]', marker.position.lng()))
     .append(hiddenInput('authenticity_token', this.authToken))
     .append(hiddenInput('form_id', formId))
+    .append(hiddenInput('note[album_ids][]', ''))
     .append(submit)
     .append(deleteButton);
 
@@ -228,6 +250,76 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
   });
 
   return form[0];
+};
+
+mapkeep.prototype.createAlbumHtml = function(note, formId) {
+  var albumHtml = $('<div/>').html('Albums: ');
+  var dropDownId = getDropDownId(formId);
+
+  function makeLabelGroup(album, showDelete) {
+    var label = $('<span/>')
+      .addClass('label')
+      .html(album.title)
+      .attr('value', album.id);
+
+    // Hide label on delete, remove on save
+    var deleteLabel = $('<span/>').addClass('alert').html('X');
+    deleteLabel.click(function() {
+      $(this).parent().addClass('hide');
+    });
+
+    if (showDelete) {
+      deleteLabel.addClass('label');
+    } else {
+      deleteLabel.addClass('hide');
+    }
+
+    return $('<span/>')
+      .addClass('group')
+      .append(label)
+      .append(deleteLabel);
+  }
+
+  function albumPrepend(album) {
+    return function() {
+      if (!albumHtml.find('span[value=' + album.id + ']').length) {
+        dropDownButton.before(makeLabelGroup(album, true));
+      }
+    }
+  }
+
+  var dropDown = ($('<ul data-dropdown-content/>')
+    .addClass('f-dropdown')
+    .attr('id', dropDownId)
+    .attr('aria-hidden', 'true'));
+
+  for (var i = 0; i < note.albums.length; i++) {
+    var album = note.albums[i];
+    albumHtml.append(makeLabelGroup(album));
+  }
+
+  var dropDownButton = $('<button/>')
+    .addClass('secondary hide tiny dropdown')
+    .attr('data-dropdown', dropDownId)
+    .attr('aria-controls', dropDownId)
+    .attr('aria-expanded', 'false')
+    .attr('type', 'button')
+    .attr('href', '#')
+    .html('+ Album');
+
+  for (i = 0; i < this.albums.length; i++) {
+    album = this.albums[i];
+    var link = $('<a/>')
+      .attr('href', '#')
+      .html(album.title)
+      .click(albumPrepend(album));
+    dropDown.append($('<li/>').append(link));
+  }
+
+  albumHtml.append(dropDownButton);
+  albumHtml.append(dropDown);
+
+  return albumHtml;
 };
 
 /**
@@ -264,8 +356,9 @@ mapkeep.prototype.toggleForm = function(formId, readonly) {
   var form = $(formId);
   var title = form.find('input[type!="hidden"]');
   var textarea = form.find('textarea');
-  var submit = form.find('button').not('.alert');
-  var deleteButton = form.find('button.alert');
+  var submit = form.find('button').not('.alert').not('.secondary');
+  var deleteDropButtons = form.find('button.alert, button.dropdown');
+  var alertSpans = form.find('span.alert');
 
   if (submit.text() == 'Edit' && !readonly) {
     // Make fields editable
@@ -274,8 +367,10 @@ mapkeep.prototype.toggleForm = function(formId, readonly) {
     // Remove submit blocking
     $('#map-canvas').off('click', getButtonId(formId));
     submit.text('Save');
-    deleteButton.removeClass('hide');
-    deleteButton.addClass('button');
+    deleteDropButtons.removeClass('hide');
+    deleteDropButtons.addClass('button');
+    alertSpans.removeClass('hide');
+    alertSpans.addClass('label');
 
   }  else if (submit.text() == 'Save') {
     // Make fields readonly
@@ -285,8 +380,10 @@ mapkeep.prototype.toggleForm = function(formId, readonly) {
     // Prevent submit, only toggle form
     this.addEditClick(formId);
     submit.text('Edit');
-    deleteButton.addClass('hide');
-    deleteButton.removeClass('button');
+    deleteDropButtons.addClass('hide');
+    deleteDropButtons.removeClass('button');
+    alertSpans.addClass('hide');
+    alertSpans.removeClass('label');
   }
 };
 
@@ -296,4 +393,8 @@ function getFormId(ct) {
 
 function getButtonId(formId) {
   return '#b' + formId.substr(1);
+}
+
+function getDropDownId(formId) {
+  return 'd' + formId.substr(1);
 }
