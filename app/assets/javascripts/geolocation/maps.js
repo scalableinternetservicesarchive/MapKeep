@@ -15,12 +15,17 @@ var mapkeep = function(notes, auth) {
   this.lastWindow = null;
   /** Markers corresponding to note location */
   this.markers = {};
+  this.forms = {};
   /** The google map object */
   this.map = null;
   /** The user's current location */
   this.userLoc = null;
 
   $('#create_note').click(this.dropPin.bind(this));
+  $('#close-overlay').click(function() {
+    // TODO: remove marker if new note
+    $('#overlay').addClass('hide').find('form').remove();
+  });
 };
 
 /**
@@ -36,8 +41,10 @@ mapkeep.prototype.initMap = function(lat, lng) {
     new google.maps.LatLng(34.0722, -118.4441);
 
   var mapOptions = {
-      center: center,
-      zoom: 10
+    center: center,
+    mapTypeControl: false,
+    streetViewControl: false,
+    zoom: 10
   };
 
   this.map = new google.maps.Map(
@@ -54,6 +61,9 @@ mapkeep.prototype.initMap = function(lat, lng) {
     });
     this.addInfoWindowToNote(this.notes[i], marker);
   }
+
+  this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
+    .push($('#overlay').get(0));
 };
 
 /**
@@ -129,13 +139,11 @@ mapkeep.prototype.dropPin = function() {
  * @param newNote Whether or not new note
  */
 mapkeep.prototype.openWindow = function(infoWindow, marker, ct, newNote) {
-  if (this.lastWindow) {
-    this.lastWindow.close();
-  }
-  infoWindow.open(this.map, marker);
-  this.lastWindow = infoWindow;
   // force form to be readonly if not a new note
   var formId = getFormId(ct);
+  var overlay = $('#overlay');
+  overlay.find('form').remove();
+  overlay.append(this.forms[formId]).removeClass('hide');
   if (!newNote && !$(formId).hasClass('new_note')) {
     this.toggleForm(formId, true);
   }
@@ -171,7 +179,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
 
   var deleteButton = $('<button/>')
     .text('Delete')
-    .addClass('alert tiny left hide')
+    .addClass('alert tiny right hide')
     .attr('type', 'submit')
     .click(function() {
       form.find('input[name=_method]').val('delete');
@@ -207,8 +215,9 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     this.addEditClick(formId);
   }
 
-  // Save marker for deletion
+  // Save marker and form for deletion
   this.markers[formId] = marker;
+  this.forms[formId] = form;
 
   // Update coords on pin drag
   // TODO: make dragging only possible on new notes and notes in edit mode

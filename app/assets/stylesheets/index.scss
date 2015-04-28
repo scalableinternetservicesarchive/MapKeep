@@ -16,9 +16,29 @@
   }
 
   #map-canvas {
+    height: 100%;
+    width: 100%;
+
     img {
       max-width: none;
     }
+  }
+
+  .full {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #close-overlay {
+    display: block;
+  }
+
+  #overlay {
+    background: white;
+    margin: 1em;
+    padding: 1em;
+    width: 25em;
 
     input {
       margin: 0;
@@ -37,20 +57,10 @@
     .button {
       margin-bottom: 0;
     }
-
-    height: 100%;
-    margin: 0;
-    padding: 0;
   }
 
   #sidebar {
     margin-top: $topbar-height/2;
-  }
-
-  .full {
-    height: 100%;
-    margin: 0;
-    padding: 0;
   }
 
   .alert {
