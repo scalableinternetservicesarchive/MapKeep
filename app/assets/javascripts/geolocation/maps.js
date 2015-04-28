@@ -16,7 +16,7 @@ var mapkeep = function(notes, albums, auth) {
   /** Form identifier */
   this.formNum = 0;
   /** Last open info window */
-  this.lastWindow = null;
+  this.curWindow = null;
   /** Markers corresponding to note location */
   this.markers = {};
   this.forms = {};
@@ -86,12 +86,7 @@ mapkeep.prototype.dropPin = function() {
   // Show note window and focus on title input
   var formNum = this.formNum;
   this.createNoteForm(marker, false);
-  this.openWindow(formNum, true);
-
-  // Open info window for note title
-  setTimeout(function() {
-    this.openInfoWindow('', marker);
-  }.bind(this), 450);
+  this.openWindow(formNum, true, 450);
 
   this.forms[formNum].find('input[name=note\\[title\\]]').focus();
 };
@@ -106,11 +101,11 @@ mapkeep.prototype.openInfoWindow = function(title, marker) {
     content: title
   });
 
-  if (this.lastWindow) {
-    this.lastWindow.setMap(null);
+  if (this.curWindow) {
+    this.curWindow.setMap(null);
   }
 
-  this.lastWindow = infoWindow;
+  this.curWindow = infoWindow;
   infoWindow.open(this.map, marker);
 };
 
@@ -121,7 +116,7 @@ mapkeep.prototype.openInfoWindow = function(title, marker) {
  */
 mapkeep.prototype.addMarkerListener = function(marker, formNum) {
   google.maps.event.addListener(marker, 'click', function() {
-    this.openWindow(formNum);
+    this.openWindow(formNum, 0);
   }.bind(this));
 };
 
@@ -129,9 +124,18 @@ mapkeep.prototype.addMarkerListener = function(marker, formNum) {
  * Close last form and open new one
  * @param formNum Form identifier
  * @param newNote Whether or not new note
+ * @param timeout For info window open
  */
-mapkeep.prototype.openWindow = function(formNum, newNote) {
+mapkeep.prototype.openWindow = function(formNum, newNote, timeout) {
   var overlay = $('#overlay');
+
+  // Open info window for note title
+  setTimeout(function() {
+    this.openInfoWindow(
+      this.forms[formNum].find('input[name=note\\[title\\]]').val(),
+      this.markers[formNum]
+    );
+  }.bind(this), timeout);
 
   // remove previous form and show specified form
   overlay.find('form').remove();
@@ -164,7 +168,10 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     .attr('name', 'note[title]')
     .attr('placeholder', 'Title')
     .attr('value', readonly ? note.title : '')
-    .attr('type', 'text');
+    .attr('type', 'text')
+    .keyup(function() {
+      this.curWindow.setContent(title.val());
+    }.bind(this));
 
   var submit = $('<button/>')
     .text(readonly ? 'Edit' : 'Save')
@@ -210,7 +217,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     .append(title)
     .append($('<br/>'))
     .append(textarea)
-    .append(this.createAlbumHtml(note))
+    .append(this.createAlbumHtml(note, readonly))
     .append(hiddenInput('note[latitude]', marker.position.lat()))
     .append(hiddenInput('note[longitude]', marker.position.lng()))
     .append(hiddenInput('authenticity_token', this.authToken))
@@ -233,12 +240,11 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
   // Update coords on pin drag
   // TODO: make dragging only possible on new notes and notes in edit mode
   var formNum = this.formNum;
-  var self = this;
   google.maps.event.addListener(marker, 'dragend', function() {
-    var form = self.forms[formNum];
+    var form = this.forms[formNum];
     form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
     form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
-  });
+  }.bind(this));
 
   this.addMarkerListener(marker, this.formNum++);
   return form[0];
@@ -248,9 +254,10 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
  * Creates html for album label creation and deletion
  * and displays albums the note belongs to
  * @param note
+ * @param readonly
  * @returns {*|jQuery}
  */
-mapkeep.prototype.createAlbumHtml = function(note) {
+mapkeep.prototype.createAlbumHtml = function(note, readonly) {
   var albumHtml = $('<div/>').html('Albums: ');
 
   /**
@@ -314,8 +321,9 @@ mapkeep.prototype.createAlbumHtml = function(note) {
     }
   }
 
+  var clz = readonly ? 'hide' : 'button';
   var dropDownButton = $('<button/>')
-    .addClass('secondary hide tiny dropdown')
+    .addClass('secondary tiny dropdown ' + clz)
     .attr('data-dropdown', dropDownId)
     .attr('aria-controls', dropDownId)
     .attr('aria-expanded', 'false')
