@@ -14,7 +14,7 @@ var mapkeep = function(notes, albums, auth) {
   /** For valid form submission */
   this.authToken = auth;
   /** Form identifier */
-  this.ct = 0;
+  this.formNum = 0;
   /** Last open info window */
   this.lastWindow = null;
   /** Markers corresponding to note location */
@@ -28,6 +28,7 @@ var mapkeep = function(notes, albums, auth) {
   $('#create_note').click(this.dropPin.bind(this));
   $('#close-overlay').click(function() {
     // TODO: remove marker if new note
+    // TODO: remake labels based on saved state
     $('#overlay').addClass('hide').find('form').remove();
   });
 };
@@ -56,14 +57,14 @@ mapkeep.prototype.initMap = function(lat, lng) {
 
   // Draw notes on map
   for (var i = 0; i < this.notes.length; i++) {
+    var note = this.notes[i];
     var marker = new google.maps.Marker({
-      position: new google.maps.LatLng(
-        this.notes[i].latitude, this.notes[i].longitude),
+      position: new google.maps.LatLng(note.latitude, note.longitude),
       map: this.map,
-      title: this.notes[i].title,
+      title: note.title,
       draggable: true
     });
-    this.addInfoWindowToNote(this.notes[i], marker);
+    this.createNoteForm(marker, true, note);
   }
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
@@ -71,31 +72,10 @@ mapkeep.prototype.initMap = function(lat, lng) {
 };
 
 /**
- * Adds info window representing note to specified marker
- * @param note For info
- * @param marker To add window to
- */
-mapkeep.prototype.addInfoWindowToNote = function(note, marker) {
-  var infoWindow = new google.maps.InfoWindow({
-    content:  this.createNoteForm(marker, true, note)
-  });
-
-  var ct = this.ct, self = this;
-  google.maps.event.addListener(marker, 'click', function() {
-    self.openWindow(infoWindow, marker, ct);
-  });
-
-  this.ct++;
-};
-
-/**
  * Drops pin in center of map with editable form
  */
 mapkeep.prototype.dropPin = function() {
-  var ct = this.ct;
-  var formId = getFormId(ct);
-  var buttonId = getButtonId(formId);
-
+  // create and drop pin onto map
   var marker = new google.maps.Marker({
     position: this.map.center,
     map: this.map,
@@ -103,54 +83,64 @@ mapkeep.prototype.dropPin = function() {
     animation: google.maps.Animation.DROP
   });
 
-  var infoWindow = new google.maps.InfoWindow({
-    content: this.createNoteForm(marker, false)
-  });
+  // Show note window and focus on title input
+  var formNum = this.formNum;
+  this.createNoteForm(marker, false);
+  this.openWindow(formNum, true);
 
-  // Cancel note if user closes info window before saving
-  var listener = google.maps.event.addListener(infoWindow,'closeclick',
-    function() {
-      marker.setMap(null);
-    });
-
-  // Clear listener when user clicks save
-  $('#map-canvas').on('click', buttonId, function() {
-    google.maps.event.removeListener(listener);
-    $('#map-canvas').off('click', buttonId);
-  });
-
-  // Show info window after pin drops down
-  var self = this;
+  // Open info window for note title
   setTimeout(function() {
-    self.openWindow(infoWindow, marker, ct, true);
-    var form = $(formId);
-    form.find('input[name=note\\[title\\]]').focus();
-  }, 500);
+    this.openInfoWindow('', marker);
+  }.bind(this), 450);
 
-  // Open info window on click
-  google.maps.event.addListener(marker, 'click', function() {
-    self.openWindow(infoWindow, marker, ct);
-  });
-
-  this.ct++;
+  this.forms[formNum].find('input[name=note\\[title\\]]').focus();
 };
 
 /**
- * Close last info window and open new one
- * @param infoWindow To open
- * @param marker To open info window at
- * @param ct Form identifier
+ * Opens info window with specified title at the marker
+ * @param title
+ * @param marker
+ */
+mapkeep.prototype.openInfoWindow = function(title, marker) {
+  var infoWindow = new google.maps.InfoWindow({
+    content: title
+  });
+
+  if (this.lastWindow) {
+    this.lastWindow.setMap(null);
+  }
+
+  this.lastWindow = infoWindow;
+  infoWindow.open(this.map, marker);
+};
+
+/**
+ * Adds a listener to a marker to open a certain form
+ * @param marker
+ * @param formNum
+ */
+mapkeep.prototype.addMarkerListener = function(marker, formNum) {
+  google.maps.event.addListener(marker, 'click', function() {
+    this.openWindow(formNum);
+  }.bind(this));
+};
+
+/**
+ * Close last form and open new one
+ * @param formNum Form identifier
  * @param newNote Whether or not new note
  */
-mapkeep.prototype.openWindow = function(infoWindow, marker, ct, newNote) {
-  // force form to be readonly if not a new note
-  var formId = getFormId(ct);
+mapkeep.prototype.openWindow = function(formNum, newNote) {
   var overlay = $('#overlay');
+
+  // remove previous form and show specified form
   overlay.find('form').remove();
-  overlay.append(this.forms[formId]).removeClass('hide');
+  overlay.append(this.forms[formNum]).removeClass('hide');
   overlay.find('.group').removeClass('hide');
-  if (!newNote && !$(formId).hasClass('new_note')) {
-    this.toggleForm(formId, true);
+
+  // force form to be readonly if not a new note
+  if (!newNote && !this.forms[formNum].hasClass('new_note')) {
+    this.toggleForm(formNum, true);
   }
 
   $(document).foundation();
@@ -170,8 +160,6 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
       .val(value);
   }
 
-  var formId = getFormId(this.ct);
-
   var title = $('<input/>')
     .attr('name', 'note[title]')
     .attr('placeholder', 'Title')
@@ -181,7 +169,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
   var submit = $('<button/>')
     .text(readonly ? 'Edit' : 'Save')
     .addClass('button tiny right')
-    .attr('id', getButtonId(formId).substr(1)) // remove # sign here
+    .attr('id', getButtonId(this.formNum).substr(1)) // remove # sign here
     .attr('type', 'submit')
     .click(function() {
       // TODO: fix this and only run when saving
@@ -211,6 +199,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     .attr('placeholder', 'Write anything you want about this location!')
     .text(readonly ? note.body : '');
 
+  var formId = getFormId(this.formNum);
   var form = $('<form/>')
     .addClass(readonly ? '' : 'new_note')
     .attr('id', formId.substr(1)) // remove # sign here
@@ -221,11 +210,11 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     .append(title)
     .append($('<br/>'))
     .append(textarea)
-    .append(this.createAlbumHtml(note, formId))
+    .append(this.createAlbumHtml(note))
     .append(hiddenInput('note[latitude]', marker.position.lat()))
     .append(hiddenInput('note[longitude]', marker.position.lng()))
     .append(hiddenInput('authenticity_token', this.authToken))
-    .append(hiddenInput('form_id', formId))
+    .append(hiddenInput('form_id', this.formNum))
     .append(hiddenInput('note[album_ids][]', ''))
     .append(submit)
     .append(deleteButton);
@@ -234,28 +223,44 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     textarea.attr('readonly', 'readonly');
     title.attr('readonly', 'readonly');
     form.append(hiddenInput('_method', 'patch'));
-    this.addEditClick(formId);
+    this.addEditClick(this.formNum);
   }
 
   // Save marker and form for deletion
-  this.markers[formId] = marker;
-  this.forms[formId] = form;
+  this.markers[this.formNum] = marker;
+  this.forms[this.formNum] = form;
 
   // Update coords on pin drag
   // TODO: make dragging only possible on new notes and notes in edit mode
+  var formNum = this.formNum;
+  var self = this;
   google.maps.event.addListener(marker, 'dragend', function() {
-    var form = $(formId);
+    var form = self.forms[formNum];
     form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
     form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
   });
 
+  this.addMarkerListener(marker, this.formNum++);
   return form[0];
 };
 
-mapkeep.prototype.createAlbumHtml = function(note, formId) {
+/**
+ * Creates html for album label creation and deletion
+ * and displays albums the note belongs to
+ * @param note
+ * @returns {*|jQuery}
+ */
+mapkeep.prototype.createAlbumHtml = function(note) {
   var albumHtml = $('<div/>').html('Albums: ');
-  var dropDownId = getDropDownId(formId);
 
+  /**
+   * Creates a label group:
+   *    - the album name label (tagged with album id as value)
+   *    - a delete X alert label
+   * @param album For title and id
+   * @param showDelete Whether or not to show the delete button
+   * @returns {*|jQuery}
+   */
   function makeLabelGroup(album, showDelete) {
     var label = $('<span/>')
       .addClass('label')
@@ -268,6 +273,7 @@ mapkeep.prototype.createAlbumHtml = function(note, formId) {
       $(this).parent().addClass('hide');
     });
 
+    // Show delete button next to label or not
     if (showDelete) {
       deleteLabel.addClass('label');
     } else {
@@ -280,22 +286,32 @@ mapkeep.prototype.createAlbumHtml = function(note, formId) {
       .append(deleteLabel);
   }
 
+  /** On click function for album dropdown click */
   function albumPrepend(album) {
     return function() {
-      if (!albumHtml.find('span[value=' + album.id + ']').length) {
+      // append label if it doesn't exist and is not hidden
+      // otherwise just unhide the label
+      var labels = albumHtml.find('span[value=' + album.id + ']');
+      if (!labels.length) {
         dropDownButton.before(makeLabelGroup(album, true));
+      } else if (labels.parent().hasClass('hide')) {
+        labels.parent().removeClass('hide');
       }
     }
   }
 
+  var dropDownId = getDropDownId(this.formNum);
   var dropDown = ($('<ul data-dropdown-content/>')
     .addClass('f-dropdown')
     .attr('id', dropDownId)
     .attr('aria-hidden', 'true'));
 
-  for (var i = 0; i < note.albums.length; i++) {
-    var album = note.albums[i];
-    albumHtml.append(makeLabelGroup(album));
+  // Add label groups for albums the note belongs in
+  if (note) {
+    for (var i = 0; i < note.albums.length; i++) {
+      var album = note.albums[i];
+      albumHtml.append(makeLabelGroup(album));
+    }
   }
 
   var dropDownButton = $('<button/>')
@@ -307,6 +323,7 @@ mapkeep.prototype.createAlbumHtml = function(note, formId) {
     .attr('href', '#')
     .html('+ Album');
 
+  // Add links that represent the user's albums, on click it adds a label group
   for (i = 0; i < this.albums.length; i++) {
     album = this.albums[i];
     var link = $('<a/>')
@@ -324,36 +341,35 @@ mapkeep.prototype.createAlbumHtml = function(note, formId) {
 
 /**
  * Updates format of form to update (patch) vs create
- * @param formId
+ * @param formNum
  * @param noteId
  */
-mapkeep.prototype.formSubmitted = function(formId, noteId) {
-  var form = $(formId);
+mapkeep.prototype.formSubmitted = function(formNum, noteId) {
+  var form = this.forms[formNum];
   form.append('<input type="hidden" name="_method" value="patch">');
   form.attr('action', '/notes/' + noteId);
   form.removeClass('new_note');
-  this.toggleForm(formId);
+  this.toggleForm(formNum);
 };
 
 /**
  * Clicking edit toggles the form and prevents form submission
- * @param formId To add click function to (button inside)
+ * @param formNum To add click function to (button inside)
  */
-mapkeep.prototype.addEditClick = function(formId) {
-  var self = this;
-  $('#map-canvas').on('click', getButtonId(formId), function() {
-    self.toggleForm(formId);
+mapkeep.prototype.addEditClick = function(formNum) {
+  $('#map-canvas').on('click', getButtonId(formNum), function() {
+    this.toggleForm(formNum);
     return false;
-  });
+  }.bind(this));
 };
 
 /**
  * Toggles form readonly status
- * @param formId Form to toggle
+ * @param formNum Form to toggle
  * @param readonly Whether to force readonly status
  */
-mapkeep.prototype.toggleForm = function(formId, readonly) {
-  var form = $(formId);
+mapkeep.prototype.toggleForm = function(formNum, readonly) {
+  var form = this.forms[formNum];
   var title = form.find('input[type!="hidden"]');
   var textarea = form.find('textarea');
   var submit = form.find('button').not('.alert').not('.secondary');
@@ -365,7 +381,7 @@ mapkeep.prototype.toggleForm = function(formId, readonly) {
     title.removeAttr('readonly');
     textarea.removeAttr('readonly');
     // Remove submit blocking
-    $('#map-canvas').off('click', getButtonId(formId));
+    $('#map-canvas').off('click', getButtonId(formNum));
     submit.text('Save');
     deleteDropButtons.removeClass('hide');
     deleteDropButtons.addClass('button');
@@ -378,7 +394,7 @@ mapkeep.prototype.toggleForm = function(formId, readonly) {
     title.css('background', 'none');
     textarea.attr('readonly', 'readonly');
     // Prevent submit, only toggle form
-    this.addEditClick(formId);
+    this.addEditClick(formNum);
     submit.text('Edit');
     deleteDropButtons.addClass('hide');
     deleteDropButtons.removeClass('button');
@@ -387,14 +403,14 @@ mapkeep.prototype.toggleForm = function(formId, readonly) {
   }
 };
 
-function getFormId(ct) {
-  return '#i' + ct;
+function getFormId(formNum) {
+  return '#i' + formNum;
 }
 
-function getButtonId(formId) {
-  return '#b' + formId.substr(1);
+function getButtonId(formNum) {
+  return '#b' + formNum;
 }
 
-function getDropDownId(formId) {
-  return 'd' + formId.substr(1);
+function getDropDownId(formNum) {
+  return 'd' + formNum;
 }
