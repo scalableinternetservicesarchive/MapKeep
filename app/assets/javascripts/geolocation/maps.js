@@ -30,7 +30,8 @@ var mapkeep = function(notes, albums, auth) {
     // TODO: remove marker if new note
     // TODO: remake labels based on saved state
     $('#overlay').addClass('hide').find('form').remove();
-  });
+    this.curWindow.setMap(null);
+  }.bind(this));
 };
 
 /**
@@ -137,15 +138,19 @@ mapkeep.prototype.openWindow = function(formNum, newNote, timeout) {
     );
   }.bind(this), timeout);
 
-  // remove previous form and show specified form
+  // Remove previous form and show specified form
   overlay.find('form').remove();
   overlay.append(this.forms[formNum]).removeClass('hide');
   overlay.find('.group').removeClass('hide');
 
-  // force form to be readonly if not a new note
+  // Force form to be readonly if not a new note
   if (!newNote && !this.forms[formNum].hasClass('new_note')) {
     this.toggleForm(formNum, true);
   }
+
+  // Hide all labels that don't belong to the note
+  var labels = this.forms[formNum].find('.label');
+  
 
   $(document).foundation();
 };
