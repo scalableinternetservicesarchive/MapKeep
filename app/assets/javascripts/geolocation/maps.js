@@ -1,5 +1,3 @@
-// TODO: reuse form elements
-
 /**
  * Constructor for mapkeep application
  * @param notes
@@ -28,8 +26,9 @@ var mapkeep = function(notes, albums, auth) {
   $('#create_note').click(this.dropPin.bind(this));
   $('#close-overlay').click(function() {
     // TODO: remove marker if new note
-    // TODO: remake labels based on saved state
-    $('#overlay').addClass('hide').find('form').remove();
+    var overlay = $('#overlay');
+    overlay.find('form').get(0).reset();
+    overlay.addClass('hide').find('form').remove();
     this.curWindow.setMap(null);
   }.bind(this));
 };
@@ -143,14 +142,21 @@ mapkeep.prototype.openWindow = function(formNum, newNote, timeout) {
   overlay.append(this.forms[formNum]).removeClass('hide');
   overlay.find('.group').removeClass('hide');
 
+  // Remove any albums not in albumIds
+  // TODO: update album ids in form submitted ?
+  var albumIds = overlay.find(
+    'input[name=note\\[album_ids\\]\\[\\]]').val().split(',');
+  var albumLabels = overlay.find('.group');
+  for (var i = 0; i < albumLabels.length; i++) {
+    if (albumIds.indexOf($(albumLabels[i]).find('.label').attr('value')) < 0) {
+      $(albumLabels[i]).remove();
+    }
+  }
+
   // Force form to be readonly if not a new note
   if (!newNote && !this.forms[formNum].hasClass('new_note')) {
     this.toggleForm(formNum, true);
   }
-
-  // Hide all labels that don't belong to the note
-  var labels = this.forms[formNum].find('.label');
-  
 
   $(document).foundation();
 };
@@ -200,16 +206,25 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
   var deleteButton = $('<button/>')
     .text('Delete')
     .addClass('alert tiny right hide')
-    .attr('type', 'submit')
-    .click(function() {
-      form.find('input[name=_method]').val('delete');
-    });
+    .attr('type', 'submit');
+  // change form method to delete before submission (for rails)
+  $('#overlay').on('click', 'button.alert', function() {
+    form.find('input[name=_method]').val('delete');
+  });
 
   var textarea = $('<textarea/>')
     .attr('name', 'note[body]')
     .attr('rows', '10')
     .attr('placeholder', 'Write anything you want about this location!')
     .text(readonly ? note.body : '');
+
+  // get album ids
+  var albumIds = '';
+  if (readonly) {
+    for (var i = 0; i < note.albums.length; i++) {
+      albumIds += note.albums[i].id + ', ';
+    }
+  }
 
   var formId = getFormId(this.formNum);
   var form = $('<form/>')
@@ -227,7 +242,7 @@ mapkeep.prototype.createNoteForm = function(marker, readonly, note) {
     .append(hiddenInput('note[longitude]', marker.position.lng()))
     .append(hiddenInput('authenticity_token', this.authToken))
     .append(hiddenInput('form_id', this.formNum))
-    .append(hiddenInput('note[album_ids][]', ''))
+    .append(hiddenInput('note[album_ids][]', albumIds))
     .append(submit)
     .append(deleteButton);
 
@@ -281,7 +296,7 @@ mapkeep.prototype.createAlbumHtml = function(note, readonly) {
 
     // Hide label on delete, remove on save
     var deleteLabel = $('<span/>').addClass('alert').html('X');
-    deleteLabel.click(function() {
+    $('#overlay').on('click', 'span.alert', function() {
       $(this).parent().addClass('hide');
     });
 
