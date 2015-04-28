@@ -4,7 +4,7 @@ class RecreateNotesWithSpatialIndex < ActiveRecord::Migration
 
     create_table :notes, :options => 'ENGINE=MyISAM' do |t|
       t.string :title
-      t.string :body
+      t.text :body
       t.float :latitude, limit: 53, numericality: true
       t.float :longitude, limit: 53, numericality: true
       t.column :latlon, :point, null: false

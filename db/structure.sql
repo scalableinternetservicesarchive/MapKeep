@@ -32,7 +32,7 @@ CREATE TABLE `albums` (
   PRIMARY KEY (`id`),
   KEY `index_albums_on_user_id` (`user_id`),
   CONSTRAINT `fk_rails_964016e0e8` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -49,7 +49,7 @@ CREATE TABLE `collections` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -75,7 +75,7 @@ DROP TABLE IF EXISTS `notes`;
 CREATE TABLE `notes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `body` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `body` text COLLATE utf8_unicode_ci,
   `latitude` double DEFAULT NULL,
   `longitude` double DEFAULT NULL,
   `latlon` point NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE `notes` (
   PRIMARY KEY (`id`),
   SPATIAL KEY `index_notes_on_latlon` (`latlon`),
   KEY `index_notes_on_user_id` (`user_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=302 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -148,7 +148,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_users_on_email` (`email`),
   UNIQUE KEY `index_users_on_reset_password_token` (`reset_password_token`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -160,7 +160,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-04-26 13:19:53
+-- Dump completed on 2015-04-27 17:07:56
 INSERT INTO schema_migrations (version) VALUES ('20150412000202');
 
 INSERT INTO schema_migrations (version) VALUES ('20150413214220');
@@ -182,4 +182,6 @@ INSERT INTO schema_migrations (version) VALUES ('20150427002954');
 INSERT INTO schema_migrations (version) VALUES ('20150427002955');
 
 INSERT INTO schema_migrations (version) VALUES ('20150427002956');
+
+INSERT INTO schema_migrations (version) VALUES ('20150428002956');
 
