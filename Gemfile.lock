@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/fjl82/activerecord-mysql2spatial-adapter.git
+  revision: 7c311555c617707579d6efe8118f4d601028bd1b
+  specs:
+    activerecord-mysql2spatial-adapter (0.5.0.nonrelease)
+      mysql2 (>= 0.2.13)
+      rgeo-activerecord (~> 2.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -97,6 +105,7 @@ GEM
     mini_portile (0.6.2)
     minitest (5.5.1)
     multi_json (1.11.0)
+    mysql2 (0.3.18)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
     orm_adapter (0.5.0)
@@ -132,6 +141,10 @@ GEM
       json (~> 1.4)
     responders (2.1.0)
       railties (>= 4.2.0, < 5)
+    rgeo (0.3.20)
+    rgeo-activerecord (2.1.1)
+      activerecord (~> 4.2)
+      rgeo (~> 0.3)
     sass (3.4.13)
     sass-rails (5.0.3)
       railties (>= 4.0.0, < 5.0)
@@ -175,6 +188,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activerecord-mysql2spatial-adapter!
   byebug
   coffee-rails (~> 4.1.0)
   devise
@@ -184,7 +198,10 @@ DEPENDENCIES
   jbuilder (~> 2.0)
   jquery-rails
   jquery-turbolinks
+  mysql2
   rails (= 4.2.1)
+  rgeo
+  rgeo-activerecord
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
   spring

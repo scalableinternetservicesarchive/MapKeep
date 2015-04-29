@@ -1,9 +1,11 @@
 require 'test_helper'
 
 class NotesControllerTest < ActionController::TestCase
+
   setup do
-    @note = notes(:all_fields)
-    sign_in users(:one)
+    @user = create(:user)
+    sign_in @user
+    @note = create(:note, user_id: @user.id)
   end
 
   test "should get index" do
@@ -36,7 +38,7 @@ class NotesControllerTest < ActionController::TestCase
   end
 
   test "should update note" do
-    patch :update, id: @note, note: @note.as_json
+    patch :update, id: @note, note: { title: 'title2' }
     assert_redirected_to note_path(assigns(:note))
   end
 

@@ -1,9 +1,11 @@
 require 'test_helper'
 
 class AlbumsControllerTest < ActionController::TestCase
+
   setup do
-    @album = albums(:all_fields)
-    sign_in users(:one)
+    @user = create(:user)
+    sign_in @user
+    @album = create(:album, user_id: @user.id)
   end
 
   test "should get index" do
