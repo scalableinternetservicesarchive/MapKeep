@@ -190,8 +190,8 @@ mapkeep.app.prototype.bounceMarker = function(time) {
  * @param note
  */
 mapkeep.app.prototype.noteCreated = function(note) {
-  this.formHelper.formSubmitted(note);
   this.formHelper.updateFormAction(note);
+  this.formHelper.formSubmitted(note);
 };
 
 /**
