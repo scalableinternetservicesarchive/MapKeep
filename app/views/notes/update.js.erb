@@ -1,4 +1,5 @@
 $(function() {
   alert('Note updated!');
-  app.formHelper.makeReadonly('<%= @form_id %>');
+  app.formHelper.formUpdated(
+      '<%= @form_id %>', <%= raw @note.to_json(:include => :albums) %>);
 });

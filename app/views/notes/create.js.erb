@@ -1,4 +1,5 @@
 $(function() {
   alert('Note saved successfully!');
-  app.formHelper.formSubmitted('<%= @form_id %>', '<%= @note.id %>');
+  app.formHelper.formSubmitted(
+      '<%= @form_id %>', <%= raw @note.to_json(:include => :albums) %>);
 });

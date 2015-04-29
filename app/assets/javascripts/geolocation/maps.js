@@ -68,14 +68,20 @@ mapkeep.app.prototype.initMap = function(lat, lng) {
 
   // Close button on note overlay
   $('#close-overlay').click(function() {
-    // TODO: remove marker if new note or cancel secondary button
+    // Reset and remove form
     var overlay = $('#overlay');
-    overlay.find('form').get(0).reset();
-    overlay.addClass('hide').find('form').remove();
+    overlay.addClass('hide');
+
+    // Close info window and make marker un-draggable
     this.curWindow.setMap(null);
     this.curMarker.setOptions({
       draggable: false
     });
+
+    // If new note not saved, clear marker
+    if (overlay.find('form').hasClass('new_note')) {
+      this.curMarker.setMap(null);
+    }
   }.bind(this));
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
@@ -95,6 +101,7 @@ mapkeep.app.prototype.dropPin = function() {
   });
 
   // Show note in overlay with a new form
+  this.curMarker = marker;
   var num = this.formHelper.createNoteForm(marker, false);
   this.formHelper.showForm(num, true, 450);
 };
