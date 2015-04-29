@@ -1,5 +1,4 @@
 $(function() {
   alert('Note updated!');
-  app.noteUpdated(
-      '<%= @form_id %>', <%= raw @note.to_json(:include => :albums) %>);
+  app.noteUpdated(<%= raw @note.to_json(:include => :albums) %>);
 });

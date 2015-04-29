@@ -465,38 +465,38 @@ mapkeep.formHelper.prototype.makeLabelGroup = function(album, showDelete) {
 
 /**
  * Callback for form submission
- * @param formNum
  * @param note
  */
-mapkeep.formHelper.prototype.formSubmitted = function(formNum, note) {
-  this.resetDefaultValues(note, this.forms[formNum]);
+mapkeep.formHelper.prototype.formSubmitted = function(note) {
+  this.resetDefaultValues(note);
   this.makeReadonly();
 };
 
 /**
  * Updates form action to "update" vs create
- * @param formNum
  * @param note
  */
-mapkeep.formHelper.prototype.updateFormAction = function(formNum, note) {
+mapkeep.formHelper.prototype.updateFormAction = function(note) {
   // Add method and change action so future submits are updated
-  var form = this.forms[formNum];
-  form.append('<input type="hidden" name="_method" value="patch">');
-  form.attr('action', '/notes/' + note.id);
-  form.removeClass('new_note');
+  this.curForm.append('<input type="hidden" name="_method" value="patch">');
+  this.curForm.attr('action', '/notes/' + note.id);
+  this.curForm.removeClass('new_note');
 };
 
 /**
  * Resets default values of inputs to fresh values from note
  * @param note
- * @param form
  */
-mapkeep.formHelper.prototype.resetDefaultValues = function(note, form) {
-  form.find('input[name=note\\[title\\]]').prop('defaultValue', note.title);
-  form.find('textarea').prop('defaultValue', note.body);
-  form.find('input[name=latitude]').prop('defaultValue', '' + note.latitude);
-  form.find('input[name=latitude]').prop('defaultValue', '' + note.latitude);
-  form.find('input[name=note\\[album_ids\\]\\[\\]]').remove();
-  form.append(this.hiddenInput(
+mapkeep.formHelper.prototype.resetDefaultValues = function(note) {
+  this.curForm.find('input[name=note\\[title\\]]')
+    .prop('defaultValue', note.title);
+  this.curForm.find('textarea')
+    .prop('defaultValue', note.body);
+  this.curForm.find('input[name=latitude]')
+    .prop('defaultValue', '' + note.latitude);
+  this.curForm.find('input[name=latitude]')
+    .prop('defaultValue', '' + note.latitude);
+  this.curForm.find('input[name=note\\[album_ids\\]\\[\\]]').remove();
+  this.curForm.append(this.hiddenInput(
     'note[album_ids][]', this.albumIdString(note.albums)));
 };
