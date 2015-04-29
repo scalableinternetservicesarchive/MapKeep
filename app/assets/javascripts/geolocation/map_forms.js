@@ -38,6 +38,7 @@ mapkeep.formHelper.prototype.albumIdString = function(albums) {
   for (var i = 0; i < albums.length; i++) {
     albumIds += albums[i].id + ', ';
   }
+  return albumIds;
 };
 
 /**
@@ -45,7 +46,7 @@ mapkeep.formHelper.prototype.albumIdString = function(albums) {
  * @param marker The note belongs to for coordinates
  * @param readonly Whether or not this is a new note
  * @param note Note to use title and body for if existing
- * @returns {*|jQuery}
+ * @returns {Number} identifier for form
  */
 mapkeep.formHelper.prototype.createNoteForm =
   function(marker, readonly, note) {
@@ -328,6 +329,11 @@ mapkeep.formHelper.prototype.resetForm = function() {
   var overlay = $('#overlay');
   this.curForm.get(0).reset();
 
+  if (this.app.curWindow) {
+    this.app.curWindow.setContent(
+      overlay.find('input[name=note\\[title\\]]').val());
+  }
+
   // Show deleted labels
   overlay.find('.group').removeClass('hide');
 
@@ -402,7 +408,7 @@ mapkeep.formHelper.prototype.formUpdated = function(formNum, note) {
 };
 
 /**
- *
+ * Resets default values of inputs to fresh values
  * @param note
  * @param form
  */
@@ -434,7 +440,7 @@ mapkeep.formHelper.prototype.setUpClicks = function() {
   }.bind(this));
 
   // Sync title input with info window title
-  overlay.on('keyup', 'input[name=note\\[title\\]]', function() {
+  overlay.on('change paste keyup', 'input[name=note\\[title\\]]', function() {
     this.app.curWindow.setContent(
       overlay.find('input[name=note\\[title\\]]').val());
   }.bind(this));
