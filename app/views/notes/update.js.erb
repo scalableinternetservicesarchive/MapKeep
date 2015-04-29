@@ -1,4 +1,4 @@
 $(function() {
   alert('Note updated!');
-  MAPKEEP.toggleForm('<%= @form_id %>');
+  app.noteUpdated(<%= raw @note.to_json(:include => :albums) %>);
 });

@@ -16,9 +16,33 @@
   }
 
   #map-canvas {
+    height: 100%;
+    width: 100%;
+
     img {
       max-width: none;
     }
+  }
+
+  .full {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #close-overlay {
+    display: block;
+    margin-top: -0.5em;
+  }
+
+  #overlay {
+    background: white;
+    font-family: $font-family-sans-serif;
+    font-size: 1.5em;
+    line-height: 2;
+    margin: 1em;
+    padding: 1em;
+    width: 20em;
 
     input {
       margin: 0;
@@ -38,19 +62,23 @@
       margin-bottom: 0;
     }
 
-    height: 100%;
-    margin: 0;
-    padding: 0;
+    #album-button {
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .group {
+      margin-right: 0.25em;
+      margin-left: 0.25em;
+    }
+
+    .alert, .secondary {
+      cursor: pointer;
+    }
   }
 
   #sidebar {
     margin-top: $topbar-height/2;
-  }
-
-  .full {
-    height: 100%;
-    margin: 0;
-    padding: 0;
   }
 
   .alert {

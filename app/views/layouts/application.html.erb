@@ -40,11 +40,13 @@
     </nav>
 
     <div id="main">
-      <% if notice %>
-        <div class="notice notice-success"><%= notice %></div>
-      <% end %>
-      <% if alert %>
-        <div class="notice notice-danger"><%= alert %></div>
+      <% if controller.controller_name != 'index' %>
+        <% if notice %>
+          <div class="notice notice-success"><%= notice %></div>
+        <% end %>
+        <% if alert %>
+          <div class="notice notice-danger"><%= alert %></div>
+        <% end %>
       <% end %>
 
       <div id="sidebar" class="large-2 columns">

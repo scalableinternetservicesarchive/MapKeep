@@ -1,6 +1,4 @@
 $(function() {
   alert('Note saved successfully!');
-  $('#<%= @form_id %>').append('<input type="hidden" name="_method" value="patch">');
-  $('#<%= @form_id %>').attr('action', '/notes/' + <%= @note.id %>);
-  MAPKEEP.toggleForm('<%= @form_id %>');
+  app.noteCreated(<%= raw @note.to_json(:include => :albums) %>);
 });
