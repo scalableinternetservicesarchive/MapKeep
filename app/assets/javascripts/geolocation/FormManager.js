@@ -27,13 +27,9 @@ mapkeep.FormManager = function(app, auth) {
  * included cancel, delete, and keyup for title input
  */
 mapkeep.FormManager.prototype.init = function(albums) {
-  // Index albums by id
-  this.albums = {};
+  // Index albums by id to name
   for (var i = 0; i < albums.length; i++) {
-    this.albums[albums[i].id] = {
-      title: albums[i].title,
-      id: albums[i].id
-    };
+    this.albums[albums[i].id] = albums[i].title;
   }
 
   var overlay = $('#overlay');
@@ -245,9 +241,8 @@ mapkeep.FormManager.prototype.createAlbumCheckboxes = function() {
   var elements = [];
   var empty = true;
 
-  for (var key in this.albums) {
-    if (this.albums.hasOwnProperty(key)) {
-      var id = key;
+  for (var id in this.albums) {
+    if (this.albums.hasOwnProperty(id)) {
       var album = this.curForm.find('.group[value=' + id + ']').not('.hide');
       if (album.length > 0) {
         empty = false;
@@ -353,15 +348,15 @@ mapkeep.FormManager.prototype.showForm = function(formNum, timeout) {
 
 /**
  * On click function for album dropdown click
- * @param album
+ * @param albumId
  * @returns {Function}
  */
-mapkeep.FormManager.prototype.albumPrepend = function(album) {
+mapkeep.FormManager.prototype.albumPrepend = function(albumId) {
   return function() {
-    var group = this.curForm.find('span[value=' + album.id + ']');
+    var group = this.curForm.find('span[value=' + albumId + ']');
     if (!group.length) {
       // Append label if it doesn't exist and is not hidden
-      $('#album-button').before(this.makeLabelGroup(album.id, true));
+      $('#album-button').before(this.makeLabelGroup(albumId, true));
     } else {
       // Otherwise just unhide the label
       group.removeClass('hide');
@@ -415,13 +410,12 @@ mapkeep.FormManager.prototype.createAlbumDropDown = function() {
     .attr('aria-hidden', 'true'));
 
   // Add links that represent the user's albums, on click it adds a label group
-  for (var key in this.albums) {
-    if (this.albums.hasOwnProperty(key)) {
-      var album = this.albums[key];
+  for (var id in this.albums) {
+    if (this.albums.hasOwnProperty(id)) {
       var link = $('<a/>')
         .attr('href', '#')
-        .html(album.title)
-        .click(this.albumPrepend(album));
+        .html(this.albums[id])
+        .click(this.albumPrepend(id));
       dropDown.append($('<li/>').append(link));
     }
   }
@@ -455,10 +449,9 @@ mapkeep.FormManager.prototype.removeAlbumLabels = function() {
  * @returns {*|jQuery}
  */
 mapkeep.FormManager.prototype.makeLabelGroup = function(albumId, showDelete) {
-  var album = this.albums[albumId];
   var label = $('<span/>')
     .addClass('label')
-    .html(album.title);
+    .html(this.albums[albumId]);
 
   // Hide label on delete, remove on save
   var deleteLabel = $('<span/>').addClass('alert').html('X');
