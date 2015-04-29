@@ -25,6 +25,7 @@ mapkeep.FormManager = function(app, auth) {
 /**
  * One time set up for form click/keyup functions that never change
  * included cancel, delete, and keyup for title input
+ * @param albums All of user's albums
  */
 mapkeep.FormManager.prototype.init = function(albums) {
   // Index albums by id to name
@@ -377,8 +378,8 @@ mapkeep.FormManager.prototype.createAlbumHtml = function(note, readonly) {
   // Add label groups for albums the note belongs in currently
   if (note && note.albums.length > 0) {
     for (var i = 0; i < note.albums.length; i++) {
-      var album = note.albums[i];
-      albumHtml.append(this.makeLabelGroup(album.id));
+      var albumId = note.albums[i].id;
+      albumHtml.append(this.makeLabelGroup(albumId));
     }
   }
 
