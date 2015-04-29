@@ -136,7 +136,9 @@ mapkeep.app.prototype.openInfoWindow = function(title, marker) {
  */
 mapkeep.app.prototype.addMarkerListener = function(formNum) {
   google.maps.event.addListener(this.markers[formNum], 'click', function() {
-    if ($('#overlay').find('.new_note').length > 0) {
+    var overlay = $('#overlay');
+    if (overlay.find('input[readonly]').length === 0 &&
+        !overlay.hasClass('hide')) {
       this.bounceMarker(350);
       return;
     }

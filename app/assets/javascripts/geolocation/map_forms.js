@@ -113,14 +113,7 @@ mapkeep.formHelper.prototype.createNoteForm =
     this.app.markers[this.formNum] = marker;
     this.forms[this.formNum] = form;
 
-    // Update coords on pin drag
     var formNum = this.formNum;
-    google.maps.event.addListener(marker, 'dragend', function() {
-      var form = this.forms[formNum];
-      form.find('input[name=note\\[latitude\\]]').val(marker.position.lat());
-      form.find('input[name=note\\[longitude\\]]').val(marker.position.lng());
-    }.bind(this));
-
     this.app.addMarkerListener(this.formNum++);
     return formNum;
   };
@@ -307,7 +300,13 @@ mapkeep.formHelper.prototype.turnOnSubmit = function() {
         }
       });
       albumIds.val(idsString);
-    });
+
+      // update lat/lng with marker coordinates
+      this.curForm.find('input[name=note\\[latitude\\]]')
+        .val(this.app.curMarker.position.lat());
+      this.curForm.find('input[name=note\\[longitude\\]]')
+        .val(this.app.curMarker.position.lng());
+    }.bind(this));
 };
 
 /**
@@ -439,6 +438,9 @@ mapkeep.formHelper.prototype.setUpClicks = function() {
       this.app.curWindow.setMap(null);
     } else {
       this.makeReadonly();
+      var lat = overlay.find('input[name=note\\[latitude\\]]').val();
+      var lng = overlay.find('input[name=note\\[longitude\\]]').val();
+      this.app.curMarker.setPosition(new google.maps.LatLng(lat, lng));
     }
   }.bind(this));
 
