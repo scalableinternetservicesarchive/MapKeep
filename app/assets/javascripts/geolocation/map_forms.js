@@ -84,7 +84,7 @@ mapkeep.formHelper.prototype.createNoteForm =
 
     var form = $('<form/>')
       .addClass(readonly ? '' : 'new_note')
-      .attr('id', getFormId(this.formNum).substr(1)) // remove # sign here
+      .attr('id', 'i' + this.formNum) // remove # sign here
       .attr('action', readonly ? '/notes/' + note.id : '/notes')
       .attr('method', 'post')
       .attr('data-remote', 'true')
@@ -379,6 +379,7 @@ mapkeep.formHelper.prototype.showForm = function(formNum, newNote, timeout) {
     this.curForm.find('input[name=note\\[title\\]]').focus();
   }
 
+  // Initialize foundation components
   $(document).foundation();
 };
 
@@ -389,6 +390,8 @@ mapkeep.formHelper.prototype.showForm = function(formNum, newNote, timeout) {
  */
 mapkeep.formHelper.prototype.formSubmitted = function(formNum, note) {
   var form = this.forms[formNum];
+
+  // Add method and change action so future submits are updated
   form.append('<input type="hidden" name="_method" value="patch">');
   form.attr('action', '/notes/' + note.id);
   form.removeClass('new_note');
@@ -450,7 +453,3 @@ mapkeep.formHelper.prototype.setUpClicks = function() {
     overlay.find('input[name=_method]').val('delete');
   });
 };
-
-function getFormId(formNum) {
-  return '#i' + formNum;
-}

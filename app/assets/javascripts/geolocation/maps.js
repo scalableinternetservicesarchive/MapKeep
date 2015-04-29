@@ -138,5 +138,6 @@ mapkeep.app.prototype.addMarkerListener = function(formNum) {
     }
     this.curMarker = this.markers[formNum];
     this.formHelper.showForm(formNum, 0);
+    this.map.panTo(this.curMarker.getPosition())
   }.bind(this));
 };
