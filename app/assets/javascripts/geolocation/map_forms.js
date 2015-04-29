@@ -434,6 +434,7 @@ mapkeep.formHelper.prototype.setUpClicks = function() {
   // Cancel button
   overlay.on('click', '#cancel-button', function() {
     if (this.curForm.hasClass('new_note')) {
+      overlay.find('form').remove();
       overlay.addClass('hide');
       this.app.curMarker.setMap(null);
       this.app.curWindow.setMap(null);

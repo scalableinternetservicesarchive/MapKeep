@@ -89,9 +89,15 @@ mapkeep.app.prototype.initMap = function(lat, lng) {
 };
 
 /**
- * Drops pin in center of map with editable form
+ * Drops pin in center of map with editable form unless they already
+ * have a new note to edit
  */
 mapkeep.app.prototype.dropPin = function() {
+  if ($('#overlay').find('.new_note').length > 0) {
+    this.bounceMarker(350);
+    return;
+  }
+
   // Create and drop pin onto map
   var marker = new google.maps.Marker({
     position: this.map.center,
@@ -130,14 +136,27 @@ mapkeep.app.prototype.openInfoWindow = function(title, marker) {
  */
 mapkeep.app.prototype.addMarkerListener = function(formNum) {
   google.maps.event.addListener(this.markers[formNum], 'click', function() {
-    // turn off dragging on last marker
+    if ($('#overlay').find('.new_note').length > 0) {
+      this.bounceMarker(350);
+      return;
+    }
+
+    // Turn off dragging on last marker
     if (this.curMarker) {
       this.curMarker.setOptions({
         draggable: false
       });
     }
+
     this.curMarker = this.markers[formNum];
     this.formHelper.showForm(formNum, 0);
-    this.map.panTo(this.curMarker.getPosition())
+    this.map.panTo(this.curMarker.getPosition());
   }.bind(this));
+};
+
+mapkeep.app.prototype.bounceMarker = function(time) {
+  this.curMarker.setAnimation(google.maps.Animation.BOUNCE);
+  setTimeout(function() {
+    this.curMarker.setAnimation(null);
+  }.bind(this), time);
 };
