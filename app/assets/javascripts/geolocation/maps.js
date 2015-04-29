@@ -114,11 +114,10 @@ mapkeep.app.prototype.openInfoWindow = function(title, marker) {
 
 /**
  * Adds a listener to a marker to open a certain form
- * @param marker
  * @param formNum
  */
-mapkeep.app.prototype.addMarkerListener = function(marker, formNum) {
-  google.maps.event.addListener(marker, 'click', function() {
+mapkeep.app.prototype.addMarkerListener = function(formNum) {
+  google.maps.event.addListener(this.markers[formNum], 'click', function() {
     this.formHelper.showForm(formNum, 0);
   }.bind(this));
 };
