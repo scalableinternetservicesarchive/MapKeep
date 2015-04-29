@@ -14,6 +14,8 @@ mapkeep.app = function(notes, albums, auth) {
   this.authToken = auth;
   /** Last open info window */
   this.curWindow = null;
+  /** Last clicked marker */
+  this.curMarker = null;
   /** Markers corresponding to note location */
   this.markers = {};
   /** The google map object */
@@ -56,7 +58,7 @@ mapkeep.app.prototype.initMap = function(lat, lng) {
       position: new google.maps.LatLng(note.latitude, note.longitude),
       map: this.map,
       title: note.title,
-      draggable: true
+      draggable: false
     });
     this.formHelper.createNoteForm(marker, true, note);
   }
@@ -71,6 +73,9 @@ mapkeep.app.prototype.initMap = function(lat, lng) {
     overlay.find('form').get(0).reset();
     overlay.addClass('hide').find('form').remove();
     this.curWindow.setMap(null);
+    this.curMarker.setOptions({
+      draggable: false
+    });
   }.bind(this));
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
@@ -118,6 +123,13 @@ mapkeep.app.prototype.openInfoWindow = function(title, marker) {
  */
 mapkeep.app.prototype.addMarkerListener = function(formNum) {
   google.maps.event.addListener(this.markers[formNum], 'click', function() {
+    // turn off dragging on last marker
+    if (this.curMarker) {
+      this.curMarker.setOptions({
+        draggable: false
+      });
+    }
+    this.curMarker = this.markers[formNum];
     this.formHelper.showForm(formNum, 0);
   }.bind(this));
 };

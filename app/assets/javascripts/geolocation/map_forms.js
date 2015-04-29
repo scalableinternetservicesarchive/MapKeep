@@ -4,6 +4,7 @@ var mapkeep = mapkeep || {};
  * Inits a form helper for form creation and dom manipulation
  * @param app Mapkeep app, map manipulation
  * @param albums For listing in the form
+ * @constructor
  */
 mapkeep.formHelper = function(app, albums) {
   this.formNum = 0;
@@ -100,7 +101,6 @@ mapkeep.formHelper.prototype.createNoteForm =
     this.forms[this.formNum] = form;
 
     // Update coords on pin drag
-    // TODO: make dragging only possible on new notes and notes in edit mode
     var formNum = this.formNum;
     google.maps.event.addListener(marker, 'dragend', function() {
       var form = this.forms[formNum];
@@ -221,6 +221,9 @@ mapkeep.formHelper.prototype.createAlbumHtml = function(note, readonly) {
  */
 mapkeep.formHelper.prototype.makeReadonly = function(formNum) {
   var form = this.forms[formNum];
+  this.app.curMarker.setOptions({
+    draggable: false
+  });
 
   // Make fields readonly
   form.find('input[name=note\\[title\\]]')
@@ -251,6 +254,9 @@ mapkeep.formHelper.prototype.makeReadonly = function(formNum) {
  */
 mapkeep.formHelper.prototype.makeEditable = function(formNum) {
   var form = this.forms[formNum];
+  this.app.curMarker.setOptions({
+    draggable: true
+  });
 
   // Make fields editable
   form.find('input[name=note\\[title\\]]')
