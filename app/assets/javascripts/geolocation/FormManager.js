@@ -95,7 +95,7 @@ mapkeep.FormManager.prototype.hiddenInput = function(name, value) {
 
 /**
  * Create album id comma separated string
- * @param albums (Note form)
+ * @param albums (Note form ie [{id:x},{id:y},...])
  * @returns {string}
  */
 mapkeep.FormManager.prototype.albumIdString = function(albums) {
@@ -179,7 +179,7 @@ mapkeep.FormManager.prototype.createNoteForm =
   };
 
 /**
- * Makes the current form readonly
+ * Makes the current form readonly and resets to default values
  */
 mapkeep.FormManager.prototype.makeReadonly = function() {
   this.app.curMarker.setOptions({
@@ -482,6 +482,7 @@ mapkeep.FormManager.prototype.makeLabelGroup = function(albumId, showDelete) {
 
 /**
  * Callback for form submission
+ * Updates default values to the server response (note)
  * @param note
  */
 mapkeep.FormManager.prototype.formSubmitted = function(note) {
