@@ -93,7 +93,9 @@ mapkeep.app.prototype.initMap = function(lat, lng) {
  * have a new note to edit
  */
 mapkeep.app.prototype.dropPin = function() {
-  if ($('#overlay').find('.new_note').length > 0) {
+  var overlay = $('#overlay');
+  if (overlay.find('input[readonly]').length === 0 &&
+    !overlay.hasClass('hide')) {
     this.bounceMarker(350);
     return;
   }
