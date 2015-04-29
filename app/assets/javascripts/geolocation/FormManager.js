@@ -25,7 +25,7 @@ mapkeep.FormManager = function(app, auth) {
 /**
  * One time set up for form click/keyup functions that never change
  * included cancel, delete, and keyup for title input
- * @param albums All of user's albums
+ * @param albums All of the user's albums
  */
 mapkeep.FormManager.prototype.init = function(albums) {
   // Index albums by id to name
@@ -63,7 +63,7 @@ mapkeep.FormManager.prototype.init = function(albums) {
     overlay.find('input[name=_method]').val('delete');
   });
 
-  // album button click
+  // Album button click
   var self = this;
   overlay.on('click', '#album-dropdown a', function() {
     self.albumPrepend($(this).attr('value'));
@@ -71,7 +71,7 @@ mapkeep.FormManager.prototype.init = function(albums) {
 };
 
 /**
- * Whether current form is editable
+ * Whether current form is editable or not
  * @returns {boolean}
  */
 mapkeep.FormManager.prototype.isEditable = function() {
@@ -95,15 +95,13 @@ mapkeep.FormManager.prototype.hiddenInput = function(name, value) {
 
 /**
  * Create album id comma separated string
- * @param albums
+ * @param albums (Note form)
  * @returns {string}
  */
 mapkeep.FormManager.prototype.albumIdString = function(albums) {
-  var albumIds = '';
-  for (var i = 0; i < albums.length; i++) {
-    albumIds += albums[i].id + ',';
-  }
-  return albumIds;
+  return albums.reduce(function(prev, cur) {
+    return prev + cur.id + ',';
+  }, '');
 };
 
 /**
