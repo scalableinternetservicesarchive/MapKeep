@@ -62,6 +62,12 @@ mapkeep.FormManager.prototype.init = function(albums) {
   overlay.on('click', '#delete-button', function() {
     overlay.find('input[name=_method]').val('delete');
   });
+
+  // album button click
+  var self = this;
+  overlay.on('click', '#album-dropdown a', function() {
+    self.albumPrepend($(this).attr('value'));
+  });
 };
 
 /**
@@ -353,16 +359,14 @@ mapkeep.FormManager.prototype.showForm = function(formNum, timeout) {
  * @returns {Function}
  */
 mapkeep.FormManager.prototype.albumPrepend = function(albumId) {
-  return function() {
-    var group = this.curForm.find('span[value=' + albumId + ']');
-    if (!group.length) {
-      // Append label if it doesn't exist and is not hidden
-      $('#album-button').before(this.makeLabelGroup(albumId, true));
-    } else {
-      // Otherwise just unhide the label
-      group.removeClass('hide');
-    }
-  }.bind(this);
+  var group = this.curForm.find('span[value=' + albumId + ']');
+  if (!group.length) {
+    // Append label if it doesn't exist and is not hidden
+    $('#album-button').before(this.makeLabelGroup(albumId, true));
+  } else {
+    // Otherwise just unhide the label
+    group.removeClass('hide');
+  }
 };
 
 /**
@@ -402,26 +406,30 @@ mapkeep.FormManager.prototype.createAlbumHtml = function(note, readonly) {
 
 /**
  * Creates dropdown of all the user's current albums
+ * Re-uses dropdown since it will never change functionality
  * @returns {*|jQuery}
  */
 mapkeep.FormManager.prototype.createAlbumDropDown = function() {
-  var dropDown = ($('<ul data-dropdown-content/>')
-    .addClass('f-dropdown')
-    .attr('id', 'album-dropdown')
-    .attr('aria-hidden', 'true'));
+  if (!this.dropDown) {
+    this.dropDown = ($('<ul data-dropdown-content/>')
+      .addClass('f-dropdown')
+      .attr('id', 'album-dropdown')
+      .attr('aria-hidden', 'true'));
 
-  // Add links that represent the user's albums, on click it adds a label group
-  for (var id in this.albums) {
-    if (this.albums.hasOwnProperty(id)) {
-      var link = $('<a/>')
-        .attr('href', '#')
-        .html(this.albums[id])
-        .click(this.albumPrepend(id));
-      dropDown.append($('<li/>').append(link));
+    // Add links that represent the user's albums
+    // On click it adds a label group
+    for (var id in this.albums) {
+      if (this.albums.hasOwnProperty(id)) {
+        var link = $('<a/>')
+          .attr('href', '#')
+          .attr('value', id)
+          .html(this.albums[id]);
+        this.dropDown.append($('<li/>').append(link));
+      }
     }
   }
 
-  return dropDown;
+  return this.dropDown.clone();
 };
 
 /**
