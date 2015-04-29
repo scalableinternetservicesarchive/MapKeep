@@ -1,4 +1,4 @@
 $(function() {
   alert('Note saved successfully!');
-  app.formSubmitted('<%= @form_id %>', '<%= @note.id %>');
+  app.formHelper.formSubmitted('<%= @form_id %>', '<%= @note.id %>');
 });

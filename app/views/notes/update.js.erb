@@ -1,4 +1,4 @@
 $(function() {
   alert('Note updated!');
-  app.toggleForm('<%= @form_id %>');
+  app.formHelper.makeReadonly('<%= @form_id %>');
 });

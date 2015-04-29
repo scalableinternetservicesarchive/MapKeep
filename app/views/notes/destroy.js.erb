@@ -2,4 +2,5 @@ $(function() {
   alert('Note deleted successfully!');
   app.markers['<%= @form_id %>'].setMap(null);
   app.curWindow.close();
+  $('#overlay').addClass('hide');
 });
