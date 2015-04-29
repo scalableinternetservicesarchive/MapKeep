@@ -36,7 +36,7 @@ mapkeep.formHelper.prototype.hiddenInput = function(name, value) {
 mapkeep.formHelper.prototype.albumIdString = function(albums) {
   var albumIds = '';
   for (var i = 0; i < albums.length; i++) {
-    albumIds += albums[i].id + ', ';
+    albumIds += albums[i].id + ',';
   }
   return albumIds;
 };
@@ -129,8 +129,7 @@ mapkeep.formHelper.prototype.createNoteForm =
 mapkeep.formHelper.prototype.makeLabelGroup = function(album, showDelete) {
   var label = $('<span/>')
     .addClass('label')
-    .html(album.title)
-    .attr('value', album.id);
+    .html(album.title);
 
   // Hide label on delete, remove on save
   var deleteLabel = $('<span/>').addClass('alert').html('X');
@@ -148,7 +147,8 @@ mapkeep.formHelper.prototype.makeLabelGroup = function(album, showDelete) {
   return $('<span/>')
     .addClass('group')
     .append(label)
-    .append(deleteLabel);
+    .append(deleteLabel)
+    .attr('value', album.id);
 };
 
 /**
@@ -289,17 +289,27 @@ mapkeep.formHelper.prototype.turnOnSubmit = function() {
     .off('click', 'button:not(.alert):not(.secondary)')
     .on('click', 'button:not(.alert):not(.secondary)', function() {
       var overlay = $('#overlay');
-      // TODO: fix this and only run when saving
-      var albumIds = overlay.find('input[name=note\\[album_ids\\]\\[\\]]');
-      var idsString = '';
-      var albums = overlay.find('.label').not('.alert');
-      albums.each(function(x, al) {
-        var album = $(al);
-        if (album.is(':visible')) {
-          idsString += $(al).attr('value') + ',';
+
+      // Create checkbox inputs for each album checked
+      overlay.find('input[name=note\\[album_ids\\]\\[\\]]').remove();
+
+      var empty = true;
+      for (var i = 0; i < this.albums.length; i++) {
+        var id = this.albums[i].id;
+        var album = overlay.find('.group[value=' + id + ']').not('.hide');
+        if (album.length > 0) {
+          empty = false;
+          this.curForm.append(
+            this.hiddenInput('note[album_ids][]', id)
+              .attr('type', 'checkbox')
+              .addClass('hide')
+              .prop('checked', album.length > 0));
         }
-      });
-      albumIds.val(idsString);
+      }
+
+      if (empty) {
+        this.curForm.append(this.hiddenInput('note[album_ids][]', ''));
+      }
 
       // update lat/lng with marker coordinates
       this.curForm.find('input[name=note\\[latitude\\]]')
@@ -341,7 +351,7 @@ mapkeep.formHelper.prototype.resetForm = function() {
     'input[name=note\\[album_ids\\]\\[\\]]').val().split(',');
   var albumLabels = overlay.find('.group');
   for (var i = 0; i < albumLabels.length; i++) {
-    if (albumIds.indexOf($(albumLabels[i]).find('.label').attr('value')) < 0) {
+    if (albumIds.indexOf($(albumLabels[i]).attr('value')) < 0) {
       $(albumLabels[i]).remove();
     }
   }
@@ -418,8 +428,9 @@ mapkeep.formHelper.prototype.resetDefaultValues = function(note, form) {
   form.find('textarea').prop('defaultValue', note.body);
   form.find('input[name=latitude]').prop('defaultValue', '' + note.latitude);
   form.find('input[name=latitude]').prop('defaultValue', '' + note.latitude);
-  form.find('input[name=note\\[album_ids\\]\\[\\]]').prop(
-    'defaultValue', this.albumIdString(note.albums));
+  form.find('input[name=note\\[album_ids\\]\\[\\]]').remove();
+  form.append(this.hiddenInput(
+    'note[album_ids][]', this.albumIdString(note.albums)));
 };
 
 /**
