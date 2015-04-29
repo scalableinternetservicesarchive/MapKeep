@@ -109,7 +109,7 @@ mapkeep.app.prototype.dropPin = function() {
   // Show note in overlay with a new form
   this.curMarker = marker;
   var num = this.formHelper.createNoteForm(marker, false);
-  this.formHelper.showForm(num, true, 450);
+  this.formHelper.showForm(num, 450);
 };
 
 /**

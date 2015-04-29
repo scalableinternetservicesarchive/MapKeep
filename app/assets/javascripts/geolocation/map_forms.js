@@ -351,10 +351,9 @@ mapkeep.formHelper.prototype.resetForm = function() {
 /**
  * Close last form and open new one as well as info window with title
  * @param formNum Form identifier
- * @param newNote Whether or not new note
  * @param timeout For info window open
  */
-mapkeep.formHelper.prototype.showForm = function(formNum, newNote, timeout) {
+mapkeep.formHelper.prototype.showForm = function(formNum, timeout) {
   var overlay = $('#overlay');
   this.curForm = this.forms[formNum];
 
@@ -371,7 +370,7 @@ mapkeep.formHelper.prototype.showForm = function(formNum, newNote, timeout) {
   overlay.append(this.curForm).removeClass('hide');
 
   // Force form to be readonly if not a new note
-  if (!newNote && !this.curForm.hasClass('new_note')) {
+  if (!this.curForm.hasClass('new_note')) {
     this.makeReadonly();
   } else {
     this.makeEditable();
