@@ -57,6 +57,16 @@ mapkeep.formHelper.prototype.init = function() {
 };
 
 /**
+ * Whether current form is editable
+ * @returns {boolean}
+ */
+mapkeep.formHelper.prototype.isEditable = function() {
+  var overlay = $('#overlay');
+  return overlay.find('input[readonly]').length === 0 &&
+    !overlay.hasClass('hide');
+};
+
+/**
  * Creates a hidden input with corresponding name and value
  * @param name
  * @param value

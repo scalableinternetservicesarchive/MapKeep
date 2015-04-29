@@ -35,24 +35,13 @@ mapkeep.app = function(notes, albums, auth) {
  */
 mapkeep.app.prototype.init = function(lat, lng) {
 
+  if (lat && lng) {
+    this.userLoc = new google.maps.LatLng(lat, lng);
+  }
+
   this.formHelper.init();
-
-  // For now, center around ip location || UCLA
-  this.userLoc = new google.maps.LatLng(lat, lng);
-
-  var center = lat && lng ?
-    new google.maps.LatLng(lat, lng) :
-    new google.maps.LatLng(34.0722, -118.4441);
-
-  var mapOptions = {
-    center: center,
-    mapTypeControl: false,
-    streetViewControl: false,
-    zoom: 10
-  };
-
-  this.map = new google.maps.Map(
-    document.getElementById('map-canvas'), mapOptions);
+  this.initMap();
+  this.setUpClicks();
 
   // Draw notes on map
   for (var i = 0; i < this.notes.length; i++) {
@@ -66,6 +55,33 @@ mapkeep.app.prototype.init = function(lat, lng) {
     this.formHelper.createNoteForm(marker, true, note);
   }
 
+  this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
+    .push($('#overlay').get(0));
+};
+
+/**
+ * Initializes map and user coordinates || UCLA
+ */
+mapkeep.app.prototype.initMap = function() {
+  var center = this.userLoc ?
+    new google.maps.LatLng(this.userLoc.lat(), this.userLoc.lng()) :
+    new google.maps.LatLng(34.0722, -118.4441);
+
+  var mapOptions = {
+    center: center,
+    mapTypeControl: false,
+    streetViewControl: false,
+    zoom: 10
+  };
+
+  this.map = new google.maps.Map(
+    document.getElementById('map-canvas'), mapOptions);
+};
+
+/**
+ * Create note and close overlay click listeners
+ */
+mapkeep.app.prototype.setUpClicks = function() {
   // Drop pin button
   $('#create_note').click(this.dropPin.bind(this));
 
@@ -86,9 +102,6 @@ mapkeep.app.prototype.init = function(lat, lng) {
       this.curMarker.setMap(null);
     }
   }.bind(this));
-
-  this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
-    .push($('#overlay').get(0));
 };
 
 /**
@@ -96,9 +109,9 @@ mapkeep.app.prototype.init = function(lat, lng) {
  * have a new note to edit
  */
 mapkeep.app.prototype.dropPin = function() {
-  var overlay = $('#overlay');
-  if (overlay.find('input[readonly]').length === 0 &&
-    !overlay.hasClass('hide')) {
+
+  // Prevent pin drop if currently editing a note
+  if (this.formHelper.isEditable()) {
     this.bounceMarker(350);
     return;
   }
@@ -141,9 +154,9 @@ mapkeep.app.prototype.openInfoWindow = function(title, marker) {
  */
 mapkeep.app.prototype.addMarkerListener = function(formNum) {
   google.maps.event.addListener(this.markers[formNum], 'click', function() {
-    var overlay = $('#overlay');
-    if (overlay.find('input[readonly]').length === 0 &&
-        !overlay.hasClass('hide')) {
+
+    // Prevent marker click if user currently editing a note
+    if (this.formHelper.isEditable()) {
       this.bounceMarker(350);
       return;
     }
@@ -161,6 +174,10 @@ mapkeep.app.prototype.addMarkerListener = function(formNum) {
   }.bind(this));
 };
 
+/**
+ * Bounce marker for certain time
+ * @param time
+ */
 mapkeep.app.prototype.bounceMarker = function(time) {
   this.curMarker.setAnimation(google.maps.Animation.BOUNCE);
   setTimeout(function() {
