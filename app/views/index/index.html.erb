@@ -12,6 +12,6 @@
       '<%= session[:_csrf_token] %>'
   );
   google.maps.event.addDomListener(window, 'load', function() {
-    app.initMap('<%= @location.lat %>', '<%= @location.lng %>');
+    app.init('<%= @location.lat %>', '<%= @location.lng %>');
   });
 <% end %>

@@ -16,7 +16,7 @@ mapkeep.app = function(notes, albums, auth) {
   this.curWindow = null;
   /** Last clicked marker */
   this.curMarker = null;
-  /** Markers corresponding to note location */
+  /** Markers corresponding to note locations */
   this.markers = {};
   /** The google map object */
   this.map = null;
@@ -29,10 +29,13 @@ mapkeep.app = function(notes, albums, auth) {
 
 /**
  * Initializes map at input coordinates with user notes
+ * Initializes form helper
  * @param lat
  * @param lng
  */
-mapkeep.app.prototype.initMap = function(lat, lng) {
+mapkeep.app.prototype.init = function(lat, lng) {
+
+  this.formHelper.init();
 
   // For now, center around ip location || UCLA
   this.userLoc = new google.maps.LatLng(lat, lng);

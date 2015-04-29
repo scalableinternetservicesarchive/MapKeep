@@ -1,18 +1,29 @@
 var mapkeep = mapkeep || {};
 
 /**
- * Inits a form helper for form creation and dom manipulation
+ * A form helper for form creation and dom manipulation
  * @param app Mapkeep app, map manipulation
  * @param albums For listing in the form
  * @constructor
  */
 mapkeep.formHelper = function(app, albums) {
+  /** Counter for form identification */
   this.formNum = 0;
+  /** All forms created so far */
   this.forms = {};
+  /** List of all user's albums */
   this.albums = albums;
+  /** Current opened form */
+  this.curForm = null;
+
   /** @type mapkeep.app */
   this.app = app;
-  this.curForm = null;
+};
+
+/**
+ * Any initialization
+ */
+mapkeep.formHelper.prototype.init = function() {
   this.setUpClicks();
 };
 
@@ -30,7 +41,7 @@ mapkeep.formHelper.prototype.hiddenInput = function(name, value) {
 };
 
 /**
- * Create album id string for submission
+ * Create album id comma separated string
  * @param albums
  */
 mapkeep.formHelper.prototype.albumIdString = function(albums) {
@@ -113,9 +124,8 @@ mapkeep.formHelper.prototype.createNoteForm =
     this.app.markers[this.formNum] = marker;
     this.forms[this.formNum] = form;
 
-    var formNum = this.formNum;
-    this.app.addMarkerListener(this.formNum++);
-    return formNum;
+    this.app.addMarkerListener(this.formNum);
+    return this.formNum++;
   };
 
 /**
@@ -154,20 +164,18 @@ mapkeep.formHelper.prototype.makeLabelGroup = function(album, showDelete) {
 /**
  * On click function for album dropdown click
  * @param album
- * @param albumHtml
- * @param dropDownButton
  * @returns {Function}
  */
 mapkeep.formHelper.prototype.albumPrepend =
-  function(album, albumHtml, dropDownButton) {
+  function(album) {
     return function() {
-      // append label if it doesn't exist and is not hidden
-      // otherwise just unhide the label
-      var labels = albumHtml.find('span[value=' + album.id + ']');
-      if (!labels.length) {
-        dropDownButton.before(this.makeLabelGroup(album, true));
-      } else if (labels.parent().hasClass('hide')) {
-        labels.parent().removeClass('hide');
+      var label = this.curForm.find('span[value=' + album.id + ']');
+      if (!label.length) {
+        // Append label if it doesn't exist and is not hidden
+        $('#album-button').before(this.makeLabelGroup(album, true));
+      } else {
+        // Otherwise just unhide the label
+        label.parent().removeClass('hide');
       }
     }.bind(this);
   };
@@ -181,19 +189,16 @@ mapkeep.formHelper.prototype.albumPrepend =
  */
 mapkeep.formHelper.prototype.createAlbumHtml = function(note, readonly) {
   var albumHtml = $('<div/>');
-  var dropDown = ($('<ul data-dropdown-content/>')
-    .addClass('f-dropdown')
-    .attr('id', 'album-dropdown')
-    .attr('aria-hidden', 'true'));
 
+  // Add label groups for albums the note belongs in currently
   if (note && note.albums.length > 0) {
-    // Add label groups for albums the note belongs in
     for (var i = 0; i < note.albums.length; i++) {
       var album = note.albums[i];
       albumHtml.append(this.makeLabelGroup(album));
     }
   }
 
+  // Create dropdown button and list
   var clz = readonly ? 'hide' : 'button';
   var dropDownButton = $('<button/>')
     .addClass('secondary tiny dropdown ' + clz)
@@ -204,21 +209,32 @@ mapkeep.formHelper.prototype.createAlbumHtml = function(note, readonly) {
     .attr('type', 'button')
     .attr('href', '#')
     .html('+ Album');
+  albumHtml.append(dropDownButton);
+  albumHtml.append(this.createAlbumDropDown());
+
+  return albumHtml;
+};
+
+/**
+ *
+ */
+mapkeep.formHelper.prototype.createAlbumDropDown = function() {
+  var dropDown = ($('<ul data-dropdown-content/>')
+    .addClass('f-dropdown')
+    .attr('id', 'album-dropdown')
+    .attr('aria-hidden', 'true'));
 
   // Add links that represent the user's albums, on click it adds a label group
-  for (i = 0; i < this.albums.length; i++) {
-    album = this.albums[i];
+  for (var i = 0; i < this.albums.length; i++) {
+    var album = this.albums[i];
     var link = $('<a/>')
       .attr('href', '#')
       .html(album.title)
-      .click(this.albumPrepend(album, albumHtml, dropDownButton));
+      .click(this.albumPrepend(album));
     dropDown.append($('<li/>').append(link));
   }
 
-  albumHtml.append(dropDownButton);
-  albumHtml.append(dropDown);
-
-  return albumHtml;
+  return dropDown;
 };
 
 /**
@@ -232,23 +248,19 @@ mapkeep.formHelper.prototype.makeReadonly = function() {
   this.resetForm();
 
   // Make fields readonly
-  this.curForm.find('input[name=note\\[title\\]]')
-    .attr('readonly', 'readonly')
-    .css('background', 'none');
-
-  this.curForm.find('textarea')
+  this.curForm.find('input[name=note\\[title\\]], textarea')
     .attr('readonly', 'readonly');
 
   // Prevent submit and change button text to 'Edit'
   this.turnOffSubmit();
   $('#submit-edit-button').text('Edit');
 
-  // hide delete and dropdown button
+  // Hide delete and dropdown button
   $('#delete-button, #album-button, #cancel-button')
     .addClass('hide')
     .removeClass('button');
 
-  // hide album delete labels
+  // Hide album delete labels
   this.curForm.find('span.alert')
     .addClass('hide')
     .removeClass('label');
@@ -279,39 +291,53 @@ mapkeep.formHelper.prototype.makeEditable = function() {
   this.curForm.find('span.alert')
     .removeClass('hide')
     .addClass('label');
+
+  // Focus on input
+  this.curForm.find('input[name=note\\[title\\]]').focus();
+};
+
+/**
+ * Creates checkboxes for present labels, or empty input if none
+ * for form submission
+ * @returns {Array}
+ */
+mapkeep.formHelper.prototype.createAlbumCheckboxes = function() {
+  var elements = [];
+  var empty = true;
+  for (var i = 0; i < this.albums.length; i++) {
+    var id = this.albums[i].id;
+    var album = this.curForm.find('.group[value=' + id + ']').not('.hide');
+    if (album.length > 0) {
+      empty = false;
+      elements.push(
+        this.hiddenInput('note[album_ids][]', id)
+          .attr('type', 'checkbox')
+          .addClass('hide')
+          .prop('checked', album.length > 0));
+    }
+  }
+
+  if (empty) {
+    elements.push(this.hiddenInput('note[album_ids][]', ''));
+  }
+
+  return elements;
 };
 
 /**
  * Update album ids input before save
+ * Make current for submittable
  */
 mapkeep.formHelper.prototype.turnOnSubmit = function() {
   $('#overlay')
-    .off('click', 'button:not(.alert):not(.secondary)')
-    .on('click', 'button:not(.alert):not(.secondary)', function() {
-      var overlay = $('#overlay');
+    .off('click', '#submit-edit-button')
+    .on('click', '#submit-edit-button', function() {
 
-      // Create checkbox inputs for each album checked
-      overlay.find('input[name=note\\[album_ids\\]\\[\\]]').remove();
+      // Update album ids input(s)
+      $('#overlay').find('input[name=note\\[album_ids\\]\\[\\]]').remove();
+      this.curForm.append.apply(this.curForm, this.createAlbumCheckboxes());
 
-      var empty = true;
-      for (var i = 0; i < this.albums.length; i++) {
-        var id = this.albums[i].id;
-        var album = overlay.find('.group[value=' + id + ']').not('.hide');
-        if (album.length > 0) {
-          empty = false;
-          this.curForm.append(
-            this.hiddenInput('note[album_ids][]', id)
-              .attr('type', 'checkbox')
-              .addClass('hide')
-              .prop('checked', album.length > 0));
-        }
-      }
-
-      if (empty) {
-        this.curForm.append(this.hiddenInput('note[album_ids][]', ''));
-      }
-
-      // update lat/lng with marker coordinates
+      // Update lat/lng with marker coordinates
       this.curForm.find('input[name=note\\[latitude\\]]')
         .val(this.app.curMarker.position.lat());
       this.curForm.find('input[name=note\\[longitude\\]]')
@@ -320,12 +346,12 @@ mapkeep.formHelper.prototype.turnOnSubmit = function() {
 };
 
 /**
- * Make form editable on click
+ * Make current form editable on click
  */
 mapkeep.formHelper.prototype.turnOffSubmit = function() {
   $('#overlay')
-    .off('click', 'button:not(.alert):not(.secondary)')
-    .on('click', 'button:not(.alert):not(.secondary)', function() {
+    .off('click', '#submit-edit-button')
+    .on('click', '#submit-edit-button', function() {
       this.makeEditable();
       return false;
     }.bind(this));
@@ -335,21 +361,28 @@ mapkeep.formHelper.prototype.turnOffSubmit = function() {
  * Resets form including inputs, textarea, album labels
  */
 mapkeep.formHelper.prototype.resetForm = function() {
-  var overlay = $('#overlay');
+  // Reset normal inputs
   this.curForm.get(0).reset();
 
+  // Set info window title to default value
   if (this.app.curWindow) {
     this.app.curWindow.setContent(
-      overlay.find('input[name=note\\[title\\]]').val());
+      this.curForm.find('input[name=note\\[title\\]]').val());
   }
 
-  // Show deleted labels
-  overlay.find('.group').removeClass('hide');
+  this.removeAlbumLabels();
+};
 
-  // Remove any album labels not in albumIds
-  var albumIds = overlay.find(
+/**
+ * Removes any album labels not in albumIds input
+ * which correspond to labels added but not *saved*
+ */
+mapkeep.formHelper.prototype.removeAlbumLabels = function() {
+  this.curForm.find('.group').removeClass('hide');
+
+  var albumIds = this.curForm.find(
     'input[name=note\\[album_ids\\]\\[\\]]').val().split(',');
-  var albumLabels = overlay.find('.group');
+  var albumLabels = this.curForm.find('.group');
   for (var i = 0; i < albumLabels.length; i++) {
     if (albumIds.indexOf($(albumLabels[i]).attr('value')) < 0) {
       $(albumLabels[i]).remove();
@@ -366,7 +399,7 @@ mapkeep.formHelper.prototype.showForm = function(formNum, timeout) {
   var overlay = $('#overlay');
   this.curForm = this.forms[formNum];
 
-  // Open info window for note title
+  // Open info window for note title at corresponding marker after timeout
   setTimeout(function() {
     this.app.openInfoWindow(
       this.curForm.find('input[name=note\\[title\\]]').val(),
@@ -378,13 +411,13 @@ mapkeep.formHelper.prototype.showForm = function(formNum, timeout) {
   overlay.find('form').remove();
   overlay.append(this.curForm).removeClass('hide');
 
-  // Force form to be readonly if not a new note
   if (!this.curForm.hasClass('new_note')) {
+    // Force form to be readonly if not a new note
     this.makeReadonly();
   } else {
+    // Hide delete button if it is a new note
     this.makeEditable();
     this.curForm.find('#delete-button').addClass('hide').removeClass('button');
-    this.curForm.find('input[name=note\\[title\\]]').focus();
   }
 
   // Initialize foundation components
@@ -419,7 +452,7 @@ mapkeep.formHelper.prototype.formUpdated = function(formNum, note) {
 };
 
 /**
- * Resets default values of inputs to fresh values
+ * Resets default values of inputs to fresh values from note
  * @param note
  * @param form
  */
@@ -440,6 +473,7 @@ mapkeep.formHelper.prototype.resetDefaultValues = function(note, form) {
 mapkeep.formHelper.prototype.setUpClicks = function() {
   var overlay = $('#overlay');
 
+  // Cancel either removes not/marker or undos changes made
   overlay.on('click', '#cancel-button', function() {
     if (this.curForm.hasClass('new_note')) {
       // Remove note and marker
