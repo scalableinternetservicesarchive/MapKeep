@@ -37,6 +37,7 @@
 
   #overlay {
     background: white;
+    font-family: $font-family-sans-serif;
     font-size: 1.5em;
     line-height: 2;
     margin: 1em;
@@ -59,6 +60,9 @@
 
     .button {
       margin-bottom: 0;
+    }
+
+    #album-button {
       padding-top: 0.25rem;
       padding-bottom: 0.25rem;
     }

@@ -180,14 +180,14 @@ mapkeep.formHelper.prototype.albumPrepend =
  * @returns {*|jQuery}
  */
 mapkeep.formHelper.prototype.createAlbumHtml = function(note, readonly) {
-  var albumHtml = $('<div/>').html('Albums: ');
+  var albumHtml = $('<div/>');
   var dropDown = ($('<ul data-dropdown-content/>')
     .addClass('f-dropdown')
     .attr('id', 'album-dropdown')
     .attr('aria-hidden', 'true'));
 
-  // Add label groups for albums the note belongs in
-  if (note) {
+  if (note && note.albums.length > 0) {
+    // Add label groups for albums the note belongs in
     for (var i = 0; i < note.albums.length; i++) {
       var album = note.albums[i];
       albumHtml.append(this.makeLabelGroup(album));
@@ -241,10 +241,10 @@ mapkeep.formHelper.prototype.makeReadonly = function() {
 
   // Prevent submit and change button text to 'Edit'
   this.turnOffSubmit();
-  this.curForm.find('#submit-edit-button').text('Edit');
+  $('#submit-edit-button').text('Edit');
 
   // hide delete and dropdown button
-  this.curForm.find('#delete-button, #album-button, #cancel-button')
+  $('#delete-button, #album-button, #cancel-button')
     .addClass('hide')
     .removeClass('button');
 
@@ -268,10 +268,10 @@ mapkeep.formHelper.prototype.makeEditable = function() {
 
   // Remove submit blocking, change text to 'Save'
   this.turnOnSubmit();
-  this.curForm.find('#submit-edit-button').text('Save');
+  $('#submit-edit-button').text('Save');
 
   // Show delete and dropdown button
-  this.curForm.find('#delete-button, #cancel-button, #album-button')
+  $('#delete-button, #cancel-button, #album-button')
     .removeClass('hide')
     .addClass('button');
 
@@ -429,14 +429,15 @@ mapkeep.formHelper.prototype.resetDefaultValues = function(note, form) {
 mapkeep.formHelper.prototype.setUpClicks = function() {
   var overlay = $('#overlay');
 
-  // Cancel button
   overlay.on('click', '#cancel-button', function() {
     if (this.curForm.hasClass('new_note')) {
+      // Remove note and marker
       overlay.find('form').remove();
       overlay.addClass('hide');
       this.app.curMarker.setMap(null);
       this.app.curWindow.setMap(null);
     } else {
+      // Undo changes the user made
       this.makeReadonly();
       var lat = overlay.find('input[name=note\\[latitude\\]]').val();
       var lng = overlay.find('input[name=note\\[longitude\\]]').val();
