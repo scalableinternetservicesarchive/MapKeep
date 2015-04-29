@@ -21,10 +21,39 @@ mapkeep.formHelper = function(app, albums) {
 };
 
 /**
- * Any initialization
+ * One time set up for form click/keyup functions that never change
+ * included cancel, delete, and keyup for title input
  */
 mapkeep.formHelper.prototype.init = function() {
-  this.setUpClicks();
+  var overlay = $('#overlay');
+
+  // Cancel either removes not/marker or undos changes made
+  overlay.on('click', '#cancel-button', function() {
+    if (this.curForm.hasClass('new_note')) {
+      // Remove note and marker
+      overlay.find('form').remove();
+      overlay.addClass('hide');
+      this.app.curMarker.setMap(null);
+      this.app.curWindow.setMap(null);
+    } else {
+      // Undo changes the user made
+      this.makeReadonly();
+      var lat = overlay.find('input[name=note\\[latitude\\]]').val();
+      var lng = overlay.find('input[name=note\\[longitude\\]]').val();
+      this.app.curMarker.setPosition(new google.maps.LatLng(lat, lng));
+    }
+  }.bind(this));
+
+  // Sync title input with info window title
+  overlay.on('change paste keyup', 'input[name=note\\[title\\]]', function() {
+    this.app.curWindow.setContent(
+      overlay.find('input[name=note\\[title\\]]').val());
+  }.bind(this));
+
+  // Change form method to delete before submission (for rails)
+  overlay.on('click', '#delete-button', function() {
+    overlay.find('input[name=_method]').val('delete');
+  });
 };
 
 /**
@@ -43,6 +72,7 @@ mapkeep.formHelper.prototype.hiddenInput = function(name, value) {
 /**
  * Create album id comma separated string
  * @param albums
+ * @returns {string}
  */
 mapkeep.formHelper.prototype.albumIdString = function(albums) {
   var albumIds = '';
@@ -61,8 +91,6 @@ mapkeep.formHelper.prototype.albumIdString = function(albums) {
  */
 mapkeep.formHelper.prototype.createNoteForm =
   function(marker, readonly, note) {
-    var overlay = $('#overlay');
-
     var title = $('<input/>')
       .attr('name', 'note[title]')
       .attr('placeholder', 'Title')
@@ -72,7 +100,7 @@ mapkeep.formHelper.prototype.createNoteForm =
     var submit = $('<button/>')
       .text(readonly ? 'Edit' : 'Save')
       .addClass('button tiny right')
-      .attr('id', 'submit-edit-button') // remove # sign here
+      .attr('id', 'submit-edit-button')
       .attr('type', 'submit');
 
     var deleteButton = $('<button/>')
@@ -95,7 +123,7 @@ mapkeep.formHelper.prototype.createNoteForm =
 
     var form = $('<form/>')
       .addClass(readonly ? '' : 'new_note')
-      .attr('id', 'i' + this.formNum) // remove # sign here
+      .attr('id', 'i' + this.formNum)
       .attr('action', readonly ? '/notes/' + note.id : '/notes')
       .attr('method', 'post')
       .attr('data-remote', 'true')
@@ -127,115 +155,6 @@ mapkeep.formHelper.prototype.createNoteForm =
     this.app.addMarkerListener(this.formNum);
     return this.formNum++;
   };
-
-/**
- * Creates a label group:
- *    - the album name label (tagged with album id as value)
- *    - a delete X alert label
- * @param album For title and id
- * @param showDelete Whether or not to show the delete button
- * @returns {*|jQuery}
- */
-mapkeep.formHelper.prototype.makeLabelGroup = function(album, showDelete) {
-  var label = $('<span/>')
-    .addClass('label')
-    .html(album.title);
-
-  // Hide label on delete, remove on save
-  var deleteLabel = $('<span/>').addClass('alert').html('X');
-  $('#overlay').on('click', 'span.alert', function() {
-    $(this).parent().addClass('hide');
-  });
-
-  // Show delete button next to label or not
-  if (showDelete) {
-    deleteLabel.addClass('label');
-  } else {
-    deleteLabel.addClass('hide');
-  }
-
-  return $('<span/>')
-    .addClass('group')
-    .append(label)
-    .append(deleteLabel)
-    .attr('value', album.id);
-};
-
-/**
- * On click function for album dropdown click
- * @param album
- * @returns {Function}
- */
-mapkeep.formHelper.prototype.albumPrepend =
-  function(album) {
-    return function() {
-      var label = this.curForm.find('span[value=' + album.id + ']');
-      if (!label.length) {
-        // Append label if it doesn't exist and is not hidden
-        $('#album-button').before(this.makeLabelGroup(album, true));
-      } else {
-        // Otherwise just unhide the label
-        label.parent().removeClass('hide');
-      }
-    }.bind(this);
-  };
-
-/**
- * Creates html for album label creation and deletion
- * and displays albums the note belongs to
- * @param note
- * @param readonly
- * @returns {*|jQuery}
- */
-mapkeep.formHelper.prototype.createAlbumHtml = function(note, readonly) {
-  var albumHtml = $('<div/>');
-
-  // Add label groups for albums the note belongs in currently
-  if (note && note.albums.length > 0) {
-    for (var i = 0; i < note.albums.length; i++) {
-      var album = note.albums[i];
-      albumHtml.append(this.makeLabelGroup(album));
-    }
-  }
-
-  // Create dropdown button and list
-  var clz = readonly ? 'hide' : 'button';
-  var dropDownButton = $('<button/>')
-    .addClass('secondary tiny dropdown ' + clz)
-    .attr('id', 'album-button')
-    .attr('data-dropdown', 'album-dropdown')
-    .attr('aria-controls', 'album-dropdown')
-    .attr('aria-expanded', 'false')
-    .attr('type', 'button')
-    .attr('href', '#')
-    .html('+ Album');
-  albumHtml.append(dropDownButton);
-  albumHtml.append(this.createAlbumDropDown());
-
-  return albumHtml;
-};
-
-/**
- *
- */
-mapkeep.formHelper.prototype.createAlbumDropDown = function() {
-  var dropDown = ($('<ul data-dropdown-content/>')
-    .addClass('f-dropdown')
-    .attr('id', 'album-dropdown')
-    .attr('aria-hidden', 'true'));
-
-  // Add links that represent the user's albums, on click it adds a label group
-  for (var i = 0; i < this.albums.length; i++) {
-    var album = this.albums[i];
-    var link = $('<a/>')
-      .attr('href', '#')
-      .html(album.title)
-      .click(this.albumPrepend(album));
-    dropDown.append($('<li/>').append(link));
-  }
-
-  return dropDown;
-};
 
 /**
  * Makes the current form readonly
@@ -370,24 +289,8 @@ mapkeep.formHelper.prototype.resetForm = function() {
       this.curForm.find('input[name=note\\[title\\]]').val());
   }
 
+  // Reset album labels
   this.removeAlbumLabels();
-};
-
-/**
- * Removes any album labels not in albumIds input
- * which correspond to labels added but not *saved*
- */
-mapkeep.formHelper.prototype.removeAlbumLabels = function() {
-  this.curForm.find('.group').removeClass('hide');
-
-  var albumIds = this.curForm.find(
-    'input[name=note\\[album_ids\\]\\[\\]]').val().split(',');
-  var albumLabels = this.curForm.find('.group');
-  for (var i = 0; i < albumLabels.length; i++) {
-    if (albumIds.indexOf($(albumLabels[i]).attr('value')) < 0) {
-      $(albumLabels[i]).remove();
-    }
-  }
 };
 
 /**
@@ -423,6 +326,133 @@ mapkeep.formHelper.prototype.showForm = function(formNum, timeout) {
   // Initialize foundation components
   $(document).foundation();
 };
+
+/**
+ * On click function for album dropdown click
+ * @param album
+ * @returns {Function}
+ */
+mapkeep.formHelper.prototype.albumPrepend = function(album) {
+  return function() {
+    var label = this.curForm.find('span[value=' + album.id + ']');
+    if (!label.length) {
+      // Append label if it doesn't exist and is not hidden
+      $('#album-button').before(this.makeLabelGroup(album, true));
+    } else {
+      // Otherwise just unhide the label
+      label.parent().removeClass('hide');
+    }
+  }.bind(this);
+};
+
+/**
+ * Creates html for album label creation and deletion
+ * and displays albums the note belongs to
+ * @param note
+ * @param readonly
+ * @returns {*|jQuery}
+ */
+mapkeep.formHelper.prototype.createAlbumHtml = function(note, readonly) {
+  var albumHtml = $('<div/>');
+
+  // Add label groups for albums the note belongs in currently
+  if (note && note.albums.length > 0) {
+    for (var i = 0; i < note.albums.length; i++) {
+      var album = note.albums[i];
+      albumHtml.append(this.makeLabelGroup(album));
+    }
+  }
+
+  // Create dropdown button and list
+  var clz = readonly ? 'hide' : 'button';
+  var dropDownButton = $('<button/>')
+    .addClass('secondary tiny dropdown ' + clz)
+    .attr('id', 'album-button')
+    .attr('data-dropdown', 'album-dropdown')
+    .attr('aria-controls', 'album-dropdown')
+    .attr('aria-expanded', 'false')
+    .attr('type', 'button')
+    .attr('href', '#')
+    .html('+ Album');
+  albumHtml.append(dropDownButton);
+  albumHtml.append(this.createAlbumDropDown());
+
+  return albumHtml;
+};
+
+/**
+ * Creates dropdown of all the user's current albums
+ * @returns {*|jQuery}
+ */
+mapkeep.formHelper.prototype.createAlbumDropDown = function() {
+  var dropDown = ($('<ul data-dropdown-content/>')
+    .addClass('f-dropdown')
+    .attr('id', 'album-dropdown')
+    .attr('aria-hidden', 'true'));
+
+  // Add links that represent the user's albums, on click it adds a label group
+  for (var i = 0; i < this.albums.length; i++) {
+    var album = this.albums[i];
+    var link = $('<a/>')
+      .attr('href', '#')
+      .html(album.title)
+      .click(this.albumPrepend(album));
+    dropDown.append($('<li/>').append(link));
+  }
+
+  return dropDown;
+};
+
+/**
+ * Removes any album labels not in albumIds input
+ * which correspond to labels added but not *saved*
+ */
+mapkeep.formHelper.prototype.removeAlbumLabels = function() {
+  this.curForm.find('.group').removeClass('hide');
+
+  var albumIds = this.curForm.find(
+    'input[name=note\\[album_ids\\]\\[\\]]').val().split(',');
+  var albumLabels = this.curForm.find('.group');
+  for (var i = 0; i < albumLabels.length; i++) {
+    if (albumIds.indexOf($(albumLabels[i]).attr('value')) < 0) {
+      $(albumLabels[i]).remove();
+    }
+  }
+};
+
+/**
+ * Creates a label group:
+ *    - the album name label (tagged with album id as value)
+ *    - a delete X alert label
+ * @param album For title and id
+ * @param showDelete Whether or not to show the delete button
+ * @returns {*|jQuery}
+ */
+mapkeep.formHelper.prototype.makeLabelGroup = function(album, showDelete) {
+  var label = $('<span/>')
+    .addClass('label')
+    .html(album.title);
+
+  // Hide label on delete, remove on save
+  var deleteLabel = $('<span/>').addClass('alert').html('X');
+  $('#overlay').on('click', 'span.alert', function() {
+    $(this).parent().addClass('hide');
+  });
+
+  // Show delete button next to label or not
+  if (showDelete) {
+    deleteLabel.addClass('label');
+  } else {
+    deleteLabel.addClass('hide');
+  }
+
+  return $('<span/>')
+    .addClass('group')
+    .append(label)
+    .append(deleteLabel)
+    .attr('value', album.id);
+};
+
 
 /**
  * Callback for note creation (switch to update);
@@ -466,38 +496,3 @@ mapkeep.formHelper.prototype.resetDefaultValues = function(note, form) {
     'note[album_ids][]', this.albumIdString(note.albums)));
 };
 
-/**
- * One time set up for form click/keyup functions that never change
- * included cancel, delete, and keyup for title input
- */
-mapkeep.formHelper.prototype.setUpClicks = function() {
-  var overlay = $('#overlay');
-
-  // Cancel either removes not/marker or undos changes made
-  overlay.on('click', '#cancel-button', function() {
-    if (this.curForm.hasClass('new_note')) {
-      // Remove note and marker
-      overlay.find('form').remove();
-      overlay.addClass('hide');
-      this.app.curMarker.setMap(null);
-      this.app.curWindow.setMap(null);
-    } else {
-      // Undo changes the user made
-      this.makeReadonly();
-      var lat = overlay.find('input[name=note\\[latitude\\]]').val();
-      var lng = overlay.find('input[name=note\\[longitude\\]]').val();
-      this.app.curMarker.setPosition(new google.maps.LatLng(lat, lng));
-    }
-  }.bind(this));
-
-  // Sync title input with info window title
-  overlay.on('change paste keyup', 'input[name=note\\[title\\]]', function() {
-    this.app.curWindow.setContent(
-      overlay.find('input[name=note\\[title\\]]').val());
-  }.bind(this));
-
-  // Change form method to delete before submission (for rails)
-  overlay.on('click', '#delete-button', function() {
-    overlay.find('input[name=_method]').val('delete');
-  });
-};
