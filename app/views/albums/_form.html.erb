@@ -20,6 +20,7 @@
     <%= f.text_area :description %>
   </div>
 
+  # use current user via devise:
   <h4>Notes to include...</h4>
   <% current_user.notes.each do |note| %>
     <div>
