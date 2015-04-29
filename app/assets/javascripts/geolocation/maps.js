@@ -2,16 +2,10 @@ var mapkeep = mapkeep || {};
 
 /**
  * Constructor for mapkeep application
- * @param notes
- * @param albums
  * @param auth
  * @constructor
  */
-mapkeep.app = function(notes, albums, auth) {
-  /** Notes and albums belonging to current user */
-  this.notes = notes;
-  /** For valid form submission */
-  this.authToken = auth;
+mapkeep.App = function(auth) {
   /** Last open info window */
   this.curWindow = null;
   /** Last clicked marker */
@@ -23,36 +17,38 @@ mapkeep.app = function(notes, albums, auth) {
   /** The user's current location */
   this.userLoc = null;
 
-  /** @type mapkeep.formHelper */
-  this.formHelper = new mapkeep.formHelper(this, albums);
+  /** @type mapkeep.FormManager */
+  this.formManager = new mapkeep.FormManager(this, auth);
 };
 
 /**
- * Initializes map at input coordinates with user notes
+ * Initializes map at input coordinates with user's notes
  * Initializes form helper
  * @param lat
  * @param lng
+ * @param notes
+ * @param albums
  */
-mapkeep.app.prototype.init = function(lat, lng) {
+mapkeep.App.prototype.init = function(lat, lng, notes, albums) {
 
   if (lat && lng) {
     this.userLoc = new google.maps.LatLng(lat, lng);
   }
 
-  this.formHelper.init();
+  this.formManager.init(albums);
   this.initMap();
   this.setUpClicks();
 
   // Draw notes on map
-  for (var i = 0; i < this.notes.length; i++) {
-    var note = this.notes[i];
+  for (var i = 0; i < notes.length; i++) {
+    var note = notes[i];
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(note.latitude, note.longitude),
       map: this.map,
       title: note.title,
       draggable: false
     });
-    this.formHelper.createNoteForm(marker, true, note);
+    this.formManager.createNoteForm(marker, true, note);
   }
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
@@ -62,7 +58,7 @@ mapkeep.app.prototype.init = function(lat, lng) {
 /**
  * Initializes map and user coordinates || UCLA
  */
-mapkeep.app.prototype.initMap = function() {
+mapkeep.App.prototype.initMap = function() {
   var center = this.userLoc ?
     new google.maps.LatLng(this.userLoc.lat(), this.userLoc.lng()) :
     new google.maps.LatLng(34.0722, -118.4441);
@@ -81,7 +77,7 @@ mapkeep.app.prototype.initMap = function() {
 /**
  * Create note and close overlay click listeners
  */
-mapkeep.app.prototype.setUpClicks = function() {
+mapkeep.App.prototype.setUpClicks = function() {
   // Drop pin button
   $('#create_note').click(this.dropPin.bind(this));
 
@@ -108,10 +104,10 @@ mapkeep.app.prototype.setUpClicks = function() {
  * Drops pin in center of map with editable form unless they already
  * have a new note to edit
  */
-mapkeep.app.prototype.dropPin = function() {
+mapkeep.App.prototype.dropPin = function() {
 
   // Prevent pin drop if currently editing a note
-  if (this.formHelper.isEditable()) {
+  if (this.formManager.isEditable()) {
     this.bounceMarker(350);
     return;
   }
@@ -126,8 +122,8 @@ mapkeep.app.prototype.dropPin = function() {
 
   // Show note in overlay with a new form
   this.curMarker = marker;
-  var num = this.formHelper.createNoteForm(marker, false);
-  this.formHelper.showForm(num, 450);
+  var num = this.formManager.createNoteForm(marker, false);
+  this.formManager.showForm(num, 450);
 };
 
 /**
@@ -135,7 +131,7 @@ mapkeep.app.prototype.dropPin = function() {
  * @param title
  * @param marker
  */
-mapkeep.app.prototype.openInfoWindow = function(title, marker) {
+mapkeep.App.prototype.openInfoWindow = function(title, marker) {
   var infoWindow = new google.maps.InfoWindow({
     content: title
   });
@@ -152,11 +148,11 @@ mapkeep.app.prototype.openInfoWindow = function(title, marker) {
  * Adds a listener to a marker to open a certain form
  * @param formNum
  */
-mapkeep.app.prototype.addMarkerListener = function(formNum) {
+mapkeep.App.prototype.addMarkerListener = function(formNum) {
   google.maps.event.addListener(this.markers[formNum], 'click', function() {
 
     // Prevent marker click if user currently editing a note
-    if (this.formHelper.isEditable()) {
+    if (this.formManager.isEditable()) {
       this.bounceMarker(350);
       return;
     }
@@ -169,7 +165,7 @@ mapkeep.app.prototype.addMarkerListener = function(formNum) {
     }
 
     this.curMarker = this.markers[formNum];
-    this.formHelper.showForm(formNum, 0);
+    this.formManager.showForm(formNum, 0);
     this.map.panTo(this.curMarker.getPosition());
   }.bind(this));
 };
@@ -178,7 +174,7 @@ mapkeep.app.prototype.addMarkerListener = function(formNum) {
  * Bounce marker for certain time
  * @param time
  */
-mapkeep.app.prototype.bounceMarker = function(time) {
+mapkeep.App.prototype.bounceMarker = function(time) {
   this.curMarker.setAnimation(google.maps.Animation.BOUNCE);
   setTimeout(function() {
     this.curMarker.setAnimation(null);
@@ -189,23 +185,23 @@ mapkeep.app.prototype.bounceMarker = function(time) {
  * Callback for note creation
  * @param note
  */
-mapkeep.app.prototype.noteCreated = function(note) {
-  this.formHelper.updateFormAction(note);
-  this.formHelper.formSubmitted(note);
+mapkeep.App.prototype.noteCreated = function(note) {
+  this.formManager.updateFormAction(note);
+  this.formManager.formSubmitted(note);
 };
 
 /**
  * Callback for note updates
  * @param note
  */
-mapkeep.app.prototype.noteUpdated = function(note) {
-  this.formHelper.formSubmitted(note);
+mapkeep.App.prototype.noteUpdated = function(note) {
+  this.formManager.formSubmitted(note);
 };
 
 /**
  * Callback for note deletion
  */
-mapkeep.app.prototype.noteDeleted = function() {
+mapkeep.App.prototype.noteDeleted = function() {
   this.curWindow.close();
   this.curMarker.setMap(null);
   $('#overlay').addClass('hide');

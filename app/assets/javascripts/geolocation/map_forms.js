@@ -3,20 +3,22 @@ var mapkeep = mapkeep || {};
 /**
  * A form helper for form creation and dom manipulation
  * @param app Mapkeep app, map manipulation
- * @param albums For listing in the form
+ * @param auth
  * @constructor
  */
-mapkeep.formHelper = function(app, albums) {
+mapkeep.FormManager = function(app, auth) {
   /** Counter for form identification */
   this.formNum = 0;
   /** All forms created so far */
   this.forms = {};
   /** List of all user's albums */
-  this.albums = albums;
+  this.albums = {};
   /** Current opened form */
   this.curForm = null;
+  /** For valid form submission */
+  this.authToken = auth;
 
-  /** @type mapkeep.app */
+  /** @type mapkeep.App */
   this.app = app;
 };
 
@@ -24,7 +26,16 @@ mapkeep.formHelper = function(app, albums) {
  * One time set up for form click/keyup functions that never change
  * included cancel, delete, and keyup for title input
  */
-mapkeep.formHelper.prototype.init = function() {
+mapkeep.FormManager.prototype.init = function(albums) {
+  // Index albums by id
+  this.albums = {};
+  for (var i = 0; i < albums.length; i++) {
+    this.albums[albums[i].id] = {
+      title: albums[i].title,
+      id: albums[i].id
+    };
+  }
+
   var overlay = $('#overlay');
 
   // Cancel either removes not/marker or undos changes made
@@ -60,7 +71,7 @@ mapkeep.formHelper.prototype.init = function() {
  * Whether current form is editable
  * @returns {boolean}
  */
-mapkeep.formHelper.prototype.isEditable = function() {
+mapkeep.FormManager.prototype.isEditable = function() {
   var overlay = $('#overlay');
   return overlay.find('input[readonly]').length === 0 &&
     !overlay.hasClass('hide');
@@ -72,7 +83,7 @@ mapkeep.formHelper.prototype.isEditable = function() {
  * @param value
  * @returns {*|jQuery}
  */
-mapkeep.formHelper.prototype.hiddenInput = function(name, value) {
+mapkeep.FormManager.prototype.hiddenInput = function(name, value) {
   return $('<input/>')
     .attr('name', name)
     .attr('type', 'hidden')
@@ -84,7 +95,7 @@ mapkeep.formHelper.prototype.hiddenInput = function(name, value) {
  * @param albums
  * @returns {string}
  */
-mapkeep.formHelper.prototype.albumIdString = function(albums) {
+mapkeep.FormManager.prototype.albumIdString = function(albums) {
   var albumIds = '';
   for (var i = 0; i < albums.length; i++) {
     albumIds += albums[i].id + ',';
@@ -99,7 +110,7 @@ mapkeep.formHelper.prototype.albumIdString = function(albums) {
  * @param note Note to use title and body for if existing
  * @returns {Number} identifier for form
  */
-mapkeep.formHelper.prototype.createNoteForm =
+mapkeep.FormManager.prototype.createNoteForm =
   function(marker, readonly, note) {
     var title = $('<input/>')
       .attr('name', 'note[title]')
@@ -169,7 +180,7 @@ mapkeep.formHelper.prototype.createNoteForm =
 /**
  * Makes the current form readonly
  */
-mapkeep.formHelper.prototype.makeReadonly = function() {
+mapkeep.FormManager.prototype.makeReadonly = function() {
   this.app.curMarker.setOptions({
     draggable: false
   });
@@ -198,7 +209,7 @@ mapkeep.formHelper.prototype.makeReadonly = function() {
 /**
  * Makes current form editable and marker draggable
  */
-mapkeep.formHelper.prototype.makeEditable = function() {
+mapkeep.FormManager.prototype.makeEditable = function() {
   this.app.curMarker.setOptions({
     draggable: true
   });
@@ -230,19 +241,22 @@ mapkeep.formHelper.prototype.makeEditable = function() {
  * for form submission
  * @returns {Array}
  */
-mapkeep.formHelper.prototype.createAlbumCheckboxes = function() {
+mapkeep.FormManager.prototype.createAlbumCheckboxes = function() {
   var elements = [];
   var empty = true;
-  for (var i = 0; i < this.albums.length; i++) {
-    var id = this.albums[i].id;
-    var album = this.curForm.find('.group[value=' + id + ']').not('.hide');
-    if (album.length > 0) {
-      empty = false;
-      elements.push(
-        this.hiddenInput('note[album_ids][]', id)
-          .attr('type', 'checkbox')
-          .addClass('hide')
-          .prop('checked', album.length > 0));
+
+  for (var key in this.albums) {
+    if (this.albums.hasOwnProperty(key)) {
+      var id = key;
+      var album = this.curForm.find('.group[value=' + id + ']').not('.hide');
+      if (album.length > 0) {
+        empty = false;
+        elements.push(
+          this.hiddenInput('note[album_ids][]', id)
+            .attr('type', 'checkbox')
+            .addClass('hide')
+            .prop('checked', album.length > 0));
+      }
     }
   }
 
@@ -257,7 +271,7 @@ mapkeep.formHelper.prototype.createAlbumCheckboxes = function() {
  * Update album ids input before save
  * Make current for submittable
  */
-mapkeep.formHelper.prototype.turnOnSubmit = function() {
+mapkeep.FormManager.prototype.turnOnSubmit = function() {
   $('#overlay')
     .off('click', '#submit-edit-button')
     .on('click', '#submit-edit-button', function() {
@@ -277,7 +291,7 @@ mapkeep.formHelper.prototype.turnOnSubmit = function() {
 /**
  * Make current form editable on click
  */
-mapkeep.formHelper.prototype.turnOffSubmit = function() {
+mapkeep.FormManager.prototype.turnOffSubmit = function() {
   $('#overlay')
     .off('click', '#submit-edit-button')
     .on('click', '#submit-edit-button', function() {
@@ -289,7 +303,7 @@ mapkeep.formHelper.prototype.turnOffSubmit = function() {
 /**
  * Resets form including inputs, textarea, album labels
  */
-mapkeep.formHelper.prototype.resetForm = function() {
+mapkeep.FormManager.prototype.resetForm = function() {
   // Reset normal inputs
   this.curForm.get(0).reset();
 
@@ -308,7 +322,7 @@ mapkeep.formHelper.prototype.resetForm = function() {
  * @param formNum Form identifier
  * @param timeout For info window open
  */
-mapkeep.formHelper.prototype.showForm = function(formNum, timeout) {
+mapkeep.FormManager.prototype.showForm = function(formNum, timeout) {
   var overlay = $('#overlay');
   this.curForm = this.forms[formNum];
 
@@ -342,15 +356,15 @@ mapkeep.formHelper.prototype.showForm = function(formNum, timeout) {
  * @param album
  * @returns {Function}
  */
-mapkeep.formHelper.prototype.albumPrepend = function(album) {
+mapkeep.FormManager.prototype.albumPrepend = function(album) {
   return function() {
-    var label = this.curForm.find('span[value=' + album.id + ']');
-    if (!label.length) {
+    var group = this.curForm.find('span[value=' + album.id + ']');
+    if (!group.length) {
       // Append label if it doesn't exist and is not hidden
-      $('#album-button').before(this.makeLabelGroup(album, true));
+      $('#album-button').before(this.makeLabelGroup(album.id, true));
     } else {
       // Otherwise just unhide the label
-      label.parent().removeClass('hide');
+      group.removeClass('hide');
     }
   }.bind(this);
 };
@@ -362,14 +376,14 @@ mapkeep.formHelper.prototype.albumPrepend = function(album) {
  * @param readonly
  * @returns {*|jQuery}
  */
-mapkeep.formHelper.prototype.createAlbumHtml = function(note, readonly) {
+mapkeep.FormManager.prototype.createAlbumHtml = function(note, readonly) {
   var albumHtml = $('<div/>');
 
   // Add label groups for albums the note belongs in currently
   if (note && note.albums.length > 0) {
     for (var i = 0; i < note.albums.length; i++) {
       var album = note.albums[i];
-      albumHtml.append(this.makeLabelGroup(album));
+      albumHtml.append(this.makeLabelGroup(album.id));
     }
   }
 
@@ -394,20 +408,22 @@ mapkeep.formHelper.prototype.createAlbumHtml = function(note, readonly) {
  * Creates dropdown of all the user's current albums
  * @returns {*|jQuery}
  */
-mapkeep.formHelper.prototype.createAlbumDropDown = function() {
+mapkeep.FormManager.prototype.createAlbumDropDown = function() {
   var dropDown = ($('<ul data-dropdown-content/>')
     .addClass('f-dropdown')
     .attr('id', 'album-dropdown')
     .attr('aria-hidden', 'true'));
 
   // Add links that represent the user's albums, on click it adds a label group
-  for (var i = 0; i < this.albums.length; i++) {
-    var album = this.albums[i];
-    var link = $('<a/>')
-      .attr('href', '#')
-      .html(album.title)
-      .click(this.albumPrepend(album));
-    dropDown.append($('<li/>').append(link));
+  for (var key in this.albums) {
+    if (this.albums.hasOwnProperty(key)) {
+      var album = this.albums[key];
+      var link = $('<a/>')
+        .attr('href', '#')
+        .html(album.title)
+        .click(this.albumPrepend(album));
+      dropDown.append($('<li/>').append(link));
+    }
   }
 
   return dropDown;
@@ -417,7 +433,7 @@ mapkeep.formHelper.prototype.createAlbumDropDown = function() {
  * Removes any album labels not in albumIds input
  * which correspond to labels added but not *saved*
  */
-mapkeep.formHelper.prototype.removeAlbumLabels = function() {
+mapkeep.FormManager.prototype.removeAlbumLabels = function() {
   this.curForm.find('.group').removeClass('hide');
 
   var albumIds = this.curForm.find(
@@ -434,11 +450,12 @@ mapkeep.formHelper.prototype.removeAlbumLabels = function() {
  * Creates a label group:
  *    - the album name label (tagged with album id as value)
  *    - a delete X alert label
- * @param album For title and id
+ * @param albumId For title and id
  * @param showDelete Whether or not to show the delete button
  * @returns {*|jQuery}
  */
-mapkeep.formHelper.prototype.makeLabelGroup = function(album, showDelete) {
+mapkeep.FormManager.prototype.makeLabelGroup = function(albumId, showDelete) {
+  var album = this.albums[albumId];
   var label = $('<span/>')
     .addClass('label')
     .html(album.title);
@@ -460,15 +477,15 @@ mapkeep.formHelper.prototype.makeLabelGroup = function(album, showDelete) {
     .addClass('group')
     .append(label)
     .append(deleteLabel)
-    .attr('value', album.id);
+    .attr('value', albumId);
 };
 
 /**
  * Callback for form submission
  * @param note
  */
-mapkeep.formHelper.prototype.formSubmitted = function(note) {
-  this.resetDefaultValues(note);
+mapkeep.FormManager.prototype.formSubmitted = function(note) {
+  this.resetDefaultValuesTo(note);
   this.makeReadonly();
 };
 
@@ -476,7 +493,7 @@ mapkeep.formHelper.prototype.formSubmitted = function(note) {
  * Updates form action to "update" vs create
  * @param note
  */
-mapkeep.formHelper.prototype.updateFormAction = function(note) {
+mapkeep.FormManager.prototype.updateFormAction = function(note) {
   // Add method and change action so future submits are updated
   this.curForm.append('<input type="hidden" name="_method" value="patch">');
   this.curForm.attr('action', '/notes/' + note.id);
@@ -487,7 +504,7 @@ mapkeep.formHelper.prototype.updateFormAction = function(note) {
  * Resets default values of inputs to fresh values from note
  * @param note
  */
-mapkeep.formHelper.prototype.resetDefaultValues = function(note) {
+mapkeep.FormManager.prototype.resetDefaultValuesTo = function(note) {
   this.curForm.find('input[name=note\\[title\\]]')
     .prop('defaultValue', note.title);
   this.curForm.find('textarea')
