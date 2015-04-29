@@ -260,7 +260,7 @@ mapkeep.formHelper.prototype.makeEditable = function(formNum) {
     .removeAttr('readonly');
 
   // Remove submit blocking, change text to 'Save'
-  $('#map-canvas').off('click', getButtonId(formNum));
+  $('#overlay').off('click', getButtonId(formNum));
   form.find('button').not('.alert').not('.secondary').text('Save');
 
   // show delete and dropdown button
@@ -351,7 +351,7 @@ mapkeep.formHelper.prototype.setUpClicks = function() {
   // Update album ids input before save
   overlay.on('click', 'button:not(.alert)', function() {
     // TODO: fix this and only run when saving
-    var albumIds = $(formId).find('input[name=note\\[album_ids\\]\\[\\]]');
+    var albumIds = overlay.find('input[name=note\\[album_ids\\]\\[\\]]');
     var idsString = '';
     var albums = $('#overlay').find('.label').not('.alert');
     albums.each(function(x, al) {
