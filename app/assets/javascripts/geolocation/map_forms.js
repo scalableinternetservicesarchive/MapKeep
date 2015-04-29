@@ -463,32 +463,27 @@ mapkeep.formHelper.prototype.makeLabelGroup = function(album, showDelete) {
     .attr('value', album.id);
 };
 
-
 /**
- * Callback for note creation (switch to update);
+ * Callback for form submission
  * @param formNum
  * @param note
  */
 mapkeep.formHelper.prototype.formSubmitted = function(formNum, note) {
-  var form = this.forms[formNum];
-
-  // Add method and change action so future submits are updated
-  form.append('<input type="hidden" name="_method" value="patch">');
-  form.attr('action', '/notes/' + note.id);
-  form.removeClass('new_note');
-
-  this.resetDefaultValues(note, form);
+  this.resetDefaultValues(note, this.forms[formNum]);
   this.makeReadonly();
 };
 
 /**
- * Callback for form updates
+ * Updates form action to "update" vs create
  * @param formNum
  * @param note
  */
-mapkeep.formHelper.prototype.formUpdated = function(formNum, note) {
-  this.resetDefaultValues(note, this.forms[formNum]);
-  this.makeReadonly();
+mapkeep.formHelper.prototype.updateFormAction = function(formNum, note) {
+  // Add method and change action so future submits are updated
+  var form = this.forms[formNum];
+  form.append('<input type="hidden" name="_method" value="patch">');
+  form.attr('action', '/notes/' + note.id);
+  form.removeClass('new_note');
 };
 
 /**
@@ -505,4 +500,3 @@ mapkeep.formHelper.prototype.resetDefaultValues = function(note, form) {
   form.append(this.hiddenInput(
     'note[album_ids][]', this.albumIdString(note.albums)));
 };
-

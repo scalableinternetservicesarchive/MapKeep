@@ -184,3 +184,32 @@ mapkeep.app.prototype.bounceMarker = function(time) {
     this.curMarker.setAnimation(null);
   }.bind(this), time);
 };
+
+/**
+ * Callback for note creation
+ * @param formNum
+ * @param note
+ */
+mapkeep.app.prototype.noteCreated = function(formNum, note) {
+  this.formHelper.formSubmitted(formNum, note);
+  this.formHelper.updateFormAction(formNum, note);
+};
+
+/**
+ * Callback for note updates
+ * @param formNum
+ * @param note
+ */
+mapkeep.app.prototype.noteUpdated = function(formNum, note) {
+  this.formHelper.formSubmitted(formNum, note);
+};
+
+/**
+ * Callback for note deletion
+ * @param formNum
+ */
+mapkeep.app.prototype.noteDeleted = function(formNum) {
+  this.markers[formNum].setMap(null);
+  this.curWindow.close();
+  $('#overlay').addClass('hide');
+};
