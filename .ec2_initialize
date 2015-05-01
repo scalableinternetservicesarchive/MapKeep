@@ -1,2 +1,28 @@
 sudo yum install -y patch
-sudo yum install -y sqlite-devel
+
+# Install mysql client
+sudo yum install mysql
+
+# Create a data directory for MySQL (this step may not be needed,
+#   or you may need to modify the /etc/my.cnf datadir setting
+#   if you want to store the data somewhere else. Beware that
+#   data may be lost if it is not stored in the right place
+#   on Amazon EC2!)
+sudo mkdir /var/lib/mysql
+
+# Install mysql server
+sudo yum install mysql-server
+
+# Configure my.cnf settings using "nano" text editor
+# For example, you can add a line like max_allowed_packet=16M (the default is 1M)
+nano /etc/my.cnf
+
+# Start mysql server
+sudo /etc/init.d/mysqld start
+
+# Set root password for MySQL (Choose a strong one if the
+#   MySQL TCP port is going to be left open.)
+mysqladmin -u root password ''
+
+# Configure mysql to run on startup
+sudo chkconfig mysqld on
