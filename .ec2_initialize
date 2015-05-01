@@ -2,7 +2,8 @@ sudo yum install -y patch
 
 # Install mysql client
 sudo yum install mysql
-
+sudo yum install geos
+sudo yum install geos-devel
 # Create a data directory for MySQL (this step may not be needed,
 #   or you may need to modify the /etc/my.cnf datadir setting
 #   if you want to store the data somewhere else. Beware that
@@ -26,3 +27,6 @@ mysqladmin -u root password ''
 
 # Configure mysql to run on startup
 sudo chkconfig mysqld on
+
+mysql -u root -e 'CREATE DATABASE mapkeep_prod;'
+
