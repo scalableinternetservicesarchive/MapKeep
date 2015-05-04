@@ -11,7 +11,7 @@ Geokit::Geocoders::request_timeout = 3
 # These setting can be nil if not needed, otherwise, a valid URI must be
 # filled in at a minimum.  If the proxy requires authentication, the username
 # and password can be provided as well.
-Geokit::Geocoders::proxy = 'https://user:password@host:port'
+Geokit::Geocoders::proxy = nil
 
 # This is your yahoo application key for the Yahoo Geocoder.
 # See http://developer.yahoo.com/faq/index.html#appid
@@ -28,7 +28,7 @@ Geokit::Geocoders::GoogleGeocoder.channel = ''
 
 # You can also use the free API key instead of signed requests
 # See https://developers.google.com/maps/documentation/geocoding/#api_key
-Geokit::Geocoders::GoogleGeocoder.api_key = ''
+Geokit::Geocoders::GoogleGeocoder.api_key = 'AIzaSyBTrBJkp-8i6MZKKotUoTnzoUiXV_zlIVg'
 
 # You can also set multiple API KEYS for different domains that may be directed to this same application.
 # The domain from which the current user is being directed will automatically be updated for Geokit via
@@ -41,7 +41,7 @@ Geokit::Geocoders::GoogleGeocoder.api_key = ''
 # usage tied to an account, the value should be set to username:password.
 # See http://geocoder.us
 # and http://geocoder.us/user/signup
-Geokit::Geocoders::UsGeocoder.key = 'username:password'
+Geokit::Geocoders::UsGeocoder.key = nil
 
 # This is your authorization key for geocoder.ca.
 # To use the free service, the value can be set to nil or false.  For
