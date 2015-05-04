@@ -143,7 +143,9 @@ mapkeep.FormManager.prototype.createNoteForm =
       .attr('placeholder', 'Write anything you want about this location!')
       .text(readonly ? note.body : '');
 
-    var privateRadio = $('<input' + (note.private ? ' checked ' : '') + '/>')
+    var isPrivate = !readonly || note.private;
+
+    var privateRadio = $('<input' + (isPrivate ? ' checked ' : '') + '/>')
       .attr('type', 'radio')
       .attr('name', 'note[private]')
       .attr('id', 'privateTrue')
@@ -152,7 +154,7 @@ mapkeep.FormManager.prototype.createNoteForm =
       .attr('for', 'privateTrue')
       .html('Private');
 
-    var publicRadio = $('<input' + (note.private ? '' : ' checked ') + '/>')
+    var publicRadio = $('<input' + (isPrivate ? '' : ' checked ') + '/>')
       .attr('type', 'radio')
       .attr('name', 'note[private]')
       .attr('id', 'privateFalse')

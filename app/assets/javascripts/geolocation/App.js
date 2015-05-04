@@ -24,15 +24,14 @@ mapkeep.App = function(auth) {
 /**
  * Initializes map at input coordinates with user's notes
  * Initializes form helper
- * @param lat
- * @param lng
+ * @param location
  * @param notes
  * @param albums
  */
-mapkeep.App.prototype.init = function(lat, lng, notes, albums) {
+mapkeep.App.prototype.init = function(location, notes, albums) {
 
-  if (lat && lng) {
-    this.userLoc = new google.maps.LatLng(lat, lng);
+  if (location.lat && location.lng) {
+    this.userLoc = new google.maps.LatLng(location.lat, location.lng);
   }
 
   this.formManager.init(albums);
@@ -40,8 +39,9 @@ mapkeep.App.prototype.init = function(lat, lng, notes, albums) {
   this.setUpClicks();
 
   // Draw notes on map
-  for (var i = 0; i < notes.length; i++) {
-    var note = notes[i];
+  var userNotes = notes.user_notes;
+  for (var i = 0; i < userNotes.length; i++) {
+    var note = userNotes[i];
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(note.latitude, note.longitude),
       map: this.map,
