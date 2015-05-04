@@ -1,9 +1,5 @@
 sudo yum install -y patch
 
-# Install mysql client
-sudo yum install mysql
-sudo yum install geos
-sudo yum install geos-devel
 # Create a data directory for MySQL (this step may not be needed,
 #   or you may need to modify the /etc/my.cnf datadir setting
 #   if you want to store the data somewhere else. Beware that
@@ -11,8 +7,8 @@ sudo yum install geos-devel
 #   on Amazon EC2!)
 sudo mkdir /var/lib/mysql
 
-# Install mysql server
-sudo yum install mysql-server
+# Install mysql client
+sudo yum install mysql mysql-server geos geos-devel
 
 # Configure my.cnf settings using "nano" text editor
 # For example, you can add a line like max_allowed_packet=16M (the default is 1M)
@@ -30,3 +26,7 @@ sudo chkconfig mysqld on
 
 mysql -u root -e 'CREATE DATABASE mapkeep_prod;'
 
+# Overwrite the database yml with the original one
+wget https://raw.githubusercontent.com/scalableinternetservices/MapKeep/master/config/database.yml
+
+mv database.yml ~/app/config/database.yml
