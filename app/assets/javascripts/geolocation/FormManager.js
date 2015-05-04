@@ -143,6 +143,29 @@ mapkeep.FormManager.prototype.createNoteForm =
       .attr('placeholder', 'Write anything you want about this location!')
       .text(readonly ? note.body : '');
 
+    var privateRadio = $('<input' + (note.private ? ' checked ' : '') + '/>')
+      .attr('type', 'radio')
+      .attr('name', 'note[private]')
+      .attr('id', 'privateTrue')
+      .val('true');
+    var privateLabel = $('<label/>')
+      .attr('for', 'privateTrue')
+      .html('Private');
+
+    var publicRadio = $('<input' + (note.private ? '' : ' checked ') + '/>')
+      .attr('type', 'radio')
+      .attr('name', 'note[private]')
+      .attr('id', 'privateFalse')
+      .val('false');
+    var publicLabel = $('<label/>')
+      .attr('for', 'privateFalse')
+      .html('Public');
+
+    var radioGroup = $('<div/>')
+      .attr('id', 'radio-group')
+      .append(privateRadio).append(privateLabel)
+      .append(publicRadio).append(publicLabel);
+
     var form = $('<form/>')
       .addClass(readonly ? '' : 'new_note')
       .attr('id', 'i' + this.formNum)
@@ -154,6 +177,7 @@ mapkeep.FormManager.prototype.createNoteForm =
       .append($('<br/>'))
       .append(textarea)
       .append(this.createAlbumHtml(note, readonly))
+      .append(radioGroup)
       .append(this.hiddenInput('note[latitude]', marker.position.lat()))
       .append(this.hiddenInput('note[longitude]', marker.position.lng()))
       .append(this.hiddenInput('authenticity_token', this.authToken))
@@ -168,6 +192,7 @@ mapkeep.FormManager.prototype.createNoteForm =
       textarea.attr('readonly', 'readonly');
       title.attr('readonly', 'readonly');
       form.append(this.hiddenInput('_method', 'patch'));
+      radioGroup.addClass('hide');
     }
 
     // Save marker and form for deletion / manipulation
@@ -196,8 +221,8 @@ mapkeep.FormManager.prototype.makeReadonly = function() {
   this.turnOffSubmit();
   $('#submit-edit-button').text('Edit');
 
-  // Hide delete and dropdown button
-  $('#delete-button, #album-button, #cancel-button')
+  // Hide delete and dropdown button and radio buttons
+  $('#delete-button, #album-button, #cancel-button, #radio-group')
     .addClass('hide')
     .removeClass('button');
 
@@ -232,6 +257,9 @@ mapkeep.FormManager.prototype.makeEditable = function() {
   this.curForm.find('span.alert')
     .removeClass('hide')
     .addClass('label');
+
+  // Show public/private radio buttons
+  this.curForm.find('#radio-group').removeClass('hide');
 
   // Focus on input
   this.curForm.find('input[name=note\\[title\\]]').focus();
@@ -517,4 +545,8 @@ mapkeep.FormManager.prototype.resetDefaultValuesTo = function(note) {
   this.curForm.find('input[name=note\\[album_ids\\]\\[\\]]').remove();
   this.curForm.append(this.hiddenInput(
     'note[album_ids][]', this.albumIdString(note.albums)));
+  this.curForm.find('#privateTrue')
+    .prop('defaultChecked', note.private);
+  this.curForm.find('#privateFalse')
+    .prop('defaultChecked', !note.private);
 };
