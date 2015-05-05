@@ -158,6 +158,7 @@ mapkeep.FormManager.prototype.createNoteView =
 /**
  * Creates title and body fields for note
  * @param note
+ * @returns {*|jQuery}
  */
 mapkeep.FormManager.prototype.createTextGroup = function(note) {
   var title = $('<input/>')
@@ -181,6 +182,7 @@ mapkeep.FormManager.prototype.createTextGroup = function(note) {
 /**
  * Creates radio buttons for public/private options
  * @param note
+ * @returns {*|jQuery}
  */
 mapkeep.FormManager.prototype.createRadioGroup = function(note) {
   var isPrivate = !note || note.private;
@@ -424,7 +426,6 @@ mapkeep.FormManager.prototype.showForm = function(formNum, timeout) {
 /**
  * On click function for album dropdown click
  * @param albumId
- * @returns {Function}
  */
 mapkeep.FormManager.prototype.albumPrepend = function(albumId) {
   var group = this.curForm.find('span[value=' + albumId + ']');
