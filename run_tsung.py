@@ -15,6 +15,18 @@ def main():
 		print 'Not a valid tsung test case: {}'.format(args.filename)
 		sys.exit(2)
 
+	# Start the script
+	try:
+		log_path = start_tsung(args.filename)
+	except e:
+		print e
+		sys.exit(1)
+
+	if compile_tsung_report(log_path) == 0
+		print 'Tsung run and compile successfully'
+	else:
+		print 'Tsung did not compile sucessfully'
+
 def get_public_hostname():
 	""" Get the public hostname of the ec2 instance """
 	proc = Popen(['ec2-metadata', '--public-hostname'], stdout=PIPE)
@@ -47,7 +59,9 @@ def start_tsung(filename):
 	return log_path
 
 def compile_tsung_report(log_path):
-	pass
+	""" Compile the tsung report using tsung_stats.pl"""
+	proc = Popen(['tsung_stats.pl'], cwd=log_path)
+	return proc.communicate()[1]
 
 if __name__ == '__main__':
 	main()
