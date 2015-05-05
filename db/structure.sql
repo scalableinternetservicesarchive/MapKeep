@@ -32,7 +32,7 @@ CREATE TABLE `albums` (
   PRIMARY KEY (`id`),
   KEY `index_albums_on_user_id` (`user_id`),
   CONSTRAINT `fk_rails_964016e0e8` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -49,7 +49,7 @@ CREATE TABLE `collections` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -82,10 +82,11 @@ CREATE TABLE `notes` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   `user_id` int(11) DEFAULT NULL,
+  `private` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`),
   SPATIAL KEY `index_notes_on_latlon` (`latlon`),
   KEY `index_notes_on_user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -160,7 +161,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-04-27 17:07:56
+-- Dump completed on 2015-05-04 11:50:10
 INSERT INTO schema_migrations (version) VALUES ('20150412000202');
 
 INSERT INTO schema_migrations (version) VALUES ('20150413214220');
@@ -184,4 +185,6 @@ INSERT INTO schema_migrations (version) VALUES ('20150427002955');
 INSERT INTO schema_migrations (version) VALUES ('20150427002956');
 
 INSERT INTO schema_migrations (version) VALUES ('20150428002956');
+
+INSERT INTO schema_migrations (version) VALUES ('20150504184918');
 

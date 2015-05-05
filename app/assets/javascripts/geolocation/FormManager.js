@@ -9,8 +9,9 @@ var mapkeep = mapkeep || {};
 mapkeep.FormManager = function(app, auth) {
   /** Counter for form identification */
   this.formNum = 0;
-  /** All forms created so far */
+  /** All forms and views created so far */
   this.forms = {};
+  this.views = {};
   /** List of all user's albums */
   this.albums = {};
   /** Current opened form */
@@ -107,76 +108,143 @@ mapkeep.FormManager.prototype.albumIdString = function(albums) {
 /**
  * Creates a form for a note that is tied to a marker
  * @param marker The note belongs to for coordinates
- * @param readonly Whether or not this is a new note
  * @param note Note to use title and body for if existing
+ * @param nonUser Only show the note, no editable features
  * @returns {Number} identifier for form
  */
-mapkeep.FormManager.prototype.createNoteForm =
-  function(marker, readonly, note) {
-    var title = $('<input/>')
-      .attr('name', 'note[title]')
-      .attr('placeholder', 'Title')
-      .attr('value', readonly ? note.title : '')
-      .attr('type', 'text');
+mapkeep.FormManager.prototype.createNoteView =
+  function(marker, note, nonUser) {
+    var holder = nonUser ? $('<div/>') : $('<form/>');
+    holder
+      .attr('id', 'noteView')
+      .append(this.createTextGroup(note))
+      .append(this.createAlbumHtml(note));
 
-    var submit = $('<button/>')
-      .text(readonly ? 'Edit' : 'Save')
-      .addClass('button tiny right')
-      .attr('id', 'submit-edit-button')
-      .attr('type', 'submit');
+    if (!nonUser) {
+      // add form attributes and hidden inputs
+      holder
+        .addClass(note ? '' : 'new_note')
+        .attr('action', note ? '/notes/' + note.id : '/notes')
+        .attr('method', 'post')
+        .attr('data-remote', 'true')
+        .attr('accept-charset', 'UTF-8')
+        .append(this.hiddenInput('note[latitude]', marker.position.lat()))
+        .append(this.hiddenInput('note[longitude]', marker.position.lng()))
+        .append(this.hiddenInput('authenticity_token', this.authToken))
+        .append(this.hiddenInput('form_id', this.formNum))
+        .append(this.hiddenInput('note[album_ids][]',
+          note ? this.albumIdString(note.albums) : ''))
+        .append(this.createRadioGroup(note))
+        .append(this.createFormButtons(note ? true : false))
+        .append(this.hiddenInput('_method', note ? 'patch' : 'post'));
+    }
 
-    var deleteButton = $('<button/>')
-      .text('Delete')
-      .addClass('alert tiny right hide')
-      .attr('type', 'submit')
-      .attr('id', 'delete-button');
-
-    var cancelButton = $('<button/>')
-      .text('Cancel')
-      .addClass('secondary tiny right hide')
-      .attr('type', 'button')
-      .attr('id', 'cancel-button');
-
-    var textarea = $('<textarea/>')
-      .attr('name', 'note[body]')
-      .attr('rows', '10')
-      .attr('placeholder', 'Write anything you want about this location!')
-      .text(readonly ? note.body : '');
-
-    var form = $('<form/>')
-      .addClass(readonly ? '' : 'new_note')
-      .attr('id', 'i' + this.formNum)
-      .attr('action', readonly ? '/notes/' + note.id : '/notes')
-      .attr('method', 'post')
-      .attr('data-remote', 'true')
-      .attr('accept-charset', 'UTF-8')
-      .append(title)
-      .append($('<br/>'))
-      .append(textarea)
-      .append(this.createAlbumHtml(note, readonly))
-      .append(this.hiddenInput('note[latitude]', marker.position.lat()))
-      .append(this.hiddenInput('note[longitude]', marker.position.lng()))
-      .append(this.hiddenInput('authenticity_token', this.authToken))
-      .append(this.hiddenInput('form_id', this.formNum))
-      .append(this.hiddenInput('note[album_ids][]',
-        readonly ? this.albumIdString(note.albums) : ''))
-      .append(submit)
-      .append(deleteButton)
-      .append(cancelButton);
-
-    if (readonly) {
-      textarea.attr('readonly', 'readonly');
-      title.attr('readonly', 'readonly');
-      form.append(this.hiddenInput('_method', 'patch'));
+    if (note) {
+      holder.find('input, textarea').attr('readonly', 'readonly');
     }
 
     // Save marker and form for deletion / manipulation
     this.app.markers[this.formNum] = marker;
-    this.forms[this.formNum] = form;
+    if (nonUser) {
+      this.views[this.formNum] = holder;
+    } else {
+      this.forms[this.formNum] = holder;
+    }
 
     this.app.addMarkerListener(this.formNum);
     return this.formNum++;
   };
+
+/**
+ * Creates title and body fields for note
+ * @param note
+ * @returns {*|jQuery}
+ */
+mapkeep.FormManager.prototype.createTextGroup = function(note) {
+  var title = $('<input/>')
+    .attr('name', 'note[title]')
+    .attr('placeholder', 'Title')
+    .attr('value', note ? note.title : '')
+    .attr('type', 'text');
+
+  var textarea = $('<textarea/>')
+    .attr('name', 'note[body]')
+    .attr('rows', '10')
+    .attr('placeholder', 'Write anything you want about this location!')
+    .text(note ? note.body : '');
+
+  return $('<div/>')
+    .append(title)
+    .append('<br/>')
+    .append(textarea);
+};
+
+/**
+ * Creates radio buttons for public/private options
+ * @param note
+ * @returns {*|jQuery}
+ */
+mapkeep.FormManager.prototype.createRadioGroup = function(note) {
+  var isPrivate = !note || note.private;
+
+  var privateRadio = $('<input' + (isPrivate ? ' checked ' : '') + '/>')
+    .attr('type', 'radio')
+    .attr('name', 'note[private]')
+    .attr('id', 'privateTrue')
+    .val('true');
+
+  var privateLabel = $('<label/>')
+    .attr('for', 'privateTrue')
+    .html('Private');
+
+  var publicRadio = $('<input' + (isPrivate ? '' : ' checked ') + '/>')
+    .attr('type', 'radio')
+    .attr('name', 'note[private]')
+    .attr('id', 'privateFalse')
+    .val('false');
+
+  var publicLabel = $('<label/>')
+    .attr('for', 'privateFalse')
+    .html('Public');
+
+  return $('<div/>')
+    .attr('id', 'radio-group')
+    .addClass(note ? 'hide' : '')
+    .append(privateRadio).append(privateLabel)
+    .append(publicRadio).append(publicLabel);
+};
+
+/**
+ * If readonly, submit button toggles the form
+ * @param readonly
+ * @returns {*|jQuery}
+ */
+mapkeep.FormManager.prototype.createFormButtons = function(readonly) {
+  var holder = $('<div/>');
+
+  var submit = $('<button/>')
+    .text(readonly ? 'Edit' : 'Save')
+    .addClass('button tiny right')
+    .attr('id', 'submit-edit-button')
+    .attr('type', 'submit');
+
+  var deleteButton = $('<button/>')
+    .text('Delete')
+    .addClass('alert tiny right hide')
+    .attr('type', 'submit')
+    .attr('id', 'delete-button');
+
+  var cancelButton = $('<button/>')
+    .text('Cancel')
+    .addClass('secondary tiny right hide')
+    .attr('type', 'button')
+    .attr('id', 'cancel-button');
+
+  return holder
+    .append(submit)
+    .append(deleteButton)
+    .append(cancelButton);
+};
 
 /**
  * Makes the current form readonly and resets to default values
@@ -196,8 +264,8 @@ mapkeep.FormManager.prototype.makeReadonly = function() {
   this.turnOffSubmit();
   $('#submit-edit-button').text('Edit');
 
-  // Hide delete and dropdown button
-  $('#delete-button, #album-button, #cancel-button')
+  // Hide delete and dropdown button and radio buttons
+  $('#delete-button, #album-button, #cancel-button, #radio-group')
     .addClass('hide')
     .removeClass('button');
 
@@ -232,6 +300,9 @@ mapkeep.FormManager.prototype.makeEditable = function() {
   this.curForm.find('span.alert')
     .removeClass('hide')
     .addClass('label');
+
+  // Show public/private radio buttons
+  this.curForm.find('#radio-group').removeClass('hide');
 
   // Focus on input
   this.curForm.find('input[name=note\\[title\\]]').focus();
@@ -324,7 +395,8 @@ mapkeep.FormManager.prototype.resetForm = function() {
  */
 mapkeep.FormManager.prototype.showForm = function(formNum, timeout) {
   var overlay = $('#overlay');
-  this.curForm = this.forms[formNum];
+  var nonUser = this.forms[formNum] ? false : true;
+  this.curForm = nonUser ? this.views[formNum] : this.forms[formNum];
 
   // Open info window for note title at corresponding marker after timeout
   setTimeout(function() {
@@ -335,13 +407,13 @@ mapkeep.FormManager.prototype.showForm = function(formNum, timeout) {
   }.bind(this), timeout);
 
   // Remove previous form and show specified form
-  overlay.find('form').remove();
+  overlay.find('#noteView').remove();
   overlay.append(this.curForm).removeClass('hide');
 
-  if (!this.curForm.hasClass('new_note')) {
+  if (!this.curForm.hasClass('new_note') && !nonUser) {
     // Force form to be readonly if not a new note
     this.makeReadonly();
-  } else {
+  } else if (!nonUser) {
     // Hide delete button if it is a new note
     this.makeEditable();
     this.curForm.find('#delete-button').addClass('hide').removeClass('button');
@@ -354,7 +426,6 @@ mapkeep.FormManager.prototype.showForm = function(formNum, timeout) {
 /**
  * On click function for album dropdown click
  * @param albumId
- * @returns {Function}
  */
 mapkeep.FormManager.prototype.albumPrepend = function(albumId) {
   var group = this.curForm.find('span[value=' + albumId + ']');
@@ -371,10 +442,9 @@ mapkeep.FormManager.prototype.albumPrepend = function(albumId) {
  * Creates html for album label creation and deletion
  * and displays albums the note belongs to
  * @param note
- * @param readonly
  * @returns {*|jQuery}
  */
-mapkeep.FormManager.prototype.createAlbumHtml = function(note, readonly) {
+mapkeep.FormManager.prototype.createAlbumHtml = function(note) {
   var albumHtml = $('<div/>');
 
   // Add label groups for albums the note belongs in currently
@@ -386,7 +456,7 @@ mapkeep.FormManager.prototype.createAlbumHtml = function(note, readonly) {
   }
 
   // Create dropdown button and list
-  var clz = readonly ? 'hide' : 'button';
+  var clz = note ? 'hide' : 'button';
   var dropDownButton = $('<button/>')
     .addClass('secondary tiny dropdown ' + clz)
     .attr('id', 'album-button')
@@ -517,4 +587,8 @@ mapkeep.FormManager.prototype.resetDefaultValuesTo = function(note) {
   this.curForm.find('input[name=note\\[album_ids\\]\\[\\]]').remove();
   this.curForm.append(this.hiddenInput(
     'note[album_ids][]', this.albumIdString(note.albums)));
+  this.curForm.find('#privateTrue')
+    .prop('defaultChecked', note.private);
+  this.curForm.find('#privateFalse')
+    .prop('defaultChecked', !note.private);
 };
