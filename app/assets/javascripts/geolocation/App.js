@@ -24,31 +24,35 @@ mapkeep.App = function(auth) {
 /**
  * Initializes map at input coordinates with user's notes
  * Initializes form helper
- * @param lat
- * @param lng
+ * @param location
  * @param notes
  * @param albums
  */
-mapkeep.App.prototype.init = function(lat, lng, notes, albums) {
+mapkeep.App.prototype.init = function(location, notes, albums) {
 
-  if (lat && lng) {
-    this.userLoc = new google.maps.LatLng(lat, lng);
+  if (location.lat && location.lng) {
+    this.userLoc = new google.maps.LatLng(location.lat, location.lng);
   }
 
   this.formManager.init(albums);
   this.initMap();
   this.setUpClicks();
 
-  // Draw notes on map
-  for (var i = 0; i < notes.length; i++) {
-    var note = notes[i];
+  // Draw user and public notes on map
+  var allNotes = notes.user_notes.concat(notes.public_notes);
+  for (var i = 0; i < allNotes.length; i++) {
+    var note = allNotes[i];
+    var nonUser = i >= notes.user_notes.length;
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(note.latitude, note.longitude),
       map: this.map,
       title: note.title,
       draggable: false
     });
-    this.formManager.createNoteForm(marker, true, note);
+    if (nonUser) {
+      marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
+    }
+    this.formManager.createNoteView(marker, note, nonUser);
   }
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
@@ -122,7 +126,7 @@ mapkeep.App.prototype.dropPin = function() {
 
   // Show note in overlay with a new form
   this.curMarker = marker;
-  var num = this.formManager.createNoteForm(marker, false);
+  var num = this.formManager.createNoteView(marker);
   this.formManager.showForm(num, 450);
 };
 
