@@ -24,14 +24,14 @@ mapkeep.App = function(auth) {
 /**
  * Initializes map at input coordinates with user's notes
  * Initializes form helper
- * @param location
+ * @param user
  * @param notes
  * @param albums
  */
-mapkeep.App.prototype.init = function(location, notes, albums) {
+mapkeep.App.prototype.init = function(user, notes, albums) {
 
-  if (location.lat && location.lng) {
-    this.userLoc = new google.maps.LatLng(location.lat, location.lng);
+  if (user.location.lat && user.location.lng) {
+    this.userLoc = new google.maps.LatLng(user.location.lat, user.location.lng);
   }
 
   this.formManager.init(albums);
@@ -39,16 +39,15 @@ mapkeep.App.prototype.init = function(location, notes, albums) {
   this.setUpClicks();
 
   // Draw user and public notes on map
-  var allNotes = notes.user_notes.concat(notes.public_notes);
-  for (var i = 0; i < allNotes.length; i++) {
-    var note = allNotes[i];
-    var nonUser = i >= notes.user_notes.length;
+  for (var i = 0; i < notes.length; i++) {
+    var note = notes[i];
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(note.latitude, note.longitude),
       map: this.map,
       title: note.title,
       draggable: false
     });
+    var nonUser = note.user_id != user.id;
     if (nonUser) {
       marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
     }
