@@ -4,6 +4,7 @@ from subprocess import Popen, PIPE
 import os
 import sys
 import argparse
+import zipfile
 from xml.dom import minidom
 
 def main():
@@ -38,8 +39,9 @@ def main():
         print 'Report file {0} does not exist. Tsung failed to compile'.format(report_file)
         sys.exit(1)
 
-    print 'Tsung succesfully ran. The report can be found at:'
+    print 'Tsung succesfully ran. The report and zip can be found at:'
     print os.path.join(hostname, os.path.split(log_path)[1], 'report.html')
+    print os.path.join(hostname, log_path.rstrip('\\') + '.py')
 
 
 def get_public_hostname():
@@ -50,6 +52,12 @@ def get_public_hostname():
     return hostname.split()[1]
 
 def replace_tsung_server(filename, hostname):
+    """ Replace the server host attribute with a custom value
+
+    Parameters:
+        filename (str):  filename of the xml to do the operation on
+        hostname (str):  the value of the server host attribute to replace with
+    """
     dom = minidom.parse(filename)
     dom.getElementsByTagName('server')[0].setAttribute('host', hostname)
     with open(filename, 'w') as f:
@@ -80,10 +88,34 @@ def start_tsung(filename):
     return log_path
 
 def compile_tsung_report(log_path):
-    """ Compile the tsung report using tsung_stats.pl"""
+    """ Compile the tsung report using tsung_stats.pl
+
+    Paramters:
+        log_path (str): path where the logs are stored for this session
+    """
     print 'Compiling the tsung statistics'
     proc = Popen(['tsung_stats.pl'], cwd=log_path)
     return proc.communicate()[1]
+
+def zip_directory(log_path):
+    """ Zip up the everything in the current directory
+
+    This will save the current contents of the log folder into a file that
+    is stored a level above. This means it will be available via the aws
+    link that is given.
+
+    Paramters:
+        log_path (str): path of the logs to zip
+    """
+    store_path, filename = os.path.split(log_path.rstrip('\\'))
+    # just in case the log_path is ended by a forward slash
+    if not filename:
+        store_path, filename = os.path.split(store_path)
+
+    with zipfile.ZipFile(os.path.join(store_path, filename + '.py'), 'w') as zf:
+        for root, dirs, files in os.walk(log_path):
+            for file in files:
+                zf.write(os.path.join(root, file))
 
 if __name__ == '__main__':
     main()
