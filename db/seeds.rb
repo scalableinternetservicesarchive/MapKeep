@@ -8,7 +8,7 @@
 num_users = 99
 num_users.times do |n|
 	u = User.new({
-		email: 'example_#{n+1}@example.com',
+		email: "example_#{n+1}@example.com",
 		password: 'password',
 		password_confirmation: 'password'
 		})
