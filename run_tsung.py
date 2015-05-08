@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python34
 
 from subprocess import Popen, PIPE
 import os
@@ -42,9 +42,9 @@ def main():
         logging.error('Report file {0} does not exist. Tsung failed to compile'.format(report_file))
         sys.exit(1)
 
-    print 'Tsung succesfully ran. The report and zip can be found at:'
-    print os.path.join(hostname, os.path.split(log_path)[1], 'report.html')
-    print os.path.join(hostname, log_path.rstrip('\\') + '.py')
+    print('Tsung succesfully ran. The report and zip can be found at:')
+    print(os.path.join(hostname, os.path.split(log_path)[1], 'report.html'))
+    print(os.path.join(hostname, log_path.rstrip('\\') + '.py'))
 
 
 def get_public_hostname():
