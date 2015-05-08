@@ -10,24 +10,24 @@ def main():
     parser = argparse.ArgumentParser(description='Run a tsung test')
     parser.add_argument('filename', metavar='filename', type=str,
                         help='filename to a valid tsung xml test instance')
-    parser.add_argument('--no-replace', action='store_false', metavar='no_replace',
+    parser.add_argument('--no-replace', action='store_false', dest='no_replace',
                         help='do not replace the server xml attribute to the current hostname')
     args = parser.parse_args()
     
     if not os.path.exists(args.filename):
-        print 'Not a valid tsung test case: {}'.format(args.filename)
+        print 'Not a valid tsung test case: {0}'.format(args.filename)
         sys.exit(2)
 
     hostname = get_public_hostname()
 
-    if not no_replace:
-        print 'Replace server name attribute with {}'.format(hostname)
+    if not args.no_replace:
+        print 'Replace server name attribute with {0}'.format(hostname)
         replace_tsung_server(args.filename, args.no_replace)
 
     # Start the script
     try:
         log_path = start_tsung(args.filename)
-    except e:
+    except Exception e:
         print e
         sys.exit(1)
 
@@ -35,7 +35,7 @@ def main():
 
     report_file = os.path.join(log_path, 'report.html')
     if not os.path.exists(report_file):
-        print 'Report file {} does not exist. Tsung failed to compile'.format(report_file)
+        print 'Report file {0} does not exist. Tsung failed to compile'.format(report_file)
         sys.exit(1)
 
     print 'Tsung succesfully ran. The report can be found at:'
@@ -49,10 +49,10 @@ def get_public_hostname():
     print hostname
     return hostname.split()[1]
 
-def replace_tsung_server(file, hostname):
-    dom = minidom.parse(file)
+def replace_tsung_server(filename, hostname):
+    dom = minidom.parse(filename)
     dom.getElementsByTagName('server')[0].setAttribute('host', hostname)
-    with open(file, 'w') as f:
+    with open(filename, 'w') as f:
         f.write(dom.toxml())
 
 def start_tsung(filename):
@@ -63,7 +63,7 @@ def start_tsung(filename):
     Returns:
         (str): A valid path to the current tsung test instance log files
     """
-    print 'Running tsung with test instance {}'.filename
+    print 'Running tsung with test instance {0}'.format(filename)
     proc = Popen(['tsung', '-f', filename, 'start'], stdout=PIPE)
     log_path = proc.communicate()[0]
     
@@ -72,7 +72,7 @@ def start_tsung(filename):
     
     # Remove the quotes and take only the directory name
     log_path = log_path.replace('"', '').split()[-1]
-    print 'Log directory is: {}'.format(log_path)
+    print 'Log directory is: {0}'.format(log_path)
 
     if not os.path.exists(log_path):
         raise OSError("Tsung log path does not exist: ".format())
