@@ -10,6 +10,8 @@ def main():
     parser = argparse.ArgumentParser(description='Run a tsung test')
     parser.add_argument('filename', metavar='filename', type=str,
                         help='filename to a valid tsung xml test instance')
+    parser.add_argument('--no-replace', action='store_false', metavar='no_replace',
+                        help='do not replace the server xml attribute to the current hostname')
     args = parser.parse_args()
     
     if not os.path.exists(args.filename):
@@ -17,6 +19,10 @@ def main():
         sys.exit(2)
 
     hostname = get_public_hostname()
+
+    if not no_replace:
+        print 'Replace server name attribute with {}'.format(hostname)
+        replace_tsung_server(args.filename, args.no_replace)
 
     # Start the script
     try:
@@ -34,6 +40,7 @@ def main():
 
     print 'Tsung succesfully ran. The report can be found at:'
     print os.path.join(hostname, os.path.split(log_path)[1], 'report.html')
+
 
 def get_public_hostname():
     """ Get the public hostname of the ec2 instance """
