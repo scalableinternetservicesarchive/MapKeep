@@ -49,7 +49,7 @@ def get_public_hostname():
     proc = Popen(['ec2-metadata', '--public-hostname'], stdout=PIPE)
     hostname = proc.communicate()[0]
     logging.info(hostname)
-    return hostname.split()[1].docode('utf-8')
+    return hostname.split()[1].decode('utf-8')
 
 def replace_tsung_server(filename, hostname):
     """ Replace the server host attribute with a custom value
@@ -62,7 +62,7 @@ def replace_tsung_server(filename, hostname):
     dom.getElementsByTagName('server')[0].setAttribute('host', hostname)
     text = dom.toxml()
     with open(filename, 'w') as f:
-        f.write(text.decode('utf-8'))
+        f.write(text)
     logging.info('Successfully saved modified xml document')
 
 def start_tsung(filename):
