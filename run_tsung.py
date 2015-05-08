@@ -4,6 +4,7 @@ from subprocess import Popen, PIPE
 import os
 import sys
 import argparse
+from xml.dom import minidom
 
 def main():
     parser = argparse.ArgumentParser(description='Run a tsung test')
@@ -42,7 +43,10 @@ def get_public_hostname():
     return hostname.split()[1]
 
 def replace_tsung_server(file, hostname):
-    pass
+    dom = minidom.parse(file)
+    dom.getElementsByTagName('server')[0].setAttribute('host', hostname)
+    with open(file, 'w') as f:
+        f.write(dom.toxml())
 
 def start_tsung(filename):
     """ Start the tsung testing
