@@ -26,14 +26,10 @@ def main():
 
     if not args.no_replace:
         logging.info('Replace server name attribute with {0}'.format(hostname))
-        replace_tsung_server(args.filename, args.no_replace)
+        replace_tsung_server(args.filename, hostname)
 
     # Start the script
-    try:
-        log_path = start_tsung(args.filename)
-    except Exception as e:
-        logging.error(e)
-        sys.exit(1)
+    log_path = start_tsung(args.filename)
 
     compile_tsung_report(log_path)
 
@@ -42,17 +38,18 @@ def main():
         logging.error('Report file {0} does not exist. Tsung failed to compile'.format(report_file))
         sys.exit(1)
 
+    zip_directory(log_path)
+
     print('Tsung succesfully ran. The report and zip can be found at:')
     print(os.path.join(hostname, os.path.split(log_path)[1], 'report.html'))
-    print(os.path.join(hostname, log_path.rstrip('\\') + '.py'))
-
+    print(os.path.join(hostname, os.path.split(log_path.rstrip('\\'))[1] + '.zip'))
 
 def get_public_hostname():
     """ Get the public hostname of the ec2 instance """
     proc = Popen(['ec2-metadata', '--public-hostname'], stdout=PIPE)
     hostname = proc.communicate()[0]
     logging.info(hostname)
-    return hostname.split()[1]
+    return hostname.split()[1].docode('utf-8')
 
 def replace_tsung_server(filename, hostname):
     """ Replace the server host attribute with a custom value
@@ -63,8 +60,9 @@ def replace_tsung_server(filename, hostname):
     """
     dom = minidom.parse(filename)
     dom.getElementsByTagName('server')[0].setAttribute('host', hostname)
+    text = dom.toxml()
     with open(filename, 'w') as f:
-        f.write(dom.toxml())
+        f.write(text.decode('utf-8'))
     logging.info('Successfully saved modified xml document')
 
 def start_tsung(filename):
@@ -77,7 +75,7 @@ def start_tsung(filename):
     """
     logging.info('Running tsung with test instance {0}'.format(filename))
     proc = Popen(['tsung', '-f', filename, 'start'], stdout=PIPE)
-    log_path = proc.communicate()[0]
+    log_path = proc.communicate()[0].decode('utf-8')
     
     if proc.returncode != 0:
         raise RuntimeError("Tsung did not run successfully")
@@ -87,7 +85,7 @@ def start_tsung(filename):
     logging.info('Log directory is: {0}'.format(log_path))
 
     if not os.path.exists(log_path):
-        raise OSError("Tsung log path does not exist: ".format())
+        raise OSError("Tsung log path does not exist: ".format(log_path))
     
     return log_path
 
@@ -116,7 +114,7 @@ def zip_directory(log_path):
     if not filename:
         store_path, filename = os.path.split(store_path)
 
-    with zipfile.ZipFile(os.path.join(store_path, filename + '.py'), 'w') as zf:
+    with zipfile.ZipFile(os.path.join(store_path, filename + '.zip'), 'w') as zf:
         for root, dirs, files in os.walk(log_path):
             for file in files:
                 zf.write(os.path.join(root, file))
