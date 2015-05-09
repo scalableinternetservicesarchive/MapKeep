@@ -16,6 +16,8 @@ mapkeep.App = function(auth) {
   this.map = null;
   /** The user's current location */
   this.userLoc = null;
+  /** Fully populated notes by id */
+  this.notes = {};
 
   /** @type mapkeep.FormManager */
   this.formManager = new mapkeep.FormManager(this, auth);
@@ -37,6 +39,7 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
   this.formManager.init(albums);
   this.initMap();
   this.setUpClicks();
+  this.user = user;
 
   // Draw user and public notes on map
   for (var i = 0; i < notes.length; i++) {
@@ -46,11 +49,13 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
       map: this.map,
       draggable: false
     });
-    var nonUser = note.user_id != user.id;
-    if (nonUser) {
+
+    if (note.user_id != user.id) {
       marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
     }
-    // this.formManager.createNoteView(marker, note, nonUser);
+
+    this.markers[note.id] = marker;
+    this.addMarkerListener(marker, note.id);
   }
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
@@ -115,17 +120,14 @@ mapkeep.App.prototype.dropPin = function() {
   }
 
   // Create and drop pin onto map
-  var marker = new google.maps.Marker({
+  this.curMarker = new google.maps.Marker({
     position: this.map.center,
     map: this.map,
     draggable: true,
     animation: google.maps.Animation.DROP
   });
 
-  // Show note in overlay with a new form
-  this.curMarker = marker;
-  var num = this.formManager.createNoteView(marker);
-  this.formManager.showForm(num, 450);
+  this.formManager.showForm(null, 450);
 };
 
 /**
@@ -148,10 +150,11 @@ mapkeep.App.prototype.openInfoWindow = function(title, marker) {
 
 /**
  * Adds a listener to a marker to open a certain form
- * @param formNum
+ * @param marker
+ * @param noteId
  */
-mapkeep.App.prototype.addMarkerListener = function(formNum) {
-  google.maps.event.addListener(this.markers[formNum], 'click', function() {
+mapkeep.App.prototype.addMarkerListener = function(marker, noteId) {
+  google.maps.event.addListener(marker, 'click', function() {
 
     // Prevent marker click if user currently editing a note
     if (this.formManager.isEditable()) {
@@ -166,9 +169,17 @@ mapkeep.App.prototype.addMarkerListener = function(formNum) {
       });
     }
 
-    this.curMarker = this.markers[formNum];
-    this.formManager.showForm(formNum, 0);
+    this.curMarker = marker;
     this.map.panTo(this.curMarker.getPosition());
+
+    if (this.notes[noteId]) {
+      this.formManager.showForm(this.notes[noteId], 0);
+    } else {
+      $.getJSON('/notes/' + noteId + '.json', function(data) {
+        this.notes[noteId] = data;
+        this.formManager.showForm(this.notes[noteId], 0);
+      }.bind(this));
+    }
   }.bind(this));
 };
 
