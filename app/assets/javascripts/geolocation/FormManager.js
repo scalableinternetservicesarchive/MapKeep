@@ -59,6 +59,11 @@ mapkeep.FormManager.prototype.init = function(albums) {
     overlay.find('input[name=_method]').val('delete');
   });
 
+  // Star button click
+  overlay.on('click', '#star', function() {
+
+  });
+
   // Album button click
   var self = this;
   overlay.on('click', '#album-dropdown a', function() {
@@ -130,6 +135,8 @@ mapkeep.FormManager.prototype.createNoteView =
         .append(this.createRadioGroup(note))
         .append(this.createFormButtons(note ? true : false))
         .append(this.hiddenInput('_method', note ? 'patch' : 'post'));
+    } else {
+      holder.find('.group').append('<span id="star">☆</span>');
     }
 
     if (note) {
