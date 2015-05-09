@@ -30,6 +30,7 @@ class Note < ActiveRecord::Base
               ((private=false AND user_id!=#{current_user.id}) OR
               user_id=#{current_user.id}) AND
               MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)")
+    # sort by data & star count
   end
 
   # Gets text representation of linestring centered around location

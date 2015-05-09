@@ -1,1 +1,2 @@
-json.extract! @note, :id, :created_at, :updated_at
+json.extract! @note, :id, :title, :body, :created_at, :updated_at
+json.albums @note.albums, :id, :title

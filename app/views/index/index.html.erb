@@ -13,9 +13,7 @@
         location: { lat: '<%= @location.lat %>', lng: '<%= @location.lng %>' },
         id: <%= current_user.id %>
       },
-      <%= raw @notes.to_json(
-                  :include => { :albums => { :only => :id }},
-                  :except => [:latlon]) %>,
+      <%= raw @notes.to_json(:only => [:latitude, :longitude, :id, :user_id]) %>,
       <%= raw current_user.albums.to_json(:only => [:title, :id]) %>);
   });
 <% end %>

@@ -100,6 +100,7 @@ mapkeep.FormManager.prototype.hiddenInput = function(name, value) {
  * @returns {string}
  */
 mapkeep.FormManager.prototype.albumIdString = function(albums) {
+  return '';
   return albums.reduce(function(prev, cur) {
     return prev + cur.id + ',';
   }, '');
@@ -117,8 +118,8 @@ mapkeep.FormManager.prototype.createNoteView =
     var holder = nonUser ? $('<div/>') : $('<form/>');
     holder
       .attr('id', 'noteView')
-      .append(this.createTextGroup(note))
-      .append(this.createAlbumHtml(note));
+      .append(this.createTextGroup(note));
+      //.append(this.createAlbumHtml(note));
 
     if (!nonUser) {
       // add form attributes and hidden inputs

@@ -44,14 +44,13 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(note.latitude, note.longitude),
       map: this.map,
-      title: note.title,
       draggable: false
     });
     var nonUser = note.user_id != user.id;
     if (nonUser) {
       marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
     }
-    this.formManager.createNoteView(marker, note, nonUser);
+    // this.formManager.createNoteView(marker, note, nonUser);
   }
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
