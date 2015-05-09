@@ -122,8 +122,8 @@ mapkeep.FormManager.prototype.createNoteView =
         .attr('method', 'post')
         .attr('data-remote', 'true')
         .attr('accept-charset', 'UTF-8')
-        .append(this.hiddenInput('note[latitude]', ''))
-        .append(this.hiddenInput('note[longitude]', ''))
+        .append(this.hiddenInput('note[latitude]', note.latitude))
+        .append(this.hiddenInput('note[longitude]', note.longitude))
         .append(this.hiddenInput('authenticity_token', this.authToken))
         .append(this.hiddenInput('note[album_ids][]',
           note ? this.albumIdString(note.albums) : ''))
