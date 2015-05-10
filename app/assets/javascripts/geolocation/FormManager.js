@@ -61,7 +61,9 @@ mapkeep.FormManager.prototype.init = function(albums) {
 
   // Star button click
   overlay.on('click', '#star', function() {
-
+    // if was empty, add { star - userid, noteid }
+    // if was full, delete star
+    // update star count ?
   });
 
   // Album button click

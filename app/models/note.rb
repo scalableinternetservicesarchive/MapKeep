@@ -2,8 +2,13 @@ class Note < ActiveRecord::Base
   belongs_to :user
   has_many :collections, :dependent => :destroy
   has_many :albums, :through => :collections
+
+  has_many :stars, :dependent => :destroy
+  has_many :users, :through => :stars
+
   before_save :set_point
   before_update :set_point
+
   validates :title, :body, :user_id, presence: true
   validates :latitude, :longitude, :user_id, numericality: true
 
@@ -23,7 +28,7 @@ class Note < ActiveRecord::Base
   def Note.find_by_proximity(location, degree, current_user)
     linestring_text = get_linestring_text(location, degree)
     Note.find_by_sql("
-            SELECT *
+            SELECT id, latitude, longitude, user_id
             FROM notes
             FORCE INDEX (index_notes_on_latlon)
             WHERE

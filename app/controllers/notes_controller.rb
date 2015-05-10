@@ -40,6 +40,19 @@ class NotesController < ApplicationController
     end
   end
 
+  # POST /notes/add_star
+  def add_star
+    note_id = params[:id]
+    user_id = params[:user_id]
+    respond_to do |format|
+      note = Note.find(note_id)
+      note.stars.create(note_id: note_id, user_id: user_id)
+      note.star_count = note.star_count + 1
+      note.save
+      format.json { render json: params, status: :ok }
+    end
+  end
+
   # PATCH/PUT /notes/1
   # PATCH/PUT /notes/1.json
   def update

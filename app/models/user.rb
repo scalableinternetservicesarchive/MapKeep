@@ -6,4 +6,7 @@ class User < ActiveRecord::Base
 
   has_many :notes, dependent: :destroy
   has_many :albums, dependent: :destroy
+
+  has_many :starred_notes, :through => :stars, :source => :notes
+  has_many :stars, :dependent => :destroy
 end
