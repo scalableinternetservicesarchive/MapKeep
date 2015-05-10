@@ -20,8 +20,10 @@ class Note < ActiveRecord::Base
 
   # Uses lat and lng to create and set point within note
   def set_point
-    self[:latlon] = RGeo::Geographic.spherical_factory(:srid => 4326)
-                        .point(self[:longitude], self[:latitude])
+    if self.latitude_was != self.latitude || self.longitude_was != self.longitude
+      self[:latlon] = RGeo::Geographic.spherical_factory(:srid => 4326)
+                          .point(self[:longitude], self[:latitude])
+    end
   end
 
   # Finds all public and user's notes close to location to certain degree

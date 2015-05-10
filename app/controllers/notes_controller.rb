@@ -44,12 +44,16 @@ class NotesController < ApplicationController
   def add_star
     note_id = params[:id]
     user_id = params[:user_id]
+    note = Note.find(note_id)
     respond_to do |format|
-      note = Note.find(note_id)
-      note.stars.create(note_id: note_id, user_id: user_id)
-      note.star_count = note.star_count + 1
-      note.save
-      format.json { render json: params, status: :ok }
+      # TODO: prevent duplicate records
+      if note.stars.create!(note_id: note_id, user_id: user_id)
+        note.star_count = note.star_count + 1
+        note.save
+        format.json { render json: params, status: :ok }
+      else
+        format.json { render json: params, status: :unprocessable_entity }
+      end
     end
   end
 
