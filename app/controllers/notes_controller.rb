@@ -46,9 +46,24 @@ class NotesController < ApplicationController
     user_id = params[:user_id]
     note = Note.find(note_id)
     respond_to do |format|
-      # TODO: prevent duplicate records
+      # TODO: prevent duplicate records, is note.stars needed?
       if note.stars.create!(note_id: note_id, user_id: user_id)
         note.star_count = note.star_count + 1
+        note.save
+        format.json { render json: params, status: :ok }
+      else
+        format.json { render json: params, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def delete_star
+    note_id = params[:id]
+    user_id = params[:user_id]
+    note = Note.find(note_id)
+    respond_to do |format|
+      if note.stars.where(user_id: user_id).destroy_all # TODO: ensure doesn't delete more
+        note.star_count = note.star_count - 1
         note.save
         format.json { render json: params, status: :ok }
       else

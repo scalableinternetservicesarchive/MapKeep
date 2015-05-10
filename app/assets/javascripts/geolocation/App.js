@@ -176,6 +176,7 @@ mapkeep.App.prototype.addMarkerListener = function(marker, noteId) {
       this.formManager.showForm(this.notes[noteId], 0);
     } else {
       $.getJSON('/notes/' + noteId + '.json', function(data) {
+        // TODO: error ?
         this.notes[noteId] = data;
         this.formManager.showForm(this.notes[noteId], 0);
       }.bind(this));

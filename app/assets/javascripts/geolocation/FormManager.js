@@ -60,14 +60,28 @@ mapkeep.FormManager.prototype.init = function(albums) {
   });
 
   // Star button click
+  var self = this;
   overlay.on('click', '#star', function() {
-    // if was empty, add { star - userid, noteid }
-    // if was full, delete star
-    // update star count ?
+    var route;
+    if ($(this).html() === '★') {
+      $(this).html('☆');
+      route = '/notes/delete_star';
+    } else {
+      $(this).html('★');
+      route = '/notes/add_star';
+    }
+
+    $.post(route, {
+        id: $(this).data('note_id'),
+        user_id: self.app.user.id,
+        authenticity_token: self.authToken
+      }, function(data) {
+        // TODO: error ?
+      }
+    );
   });
 
   // Album button click
-  var self = this;
   overlay.on('click', '#album-dropdown a', function() {
     self.albumPrepend($(this).attr('value'));
   });
@@ -137,8 +151,11 @@ mapkeep.FormManager.prototype.createNoteView =
         .append(this.createRadioGroup(note))
         .append(this.createFormButtons(note ? true : false))
         .append(this.hiddenInput('_method', note ? 'patch' : 'post'));
-    } else {
-      holder.find('.group').append('<span id="star">☆</span>');
+    } else if (note) {
+      var star = note.starred ? '★' : '☆';
+      var span = $('<span id="star">' + star + '</span>');
+      span.data('note_id', note.id);
+      holder.find('.group').append(span);
     }
 
     if (note) {
