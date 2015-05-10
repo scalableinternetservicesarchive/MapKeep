@@ -62,18 +62,11 @@ mapkeep.FormManager.prototype.init = function(albums) {
   // Star button click
   var self = this;
   overlay.on('click', '#star', function() {
-    var type;
-    if ($(this).html() === '★') {
-      $(this).html('☆');
-      type = 'DELETE';
-    } else {
-      $(this).html('★');
-      type = 'PUT';
-    }
-
+    var putStar = $(this).html() === '☆';
+    $(this).html(putStar ? '★' : '☆');
     $.ajax({
       url: '/notes/' + $(this).data('note_id') + '/stars/' + self.app.user.id,
-      type: type,
+      type: putStar ? 'PUT' : 'DELETE',
       success: function(data) {
         // TODO: error ?
       }
