@@ -62,23 +62,22 @@ mapkeep.FormManager.prototype.init = function(albums) {
   // Star button click
   var self = this;
   overlay.on('click', '#star', function() {
-    var route;
+    var type;
     if ($(this).html() === '★') {
       $(this).html('☆');
-      route = '/notes/delete_star';
+      type = 'DELETE';
     } else {
       $(this).html('★');
-      route = '/notes/add_star';
+      type = 'PUT';
     }
 
-    $.post(route, {
-        id: $(this).data('note_id'),
-        user_id: self.app.user.id,
-        authenticity_token: self.authToken
-      }, function(data) {
+    $.ajax({
+      url: '/notes/' + $(this).data('note_id') + '/stars/' + self.app.user.id,
+      type: type,
+      success: function(data) {
         // TODO: error ?
       }
-    );
+    });
   });
 
   // Album button click

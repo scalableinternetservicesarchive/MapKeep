@@ -14,9 +14,8 @@ Rails.application.routes.draw do
   # Example of named route that can be invoked with purchase_url(id: product.id)
   #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
 
-  # TODO: Be restful
-  post 'notes/add_star' => 'notes#add_star'
-  post 'notes/delete_star' => 'notes#delete_star'
+  put 'notes/:id/stars/:user_id' => 'notes#add_star'
+  delete 'notes/:id/stars/:user_id' => 'notes#delete_star'
 
   resources :notes
   resources :albums
