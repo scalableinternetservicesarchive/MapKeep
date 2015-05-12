@@ -64,8 +64,9 @@ mapkeep.FormManager.prototype.init = function(albums) {
   overlay.on('click', '#star', function() {
     var putStar = $(this).html() === '☆';
     $(this).html(putStar ? '★' : '☆');
+    var noteId = $(this).parent().attr('id');
     $.ajax({
-      url: '/notes/' + $(this).data('note_id') + '/stars/' + self.app.user.id,
+      url: '/notes/' + noteId + '/stars/' + self.app.user.id,
       type: putStar ? 'PUT' : 'DELETE',
       success: function(data) {
         // TODO: error ?
@@ -145,8 +146,9 @@ mapkeep.FormManager.prototype.createNoteView =
         .append(this.hiddenInput('_method', note ? 'patch' : 'post'));
     } else if (note) {
       var star = note.starred ? '★' : '☆';
-      var span = $('<span id="star">' + star + '</span>');
-      span.data('note_id', note.id);
+      var span = $('<span/>')
+        .attr('id', note.id)
+        .append($('<span/>').attr('id', 'star').html(star));
       holder.find('#album-div').append(span);
     }
 

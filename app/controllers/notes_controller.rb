@@ -59,7 +59,7 @@ class NotesController < ApplicationController
   def delete_star
     note = Note.find(params[:id])
     respond_to do |format|
-      if note.stars.where(user_id: params[:user_id]).destroy_all # TODO: ensure doesn't delete more
+      if note.stars.where(user_id: params[:user_id]).destroy_all
         note.star_count = note.star_count - 1
         note.save
         format.json { render json: params, status: :ok }
