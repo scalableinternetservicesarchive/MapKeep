@@ -1,5 +1,7 @@
 var mapkeep = mapkeep || {};
 
+//mapkeep.NotesViewer.prototype = new mapkeep.App();
+
 var map = null;
 
 $(document).ready(function() {
@@ -30,7 +32,7 @@ var note = null;
 var albums = null;
 var app = null;
 
-$("#editModalLauncher").click(function () {
+$("a.reveal-link").click(function () {
   $('#editModal').foundation('reveal', 'open');
   note = $(this).data('note');
   albums = $(this).data('albums');
