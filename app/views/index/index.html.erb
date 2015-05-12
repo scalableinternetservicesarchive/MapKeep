@@ -9,10 +9,11 @@
   var app = new mapkeep.App('<%= session[:_csrf_token] %>');
   google.maps.event.addDomListener(window, 'load', function() {
     app.init(
-      { lat: '<%= @location.lat %>', lng: '<%= @location.lng %>' },
-      <%= raw @notes.to_json(
-                  :include => { :albums => { :only => :id }},
-                  :except => [:user_id, :latlon]) %>,
+      {
+        location: { lat: '<%= @location.lat %>', lng: '<%= @location.lng %>' },
+        id: <%= current_user.id %>
+      },
+      <%= raw @notes.to_json %>,
       <%= raw current_user.albums.to_json(:only => [:title, :id]) %>);
   });
 <% end %>

@@ -40,6 +40,35 @@ class NotesController < ApplicationController
     end
   end
 
+  # PUT /notes/stars
+  def add_star
+    note_id = params[:id]
+    note = Note.find(note_id)
+    respond_to do |format|
+      if note.stars.create!(note_id: note_id, user_id: params[:user_id])
+        note.star_count = note.star_count + 1
+        note.save
+        format.json { render json: params, status: :ok }
+      else
+        format.json { render json: params, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /notes/stars
+  def delete_star
+    note = Note.find(params[:id])
+    respond_to do |format|
+      if note.stars.where(user_id: params[:user_id]).destroy_all
+        note.star_count = note.star_count - 1
+        note.save
+        format.json { render json: params, status: :ok }
+      else
+        format.json { render json: params, status: :unprocessable_entity }
+      end
+    end
+  end
+
   # PATCH/PUT /notes/1
   # PATCH/PUT /notes/1.json
   def update

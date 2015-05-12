@@ -10,49 +10,57 @@ mapkeep.App = function(auth) {
   this.curWindow = null;
   /** Last clicked marker */
   this.curMarker = null;
-  /** Markers corresponding to note locations */
-  this.markers = {};
   /** The google map object */
   this.map = null;
   /** The user's current location */
   this.userLoc = null;
+  /** Fully populated notes by id */
+  this.notes = {};
 
   /** @type mapkeep.FormManager */
   this.formManager = new mapkeep.FormManager(this, auth);
 };
 
 /**
+ * Alert user something went wrong
+ */
+mapkeep.App.prototype.tryAgain = function() {
+  alert('Oops! Something went wrong. ' +
+    'Please reload the page and try again.');
+};
+
+/**
  * Initializes map at input coordinates with user's notes
  * Initializes form helper
- * @param location
+ * @param user
  * @param notes
  * @param albums
  */
-mapkeep.App.prototype.init = function(location, notes, albums) {
+mapkeep.App.prototype.init = function(user, notes, albums) {
 
-  if (location.lat && location.lng) {
-    this.userLoc = new google.maps.LatLng(location.lat, location.lng);
+  if (user.location.lat && user.location.lng) {
+    this.userLoc = new google.maps.LatLng(user.location.lat, user.location.lng);
   }
 
   this.formManager.init(albums);
   this.initMap();
   this.setUpClicks();
+  this.user = user;
 
   // Draw user and public notes on map
-  var allNotes = notes.user_notes.concat(notes.public_notes);
-  for (var i = 0; i < allNotes.length; i++) {
-    var note = allNotes[i];
-    var nonUser = i >= notes.user_notes.length;
+  for (var i = 0; i < notes.length; i++) {
+    var note = notes[i];
     var marker = new google.maps.Marker({
       position: new google.maps.LatLng(note.latitude, note.longitude),
       map: this.map,
-      title: note.title,
       draggable: false
     });
-    if (nonUser) {
+
+    if (note.user_id != user.id) {
       marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
     }
-    this.formManager.createNoteView(marker, note, nonUser);
+
+    this.addMarkerListener(marker, note.id);
   }
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
@@ -117,17 +125,14 @@ mapkeep.App.prototype.dropPin = function() {
   }
 
   // Create and drop pin onto map
-  var marker = new google.maps.Marker({
+  this.curMarker = new google.maps.Marker({
     position: this.map.center,
     map: this.map,
     draggable: true,
     animation: google.maps.Animation.DROP
   });
 
-  // Show note in overlay with a new form
-  this.curMarker = marker;
-  var num = this.formManager.createNoteView(marker);
-  this.formManager.showForm(num, 450);
+  this.formManager.showForm(null, 450);
 };
 
 /**
@@ -150,10 +155,11 @@ mapkeep.App.prototype.openInfoWindow = function(title, marker) {
 
 /**
  * Adds a listener to a marker to open a certain form
- * @param formNum
+ * @param marker
+ * @param noteId
  */
-mapkeep.App.prototype.addMarkerListener = function(formNum) {
-  google.maps.event.addListener(this.markers[formNum], 'click', function() {
+mapkeep.App.prototype.addMarkerListener = function(marker, noteId) {
+  google.maps.event.addListener(marker, 'click', function() {
 
     // Prevent marker click if user currently editing a note
     if (this.formManager.isEditable()) {
@@ -168,9 +174,26 @@ mapkeep.App.prototype.addMarkerListener = function(formNum) {
       });
     }
 
-    this.curMarker = this.markers[formNum];
-    this.formManager.showForm(formNum, 0);
+    this.curMarker = marker;
     this.map.panTo(this.curMarker.getPosition());
+
+    if (this.notes[noteId]) {
+      this.formManager.showForm(this.notes[noteId], 0);
+    } else {
+      var self = this;
+      $.ajax({
+        url: '/notes/' + noteId + '.json',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          self.notes[noteId] = data;
+          self.formManager.showForm(self.notes[noteId], 0);
+        },
+        error: function() {
+          self.tryAgain();
+        }
+      });
+    }
   }.bind(this));
 };
 
@@ -190,6 +213,8 @@ mapkeep.App.prototype.bounceMarker = function(time) {
  * @param note
  */
 mapkeep.App.prototype.noteCreated = function(note) {
+  this.notes[note.id] = note;
+  this.addMarkerListener(this.curMarker, note.id);
   this.formManager.updateFormAction(note);
   this.formManager.formSubmitted(note);
 };
