@@ -14,6 +14,11 @@ Rails.application.routes.draw do
   # Example of named route that can be invoked with purchase_url(id: product.id)
   #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
 
+  get 'index/update_notes/:ne_lat/:ne_lng/:sw_lat/:sw_lng' => 'index#update_notes',
+      defaults: { format: 'json' },
+      :constraints => { :ne_lat => /.*/, :ne_lng => /.*/,
+                        :sw_lat => /.*/, :sw_lng => /.*/}
+
   put 'notes/:id/stars/:user_id' => 'notes#add_star'
   delete 'notes/:id/stars/:user_id' => 'notes#delete_star'
 

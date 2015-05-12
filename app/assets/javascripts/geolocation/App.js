@@ -16,6 +16,8 @@ mapkeep.App = function(auth) {
   this.userLoc = null;
   /** Fully populated notes by id */
   this.notes = {};
+  /** All markers **/
+  this.markers = [];
 
   /** @type mapkeep.FormManager */
   this.formManager = new mapkeep.FormManager(this, auth);
@@ -46,6 +48,23 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
   this.initMap();
   this.setUpClicks();
   this.user = user;
+  this.drawNotes(notes);
+
+  this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
+    .push($('#overlay').get(0));
+};
+
+/**
+ * Draws list of notes on maps, clearing old ones
+ * @param notes
+ */
+mapkeep.App.prototype.drawNotes = function(notes) {
+  for (var i = 0; i < this.markers.length; i++) {
+    this.markers[i].setMap(null);
+    this.markers[i] = null;
+  }
+  this.markers = [];
+  this.notes = {}; // TODO: only delete when necessary
 
   // Draw user and public notes on map
   for (var i = 0; i < notes.length; i++) {
@@ -55,16 +74,14 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
       map: this.map,
       draggable: false
     });
+    this.markers.push(marker);
 
-    if (note.user_id != user.id) {
+    if (note.user_id != this.user.id) {
       marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
     }
 
     this.addMarkerListener(marker, note.id);
   }
-
-  this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
-    .push($('#overlay').get(0));
 };
 
 /**
@@ -78,12 +95,40 @@ mapkeep.App.prototype.initMap = function() {
   var mapOptions = {
     center: center,
     mapTypeControl: false,
+    minZoom: 4,
     streetViewControl: false,
     zoom: 10
   };
 
   this.map = new google.maps.Map(
     document.getElementById('map-canvas'), mapOptions);
+
+  google.maps.event.addListener(this.map, 'dragend',
+    this.refreshNotes.bind(this));
+
+  google.maps.event.addListener(this.map, 'zoom_changed',
+    this.refreshNotes.bind(this));
+};
+
+/**
+ * Refresh notes based on map bounds
+ */
+mapkeep.App.prototype.refreshNotes = function() {
+  var self = this;
+  var bounds = this.map.getBounds();
+  var ne = bounds.getNorthEast();
+  var sw = bounds.getSouthWest();
+  $.ajax({
+    url: '/index/update_notes/' + ne.lat() + '/' + ne.lng() +
+    '/' + sw.lat() + '/' + sw.lng(),
+    type: 'GET',
+    success: function(data) {
+      self.drawNotes(data);
+    },
+    error: function() {
+      self.tryAgain();
+    }
+  });
 };
 
 /**
@@ -131,6 +176,7 @@ mapkeep.App.prototype.dropPin = function() {
     draggable: true,
     animation: google.maps.Animation.DROP
   });
+  this.markers.push(this.curMarker);
 
   this.formManager.showForm(null, 450);
 };
