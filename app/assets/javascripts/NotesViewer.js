@@ -9,13 +9,11 @@ $(document).ready(function() {
   $('.reveal-modal').css('height', $('html').height() - 120 + 'px'); // 100+20px to keep modal effect visible
 
   function initialize() {
-    var center = this.userLoc ?
-      new google.maps.LatLng(this.userLoc.lat(), this.userLoc.lng()) :
-      new google.maps.LatLng(34.0722, -118.4441);
-
     var mapOptions = {
-      zoom: 8,
-      center: new google.maps.LatLng(-34.397, 150.644)
+      zoom: 10,
+      mapTypeControl: false,
+      streetViewControl: false,
+      center: new google.maps.LatLng(34.0722, -118.4441)  // center at UCLA
     };
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
   }
@@ -52,5 +50,8 @@ $('#editModal').bind('opened.fndtn.reveal', function() {
 });
 
 $('#editModal').on('opened.fndtn.reveal', function() {
-
+  var center = (note && note.latitude && note.longitude) ?
+    new google.maps.LatLng(note.latitude, note.longitude) :
+    new google.maps.LatLng(34.0722, -118.4441);
+  map.setCenter(center);
 });
