@@ -29,15 +29,23 @@ class Note < ActiveRecord::Base
   # Finds all public and user's notes close to location to certain degree
   def Note.find_by_proximity(location, degree, current_user)
     linestring_text = get_linestring_text(location, degree)
-    Note.find_by_sql("
+    user_notes = Note.find_by_sql("
             SELECT id, latitude, longitude, user_id
             FROM notes
             FORCE INDEX (index_notes_on_latlon)
             WHERE
-              ((private=false AND user_id!=#{current_user.id}) OR
-              user_id=#{current_user.id}) AND
+              user_id=#{current_user.id} AND
               MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)")
-    # sort by data & star count
+    # order first by day (not time), then by star count
+    pub_notes = Note.find_by_sql("
+            SELECT id, latitude, longitude, user_id
+            FROM notes
+            FORCE INDEX (index_notes_on_latlon)
+            WHERE
+              private=false AND user_id!=#{current_user.id} AND
+              MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)
+            ORDER BY LEFT(created_at, 10) DESC, star_count DESC LIMIT 30")
+    user_notes + pub_notes
   end
 
   # Gets text representation of linestring centered around location
