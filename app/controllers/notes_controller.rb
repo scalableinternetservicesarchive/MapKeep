@@ -45,7 +45,6 @@ class NotesController < ApplicationController
     note_id = params[:id]
     note = Note.find(note_id)
     respond_to do |format|
-      # TODO: prevent duplicate records, is note.stars needed?
       if note.stars.create!(note_id: note_id, user_id: params[:user_id])
         note.star_count = note.star_count + 1
         note.save

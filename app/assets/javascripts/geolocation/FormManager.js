@@ -147,7 +147,7 @@ mapkeep.FormManager.prototype.createNoteView =
       var star = note.starred ? '★' : '☆';
       var span = $('<span id="star">' + star + '</span>');
       span.data('note_id', note.id);
-      holder.find('.group').append(span);
+      holder.find('#album-div').append(span);
     }
 
     if (note) {
@@ -460,7 +460,7 @@ mapkeep.FormManager.prototype.albumPrepend = function(albumId) {
  * @returns {*|jQuery}
  */
 mapkeep.FormManager.prototype.createAlbumHtml = function(note) {
-  var albumHtml = $('<div/>');
+  var albumHtml = $('<div/>').attr('id', 'album-div');
 
   // Add label groups for albums the note belongs in currently
   if (note && note.albums.length > 0) {
