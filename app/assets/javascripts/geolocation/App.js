@@ -22,6 +22,14 @@ mapkeep.App = function(auth) {
 };
 
 /**
+ * Alert user something went wrong
+ */
+mapkeep.App.prototype.tryAgain = function() {
+  alert('Oops! Something went wrong. ' +
+    'Please reload the page and try again.');
+};
+
+/**
  * Initializes map at input coordinates with user's notes
  * Initializes form helper
  * @param user
@@ -173,9 +181,10 @@ mapkeep.App.prototype.addMarkerListener = function(marker, noteId) {
       this.formManager.showForm(this.notes[noteId], 0);
     } else {
       $.getJSON('/notes/' + noteId + '.json', function(data) {
-        // TODO: error ?
         this.notes[noteId] = data;
         this.formManager.showForm(this.notes[noteId], 0);
+      }.bind(this)).error(function() {
+        this.tryAgain();
       }.bind(this));
     }
   }.bind(this));

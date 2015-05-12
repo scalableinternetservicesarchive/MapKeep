@@ -62,14 +62,17 @@ mapkeep.FormManager.prototype.init = function(albums) {
   // Star button click
   var self = this;
   overlay.on('click', '#star', function() {
-    var putStar = $(this).html() === '☆';
-    $(this).html(putStar ? '★' : '☆');
-    var noteId = $(this).parent().attr('id');
+    var span = $(this);
+    var putStar = span.html() === '☆';
+    var noteId = span.parent().attr('id');
     $.ajax({
       url: '/notes/' + noteId + '/stars/' + self.app.user.id,
       type: putStar ? 'PUT' : 'DELETE',
-      success: function(data) {
-        // TODO: error ?
+      success: function() {
+        span.html(putStar ? '★' : '☆');
+      },
+      error: function() {
+        self.app.tryAgain();
       }
     });
   });
