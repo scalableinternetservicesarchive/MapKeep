@@ -13,12 +13,12 @@
         <td><%= note.title %></td>
         <td><%= link_to 'Show', note %></td>
         <td><%= link_to 'Edit', edit_note_path(note) %></td>
-        <td><a href="#" id="editModalLauncher" class="reveal-link"
+        <td><a href="#" class="reveal-link"
                data-note='<%= raw note.to_json(
                                       :include => { :albums => { :only => :id }},
                                       :except => [:user_id, :latlon]) %>'
                data-albums="<%= raw current_user.albums.to_json(:only => [:title, :id]) %>"
-        >Edit (popup)</a></td>
+            >Edit (popup)</a></td>
         <td><%= link_to 'Delete', note, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
