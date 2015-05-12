@@ -6,6 +6,8 @@ class AddStars < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index  :stars, [:note_id, :user_id], :unique => true
   end
 
   def self.down

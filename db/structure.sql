@@ -90,7 +90,7 @@ CREATE TABLE `notes` (
   PRIMARY KEY (`id`),
   SPATIAL KEY `index_notes_on_latlon` (`latlon`),
   KEY `index_notes_on_user_id` (`user_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -142,7 +142,8 @@ CREATE TABLE `stars` (
   `note_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_stars_on_note_id_and_user_id` (`note_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -182,7 +183,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-05-09 16:59:54
+-- Dump completed on 2015-05-11 17:36:20
 INSERT INTO schema_migrations (version) VALUES ('20150412000202');
 
 INSERT INTO schema_migrations (version) VALUES ('20150413214220');
@@ -214,4 +215,6 @@ INSERT INTO schema_migrations (version) VALUES ('20150507202906');
 INSERT INTO schema_migrations (version) VALUES ('20150509232035');
 
 INSERT INTO schema_migrations (version) VALUES ('20150509235824');
+
+INSERT INTO schema_migrations (version) VALUES ('20150512003036');
 
