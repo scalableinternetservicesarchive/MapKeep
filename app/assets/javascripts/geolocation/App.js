@@ -19,6 +19,7 @@ mapkeep.App = function(auth) {
 
   /** @type mapkeep.FormManager */
   this.formManager = new mapkeep.FormManager(this, auth);
+  this.albumManager = new mapkeep.AlbumManager(this, auth);
 };
 
 /**
@@ -35,6 +36,7 @@ mapkeep.App.prototype.init = function(location, notes, albums) {
   }
 
   this.formManager.init(albums);
+  this.albumManager.init();
   this.initMap();
   this.setUpClicks();
 
@@ -55,8 +57,12 @@ mapkeep.App.prototype.init = function(location, notes, albums) {
     this.formManager.createNoteView(marker, note, nonUser);
   }
 
+  //Push the overlay onto the map also.
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
     .push($('#overlay').get(0));
+
+  this.map.controls[google.maps.ControlPosition.TOP_LEFT]
+    .push($('#album-overlay').get(0));
 };
 
 /**
@@ -85,6 +91,12 @@ mapkeep.App.prototype.setUpClicks = function() {
   // Drop pin button
   $('#create_note').click(this.dropPin.bind(this));
 
+  // Open an album form
+  $('#create_album').click(this.createAlbum.bind(this));
+  //$('#create_album').click(function() {
+  //  alert('New thing!');
+  //})
+
   // Close button on note overlay
   $('#close-overlay').click(function() {
     // Reset and remove form
@@ -99,6 +111,24 @@ mapkeep.App.prototype.setUpClicks = function() {
 
     // If new note not saved, clear marker
     if (overlay.find('form').hasClass('new_note')) {
+      this.curMarker.setMap(null);
+    }
+  }.bind(this));
+
+  // Close button on note album overlay
+  $('#album-close-overlay').click(function() {
+    // Reset and remove form
+    var overlay = $('#album-overlay');
+    overlay.addClass('hide');
+
+    // Close info window and make marker un-draggable
+    this.curWindow.setMap(null);
+    this.curMarker.setOptions({
+      draggable: false
+    });
+
+    // If new note not saved, clear marker
+    if (overlay.find('form').hasClass('new_album')) {
       this.curMarker.setMap(null);
     }
   }.bind(this));
@@ -128,6 +158,18 @@ mapkeep.App.prototype.dropPin = function() {
   this.curMarker = marker;
   var num = this.formManager.createNoteView(marker);
   this.formManager.showForm(num, 450);
+};
+
+mapkeep.App.prototype.createAlbum = function() {
+  // Will this prevent a new form if already editing a note?
+  //if (this.albumManager.isEditable()) {
+  //  this.bounceMarker(350);
+  //  return;
+  //}
+
+  // Show album in overlay with a new form
+  var num = this.albumManager.createAlbumView();
+  this.albumManager.showForm(num);
 };
 
 /**

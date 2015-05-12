@@ -174,6 +174,7 @@ mapkeep.FormManager.prototype.createTextGroup = function(note) {
     .text(note ? note.body : '');
 
   return $('<div/>')
+    .attr('id', 'form-box')
     .append(title)
     .append('<br/>')
     .append(textarea);
