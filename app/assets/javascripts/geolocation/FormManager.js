@@ -413,7 +413,7 @@ mapkeep.FormManager.prototype.showForm = function(note, timeout) {
   setTimeout(function() {
     this.app.openInfoWindow(
       this.curForm.find('input[name=note\\[title\\]]').val(),
-      this.app.curMarker // TODO: index marker by note id ?
+      this.app.curMarker
     );
   }.bind(this), timeout);
 

@@ -10,8 +10,6 @@ mapkeep.App = function(auth) {
   this.curWindow = null;
   /** Last clicked marker */
   this.curMarker = null;
-  /** Markers corresponding to note locations */
-  this.markers = {};
   /** The google map object */
   this.map = null;
   /** The user's current location */
@@ -54,7 +52,6 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
       marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
     }
 
-    this.markers[note.id] = marker;
     this.addMarkerListener(marker, note.id);
   }
 
