@@ -180,12 +180,19 @@ mapkeep.App.prototype.addMarkerListener = function(marker, noteId) {
     if (this.notes[noteId]) {
       this.formManager.showForm(this.notes[noteId], 0);
     } else {
-      $.getJSON('/notes/' + noteId + '.json', function(data) {
-        this.notes[noteId] = data;
-        this.formManager.showForm(this.notes[noteId], 0);
-      }.bind(this)).error(function() {
-        this.tryAgain();
-      }.bind(this));
+      var self = this;
+      $.ajax({
+        url: '/notes/' + noteId + '.json',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          self.notes[noteId] = data;
+          self.formManager.showForm(self.notes[noteId], 0);
+        },
+        error: function() {
+          self.tryAgain();
+        }
+      });
     }
   }.bind(this));
 };
