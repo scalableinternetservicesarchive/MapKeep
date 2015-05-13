@@ -17,7 +17,7 @@ mapkeep.App = function(auth) {
   /** Fully populated notes by id */
   this.notes = {};
   /** All markers **/
-  this.markers = [];
+  this.markers = {};
 
   /** @type mapkeep.FormManager */
   this.formManager = new mapkeep.FormManager(this, auth);
@@ -63,28 +63,35 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
  * @param notes
  */
 mapkeep.App.prototype.drawNotes = function(notes) {
-  for (var i = 0; i < this.markers.length; i++) {
-    this.markers[i].setMap(null);
-    this.markers[i] = null;
-  }
-  this.markers = [];
   this.notes = {}; // TODO: only delete when necessary
 
   // Draw user and public notes on map
+  var ids = {};
   for (var i = 0; i < notes.length; i++) {
     var note = notes[i];
-    var marker = new google.maps.Marker({
-      position: new google.maps.LatLng(note.latitude, note.longitude),
-      map: this.map,
-      draggable: false
-    });
-    this.markers.push(marker);
+    if (!this.markers[note.id]) {
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(note.latitude, note.longitude),
+        map: this.map,
+        draggable: false
+      });
 
-    if (note.user_id != this.user.id) {
-      marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
+      this.markers[note.id] = marker;
+      if (note.user_id != this.user.id) {
+        marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
+      }
+
+      this.addMarkerListener(marker, note.id);
     }
+    ids[note.id] = true;
+  }
 
-    this.addMarkerListener(marker, note.id);
+  // Delete markers we no longer are showing
+  for (var prop in this.markers) {
+    if (this.markers.hasOwnProperty(prop) && !ids[note.id]) {
+      this.markers[prop].setMap(null);
+      this.markers[prop] = null;
+    }
   }
 };
 
@@ -180,7 +187,6 @@ mapkeep.App.prototype.dropPin = function() {
     draggable: true,
     animation: google.maps.Animation.DROP
   });
-  this.markers.push(this.curMarker);
 
   this.formManager.showForm(null, 450);
 };
@@ -264,6 +270,7 @@ mapkeep.App.prototype.bounceMarker = function(time) {
  */
 mapkeep.App.prototype.noteCreated = function(note) {
   this.notes[note.id] = note;
+  this.markers[note.id] = this.curMarker;
   this.addMarkerListener(this.curMarker, note.id);
   this.formManager.updateFormAction(note);
   this.formManager.formSubmitted(note);
