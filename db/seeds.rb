@@ -1,21 +1,17 @@
 # This file should contain all the record creation needed to seed the database with its default values.
 # The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
-#
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
 
-num_users = 		1
-num_notes = 		500
+num_users = 		25
+num_notes = 		1000
 num_albums = 		10
 notes_per_album = 	20
 
-center_lat = 34.0722
-center_lon = 118.4441
-coord_distance = 10
+center_lat = 		34.0722
+center_lon = 		-118.4441
+coord_distance = 	20
 
 $rng = Random.new
+
 def generate_location(start_lat, start_lon, distance)
 	lat = start_lat - (distance/2) + ($rng.rand * distance)
 	lon = start_lon - (distance/2) + ($rng.rand * distance)
