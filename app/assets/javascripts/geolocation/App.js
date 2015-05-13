@@ -48,7 +48,11 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
   this.initMap();
   this.setUpClicks();
   this.user = user;
+  // initially just user's notes
   this.drawNotes(notes);
+
+  google.maps.event.addListener(this.map, 'idle',
+    this.refreshNotes.bind(this));
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
     .push($('#overlay').get(0));

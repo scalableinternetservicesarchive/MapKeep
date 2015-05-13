@@ -17,8 +17,17 @@ class Note < ActiveRecord::Base
         lambda { |location, current_user, bounds = nil|
           if bounds.nil?
             linestring_text = get_linestring__by_loc(location)
+            pub_notes = []
           else
             linestring_text = get_linestring_by_bounds(bounds)
+            pub_notes = Note.find_by_sql("
+            SELECT id, latitude, longitude, user_id
+            FROM notes
+            FORCE INDEX (index_notes_on_latlon)
+            WHERE
+              private=false AND user_id!=#{current_user.id} AND
+              MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)
+            ORDER BY LEFT(created_at, 10) DESC, star_count DESC LIMIT 30")
           end
 
           user_notes = Note.find_by_sql("
@@ -29,14 +38,7 @@ class Note < ActiveRecord::Base
               user_id=#{current_user.id} AND
               MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)")
           # order first by day (not time), then by star count
-          pub_notes = Note.find_by_sql("
-            SELECT id, latitude, longitude, user_id
-            FROM notes
-            FORCE INDEX (index_notes_on_latlon)
-            WHERE
-              private=false AND user_id!=#{current_user.id} AND
-              MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)
-            ORDER BY LEFT(created_at, 10) DESC, star_count DESC LIMIT 30")
+
           user_notes + pub_notes
         }
 
@@ -56,8 +58,8 @@ class Note < ActiveRecord::Base
 
   # Gets text representation of linestring centered around location
   def Note.get_linestring__by_loc(location)
-    "LINESTRING(#{location.lng - 2} #{location.lat - 1},
-                #{location.lng + 2} #{location.lat + 1})"
+    "LINESTRING(#{location.lng - 1} #{location.lat - 0.5},
+                #{location.lng + 1} #{location.lat + 0.5})"
   end
 
   # Gets text representation of linestring based on map bounds
