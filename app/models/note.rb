@@ -12,6 +12,37 @@ class Note < ActiveRecord::Base
   validates :title, :body, :user_id, presence: true
   validates :latitude, :longitude, :user_id, numericality: true
 
+  # Finds all public and user's notes close to location to certain degree
+  scope :find_by_proximity,
+        lambda { |location, current_user, bounds = nil|
+          if bounds.nil?
+            linestring_text = get_linestring__by_loc(location)
+            pub_notes = []
+          else
+            linestring_text = get_linestring_by_bounds(bounds)
+            pub_notes = Note.find_by_sql("
+            SELECT id, latitude, longitude, user_id
+            FROM notes
+            FORCE INDEX (index_notes_on_latlon)
+            WHERE
+              private=false AND user_id!=#{current_user.id} AND
+              MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)
+            ORDER BY LEFT(created_at, 10) DESC, star_count DESC LIMIT 30")
+          end
+
+          # TODO: prevent double user load on index page
+          user_notes = Note.find_by_sql("
+            SELECT id, latitude, longitude, user_id
+            FROM notes
+            FORCE INDEX (index_notes_on_latlon)
+            WHERE
+              user_id=#{current_user.id} AND
+              MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)")
+          # order first by day (not time), then by star count
+
+          user_notes + pub_notes
+        }
+
   # By default, use the GEOS implementation for spatial columns
   self.rgeo_factory_generator = RGeo::Geos.method(:factory)
 
@@ -26,31 +57,15 @@ class Note < ActiveRecord::Base
     end
   end
 
-  # Finds all public and user's notes close to location to certain degree
-  def Note.find_by_proximity(location, degree, current_user)
-    linestring_text = get_linestring_text(location, degree)
-    user_notes = Note.find_by_sql("
-            SELECT id, latitude, longitude, user_id
-            FROM notes
-            FORCE INDEX (index_notes_on_latlon)
-            WHERE
-              user_id=#{current_user.id} AND
-              MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)")
-    # order first by day (not time), then by star count
-    pub_notes = Note.find_by_sql("
-            SELECT id, latitude, longitude, user_id
-            FROM notes
-            FORCE INDEX (index_notes_on_latlon)
-            WHERE
-              private=false AND user_id!=#{current_user.id} AND
-              MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)
-            ORDER BY LEFT(created_at, 10) DESC, star_count DESC LIMIT 30")
-    user_notes + pub_notes
+  # Gets text representation of linestring centered around location
+  def Note.get_linestring__by_loc(location)
+    "LINESTRING(#{location.lng - 1} #{location.lat - 0.5},
+                #{location.lng + 1} #{location.lat + 0.5})"
   end
 
-  # Gets text representation of linestring centered around location
-  def Note.get_linestring_text(location, degree)
-    "LINESTRING(#{location.lng - degree} #{location.lat - degree},
-                #{location.lng + degree} #{location.lat + degree})"
+  # Gets text representation of linestring based on map bounds
+  def Note.get_linestring_by_bounds(bounds)
+    "LINESTRING(#{bounds[:ne][:lng]} #{bounds[:ne][:lat]},
+                #{bounds[:sw][:lng]} #{bounds[:sw][:lat]})"
   end
 end
