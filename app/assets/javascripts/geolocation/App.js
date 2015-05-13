@@ -88,9 +88,9 @@ mapkeep.App.prototype.drawNotes = function(notes) {
 
   // Delete markers we no longer are showing
   for (var prop in this.markers) {
-    if (this.markers.hasOwnProperty(prop) && !ids[note.id]) {
+    if (this.markers.hasOwnProperty(prop) && !ids[prop]) {
       this.markers[prop].setMap(null);
-      this.markers[prop] = null;
+      delete this.markers[prop];
     }
   }
 };
