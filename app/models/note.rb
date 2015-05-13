@@ -30,6 +30,7 @@ class Note < ActiveRecord::Base
             ORDER BY LEFT(created_at, 10) DESC, star_count DESC LIMIT 30")
           end
 
+          # TODO: prevent double user load on index page
           user_notes = Note.find_by_sql("
             SELECT id, latitude, longitude, user_id
             FROM notes
