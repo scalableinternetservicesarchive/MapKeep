@@ -113,12 +113,6 @@ mapkeep.App.prototype.initMap = function() {
 
   this.map = new google.maps.Map(
     document.getElementById('map-canvas'), mapOptions);
-
-  google.maps.event.addListener(this.map, 'dragend',
-    this.refreshNotes.bind(this));
-
-  google.maps.event.addListener(this.map, 'zoom_changed',
-    this.refreshNotes.bind(this));
 };
 
 /**
