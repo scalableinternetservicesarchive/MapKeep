@@ -17,7 +17,7 @@
                data-note='<%= raw note.to_json(
                                       :include => { :albums => { :only => :id }},
                                       :except => [:user_id, :latlon]) %>'
-               data-albums="<%= raw current_user.albums.to_json(:only => [:title, :id]) %>"
+               data-albums='<%= raw current_user.albums.to_json(:only => [:title, :id]) %>'
             >Edit (popup)</a></td>
         <td><%= link_to 'Delete', note, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>

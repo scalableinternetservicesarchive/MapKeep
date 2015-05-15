@@ -13,16 +13,18 @@ mapkeep.NotesViewer = function(userid, auth) {
   this.noteForm = $('#noteView');
   /** The user id */
   this.userid = userid;
-  /** The user's current location */
-  this.userLoc = null;
+  /** The current note's location */
+  this.curLoc = null;
   /** The current session token */
   this.authToken = auth;
 
   this.formManager = new mapkeep.FormManager(this, auth);
 };
 
+/**
+ * Initializes map at UCLA
+ */
 mapkeep.NotesViewer.prototype.initMap = function () {
-  // Initialize the map at UCLA
   var mapOptions = {
     zoom: 10,
     mapTypeControl: false,
@@ -31,26 +33,31 @@ mapkeep.NotesViewer.prototype.initMap = function () {
     center: new google.maps.LatLng(34.0722, -118.4441)  // center at UCLA
   };
 
-  this.userLoc = mapOptions.center;
+  this.curLoc = mapOptions.center;
   this.map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 };
 
+/**
+ * Updates form data to contents of note
+ * @param note
+ * @param albums
+ */
 mapkeep.NotesViewer.prototype.updateForm = function(note, albums) {
-  this.userLoc = new google.maps.LatLng(note.latitude, note.longitude);
+  this.curLoc = new google.maps.LatLng(note.latitude, note.longitude);
 
   this.noteForm.prop('action', '/notes/' + note.id);
   this.noteForm.find('input[name=note\\[title\\]]')
     .val(note.title);
   this.noteForm.find('textarea')
     .html(note.body);
-  this.noteForm.find('input[name=latitude]')
+  this.noteForm.find('input[name=note\\[latitude\\]]')
     .val('' + note.latitude);
-  this.noteForm.find('input[name=longitude]')
+  this.noteForm.find('input[name=note\\[longitude\\]]')
     .val('' + note.longitude);
   this.noteForm.find('input[name=authenticity_token]')
     .val('' + this.authToken);
-  this.noteForm.find('input[name=album_ids]')
-    .val(this.formManager.albumIdString(note.albums));
+  this.noteForm.find('input[name=note\\[album_ids\\]\\[\\]]')
+    .val(this.formManager.albumIdString(albums));
   this.noteForm.find('#privateTrue')
     .prop('defaultChecked', note.private);
   this.noteForm.find('#privateFalse')
@@ -59,7 +66,7 @@ mapkeep.NotesViewer.prototype.updateForm = function(note, albums) {
 
 mapkeep.NotesViewer.prototype.centerMap = function() {
   google.maps.event.trigger(this.map, 'resize');
-  this.map.panTo(this.userLoc);
+  this.map.panTo(this.curLoc);
 };
 
 mapkeep.NotesViewer.prototype.updatePin = function() {
@@ -102,11 +109,12 @@ $("a.reveal-link").click(function () {
   notesApp.updateForm(note, albums);
 
   editModal.foundation('reveal', 'open');
-
 });
 
 editModal.bind('opened.fndtn.reveal', function() {
   // Otherwise the map will be off center and the wrong size
   notesApp.centerMap();
   notesApp.updatePin();
+
+  $(document).foundation();
 });
