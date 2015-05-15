@@ -7,7 +7,7 @@
 
   <!-- Server side setup -->
   <servers>
-    <server host="lolz" port="80" type="tcp"/>
+    <server host="localhost" port="80" type="tcp"/>
   </servers>
 
 
