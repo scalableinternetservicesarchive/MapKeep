@@ -16,6 +16,10 @@
 //= require foundation
 //= require_tree ./global
 
-$(function(){ $(document).foundation(); });
+$(function(){
+  $(document).foundation();
+  // janky fix
+  $('ul.dropdown .hide-for-large-up').addClass('hide-for-medium-up');
+});
 
 //= require turbolinks

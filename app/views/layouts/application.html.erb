@@ -23,18 +23,29 @@
       </ul>
       <section class="top-bar-section">
         <ul class="right">
-        <% if user_signed_in? %>
-          <li class="has-dropdown">
-          <%= link_to current_user.email, 'javascript:;' %>
-              <ul class="dropdown">
-                  <li><%= link_to 'Edit profile', edit_user_registration_path %></li>
-                  <li><%= link_to "Logout", destroy_user_session_path, method: :delete %></li>
-              </ul>
+          <li class="show-for-medium-only">
+            <%= link_to 'All Notes', notes_path %>
           </li>
-        <% else %>
-          <li><%= link_to "Sign up", new_user_registration_path  %></li>
-          <li><%= link_to "Login", new_user_session_path  %></li>
-        <% end %>
+          <li class="show-for-medium-only has-dropdown">
+            <%= link_to 'Albums', albums_path %>
+            <ul class="dropdown">
+              <% current_user.albums.each do |album| %>
+                <li><%= link_to album.title, album %></li>
+              <% end %>
+            </ul>
+          </li>
+          <% if user_signed_in? %>
+            <li class="has-dropdown">
+              <%= link_to current_user.email, 'javascript:;' %>
+              <ul class="dropdown">
+                <li><%= link_to 'Edit profile', edit_user_registration_path %></li>
+                <li><%= link_to "Logout", destroy_user_session_path, method: :delete %></li>
+              </ul>
+            </li>
+          <% else %>
+            <li><%= link_to "Sign up", new_user_registration_path  %></li>
+            <li><%= link_to "Login", new_user_session_path  %></li>
+          <% end %>
         </ul>
       </section>
     </nav>
@@ -49,7 +60,7 @@
         <% end %>
       <% end %>
 
-      <div id="sidebar" class="large-2 columns">
+      <div id="sidebar" class="large-2 columns show-for-large-up">
         <h4>Notes</h4>
         <ul class="side-nav">
           <li><%= link_to 'All Notes', notes_path %></li>
