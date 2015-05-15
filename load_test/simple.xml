@@ -7,13 +7,19 @@
 
   <!-- Server side setup -->
   <servers>
-    <server host="localhost" port="80" type="tcp"/>
+    <server host="localhost" port="3000" type="tcp"/>
   </servers>
 
 
   <load>
-    <arrivalphase duration="10" phase="1" unit="second">
-      <users arrivalrate="1" unit="second"/>
+    <arrivalphase phase="1" duration="30" unit="second">
+      <users arrivalrate="1" unit="second"></users>
+    </arrivalphase>
+    <arrivalphase phase="2" duration="30" unit="second">
+      <users arrivalrate="2" unit="second"></users>
+    </arrivalphase>
+    <arrivalphase phase="3" duration="30" unit="second">
+      <users arrivalrate="4" unit="second"></users>
     </arrivalphase>
   </load>
 
