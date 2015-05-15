@@ -3,7 +3,7 @@
   <table>
     <thead>
     <tr>
-      <th colspan="3"></th>
+      <th colspan="4"></th>
     </tr>
     </thead>
 
@@ -33,16 +33,15 @@
 
 <%= link_to 'Create Note', new_note_path, class:'button' %>
 
-<div id="editModal" class="reveal-modal xlarge" data-reveal aria-hidden="true">
-  <div class="medium-6 columns">
-    <h3>Note</h3>
+<div id="editModal" class="reveal-modal xlarge" data-reveal aria-hidden="true"
+     data-session='<%= session[:_csrf_token] %>'
+     data-userid='<%= current_user.id %>'>
+  <div id="form" class="medium-6 columns">
+    <%= render 'notes/noteForm' %>
   </div>
 
   <div class="medium-6 columns full">
     <div id="map-canvas"></div>
-    <div id="overlay" class="hide">
-      <a id="close-overlay" class="right">X</a>
-    </div>
   </div>
   <a class="close-reveal-modal" aria-label="Close">&#215;</a>
 </div>
