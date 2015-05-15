@@ -18,7 +18,49 @@ mapkeep.NotesViewer = function(userid, auth) {
   /** The current session token */
   this.authToken = auth;
 
+  /** @type mapkeep.FormManager */
   this.formManager = new mapkeep.FormManager(this, auth);
+  this.formManager.curForm = this.noteForm;
+};
+
+/**
+ * One time set up for form click/keyup functions that never change
+ * included cancel, delete, and keyup for title input
+ * @param albums All of the user's albums
+ */
+mapkeep.NotesViewer.prototype.init = function(albums) {
+  this.initMap();
+  // Index albums by id to name
+  for (var i = 0; i < albums.length; i++) {
+    this.formManager.albums[albums[i].id] = albums[i].title;
+  }
+
+  var overlay = $('#overlay');
+
+  // Cancel either removes not/marker or undos changes made
+  overlay.on('click', '#cancel-button', function() {
+    // Undo changes the user made
+    this.formManager.makeReadonly();
+    var lat = overlay.find('input[name=note\\[latitude\\]]').val();
+    var lng = overlay.find('input[name=note\\[longitude\\]]').val();
+    this.curMarker.setPosition(new google.maps.LatLng(lat, lng));
+  }.bind(this));
+
+  // Change form method to delete before submission (for rails)
+  overlay.on('click', '#delete-button', function() {
+    overlay.find('input[name=_method]').val('delete');
+
+    // Confirm if user wants to delete
+    var confirmDelete = confirm('Are you sure you want to delete the note?');
+    // Change form method back to post
+    if (!confirmDelete)
+      overlay.find('input[name=_method]').val('post');
+  });
+
+  // Album button click
+  overlay.on('click', '#album-dropdown a', function() {
+    self.albumPrepend($(this).attr('value'));
+  });
 };
 
 /**
@@ -40,14 +82,15 @@ mapkeep.NotesViewer.prototype.initMap = function () {
 /**
  * Updates form data to contents of note
  * @param note
- * @param albums
  */
-mapkeep.NotesViewer.prototype.updateForm = function(note, albums) {
+mapkeep.NotesViewer.prototype.updateForm = function(note) {
   this.curLoc = new google.maps.LatLng(note.latitude, note.longitude);
 
   this.noteForm.prop('action', '/notes/' + note.id);
   this.noteForm.find('input[name=note\\[title\\]]')
-    .val(note.title);
+    .val('' + note.title);
+  this.noteForm.find('input[name=note\\[title\\]]')
+    .attr('value', '' + note.title);
   this.noteForm.find('textarea')
     .html(note.body);
   this.noteForm.find('input[name=note\\[latitude\\]]')
@@ -57,7 +100,7 @@ mapkeep.NotesViewer.prototype.updateForm = function(note, albums) {
   this.noteForm.find('input[name=authenticity_token]')
     .val('' + this.authToken);
   this.noteForm.find('input[name=note\\[album_ids\\]\\[\\]]')
-    .val(this.formManager.albumIdString(albums));
+    .val(this.formManager.albumIdString(note.albums));
   this.noteForm.find('#privateTrue')
     .prop('defaultChecked', note.private);
   this.noteForm.find('#privateFalse')
@@ -76,10 +119,9 @@ mapkeep.NotesViewer.prototype.updatePin = function() {
 
   // Create and drop pin onto map
   this.curMarker = new google.maps.Marker({
-    position: this.map.center,
+    position: this.curLoc,
     map: this.map,
-    draggable: true,
-    animation: google.maps.Animation.DROP
+    draggable: true
   });
 };
 
@@ -93,9 +135,10 @@ $(document).ready(function() {
 
   var auth = editModal.data('session');
   var userid = editModal.data('userid');
+  var albums = editModal.data('albums');
   notesApp = new mapkeep.NotesViewer(userid, auth);
 
-  google.maps.event.addDomListener(window, 'load', notesApp.initMap());
+  google.maps.event.addDomListener(window, 'load', notesApp.init(albums));
 });
 
 $(window).resize(function() {
@@ -105,8 +148,9 @@ $(window).resize(function() {
 
 $("a.reveal-link").click(function () {
   var note = $(this).data('note');
-  var albums = $(this).data('albums');
-  notesApp.updateForm(note, albums);
+  notesApp.updateForm(note);
+  notesApp.updatePin();
+  notesApp.formManager.makeReadonly();
 
   editModal.foundation('reveal', 'open');
 });
@@ -114,7 +158,10 @@ $("a.reveal-link").click(function () {
 editModal.bind('opened.fndtn.reveal', function() {
   // Otherwise the map will be off center and the wrong size
   notesApp.centerMap();
-  notesApp.updatePin();
+
+  // Animate the pin. Stop after 750ms -> 1 or 2 bounces
+  notesApp.curMarker.setAnimation(google.maps.Animation.BOUNCE);
+  setTimeout(function(){ notesApp.curMarker.setAnimation(null); }, 750);
 
   $(document).foundation();
 });

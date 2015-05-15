@@ -3,7 +3,7 @@
   <table>
     <thead>
     <tr>
-      <th colspan="4"></th>
+      <th colspan="3"></th>
     </tr>
     </thead>
 
@@ -17,8 +17,7 @@
                data-note='<%= raw note.to_json(
                                       :include => { :albums => { :only => :id }},
                                       :except => [:user_id, :latlon]) %>'
-               data-albums='<%= raw current_user.albums.to_json(:only => [:title, :id]) %>'
-            >Edit (popup)</a></td>
+            >Show/Edit</a></td>
         <td><%= link_to 'Delete', note, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
@@ -35,7 +34,8 @@
 
 <div id="editModal" class="reveal-modal xlarge" data-reveal aria-hidden="true"
      data-session='<%= session[:_csrf_token] %>'
-     data-userid='<%= current_user.id %>'>
+     data-userid='<%= current_user.id %>'
+     data-albums='<%= raw current_user.albums.to_json(:only => [:title, :id]) %>'>
   <div id="form" class="medium-6 columns">
     <%= render 'notes/noteForm' %>
   </div>
