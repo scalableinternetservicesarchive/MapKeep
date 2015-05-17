@@ -36,7 +36,7 @@ mapkeep.App.prototype.init = function(location, notes, albums) {
   }
 
   this.formManager.init(albums);
-  this.albumManager.init();
+  this.albumManager.init(albums);
   this.initMap();
   this.setUpClicks();
 
@@ -127,10 +127,6 @@ mapkeep.App.prototype.setUpClicks = function() {
       draggable: false
     });
 
-    // If new note not saved, clear marker
-    if (overlay.find('form').hasClass('new_album')) {
-      this.curMarker.setMap(null);
-    }
   }.bind(this));
 };
 
@@ -161,12 +157,6 @@ mapkeep.App.prototype.dropPin = function() {
 };
 
 mapkeep.App.prototype.createAlbum = function() {
-  // Will this prevent a new form if already editing a note?
-  //if (this.albumManager.isEditable()) {
-  //  this.bounceMarker(350);
-  //  return;
-  //}
-
   // Show album in overlay with a new form
   var num = this.albumManager.createAlbumView();
   this.albumManager.showForm(num);
@@ -252,3 +242,10 @@ mapkeep.App.prototype.noteDeleted = function() {
   this.curMarker.setMap(null);
   $('#overlay').addClass('hide');
 };
+
+
+mapkeep.App.prototype.albumCreated = function() {
+  this.albumManager.addAlbum();
+};
+
+// TODO: change title of album here & albumSize into album id here and in the albumManager.
