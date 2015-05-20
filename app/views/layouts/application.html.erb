@@ -23,18 +23,18 @@
       </ul>
       <section class="top-bar-section">
         <ul class="right">
-          <li class="show-for-medium-only">
-            <%= link_to 'All Notes', notes_path %>
-          </li>
-          <li class="show-for-medium-only has-dropdown">
-            <%= link_to 'Albums', albums_path %>
-            <ul class="dropdown">
-              <% current_user.albums.each do |album| %>
-                <li><%= link_to album.title, album %></li>
-              <% end %>
-            </ul>
-          </li>
           <% if user_signed_in? %>
+            <li class="hide-for-large-up">
+              <%= link_to 'All Notes', notes_path %>
+            </li>
+            <li class="hide-for-large-up has-dropdown">
+              <%= link_to 'Albums', albums_path %>
+              <ul class="dropdown">
+                <% current_user.albums.each do |album| %>
+                  <li><%= link_to album.title, album %></li>
+                <% end %>
+              </ul>
+            </li>
             <li class="has-dropdown">
               <%= link_to current_user.email, 'javascript:;' %>
               <ul class="dropdown">
