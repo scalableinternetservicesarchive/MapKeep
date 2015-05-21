@@ -5,9 +5,7 @@ class ApplicationController < ActionController::Base
   before_action :random_auth
 
   def random_auth
-  	# This value should be similar to the seed values
-  	max_users = 25
-  	user = User.find_by(email: "example_#{rand(max_users)+1}@example.com")
+  	user = User.where('email LIKE ?', '%example_%').all.sample
   	sign_in user
   end
 end
