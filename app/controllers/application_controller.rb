@@ -7,9 +7,7 @@ class ApplicationController < ActionController::Base
   def random_auth
   	# This value should be similar to the seed values
   	max_users = 25
-  	rng = Random.new
-  	user_id = rng.rand(max_users)
-	user = User.find(user_id)
-	sign_in user
+  	user = User.find_by(email: "example_#{rand(max_users)+1}@example.com")
+  	sign_in user
   end
 end
