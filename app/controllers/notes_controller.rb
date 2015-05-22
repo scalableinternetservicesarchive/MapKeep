@@ -101,6 +101,9 @@ class NotesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_note
       @note = Note.find(params[:id])
+      if @note.user_id != current_user.id && @note.private
+        raise 'Invalid permissions'
+      end
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
