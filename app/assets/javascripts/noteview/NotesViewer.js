@@ -2,13 +2,15 @@ var mapkeep = mapkeep || {};
 
 var editModal = $('#editModal');
 
-var notesApp = null;
+var app = null;
 
 mapkeep.NotesViewer = function(userid, auth) {
   /** The google map object */
   this.map = null;
   /** Last clicked marker */
   this.curMarker = null;
+  /** Current note */
+  this.curNote = null;
   /** The note form */
   this.noteForm = $('#noteView');
   /** The user id */
@@ -110,6 +112,7 @@ mapkeep.NotesViewer.prototype.updateForm = function(note) {
 mapkeep.NotesViewer.prototype.centerMap = function() {
   google.maps.event.trigger(this.map, 'resize');
   this.map.panTo(this.curLoc);
+  this.map.setZoom(10);
 };
 
 mapkeep.NotesViewer.prototype.updatePin = function() {
@@ -125,6 +128,40 @@ mapkeep.NotesViewer.prototype.updatePin = function() {
   });
 };
 
+/**
+ * Callback for note updates
+ * @param note
+ */
+mapkeep.NotesViewer.prototype.noteUpdated = function(note) {
+  this.updateForm(note);
+  this.formManager.makeReadonly();
+
+  // Select the correct HTML node
+  var tr = $(document).find('a[href="/notes/' + app.curNote.id +  '"]').parentsUntil('tbody');
+  // Update title in table entry of updated note
+  tr.children(':contains("' + this.curNote.title + '")').html(note.title);
+  // Update note data embedded in HTML
+  tr.find('a[data-note]').data('note', note);
+  $(document).foundation();
+
+  this.curNote = note;
+};
+
+
+/**
+ * Callback for note deletion
+ */
+mapkeep.NotesViewer.prototype.noteDeleted = function() {
+  // Select the correct HTML node
+  var tr = $(document).find('a[href="/notes/' + app.curNote.id +  '"]').parentsUntil('tbody');
+
+  // Remove the table entry corresponding to the deleted note
+  tr.remove();
+
+  editModal.foundation('reveal', 'close');
+  $(document).foundation();
+};
+
 
 /********* Document *********/
 $(document).ready(function() {
@@ -136,9 +173,9 @@ $(document).ready(function() {
   var auth = editModal.data('session');
   var userid = editModal.data('userid');
   var albums = editModal.data('albums');
-  notesApp = new mapkeep.NotesViewer(userid, auth);
+  app = new mapkeep.NotesViewer(userid, auth);
 
-  google.maps.event.addDomListener(window, 'load', notesApp.init(albums));
+  google.maps.event.addDomListener(window, 'load', app.init(albums));
 });
 
 $(window).resize(function() {
@@ -148,20 +185,22 @@ $(window).resize(function() {
 
 $("a.reveal-link").click(function () {
   var note = $(this).data('note');
-  notesApp.updateForm(note);
-  notesApp.updatePin();
-  notesApp.formManager.makeReadonly();
+  app.updateForm(note);
+  app.updatePin();
+  app.formManager.makeReadonly();
+
+  app.curNote = note;
 
   editModal.foundation('reveal', 'open');
 });
 
 editModal.bind('opened.fndtn.reveal', function() {
   // Otherwise the map will be off center and the wrong size
-  notesApp.centerMap();
+  app.centerMap();
 
-  // Animate the pin. Stop after 750ms -> 1 or 2 bounces
-  notesApp.curMarker.setAnimation(google.maps.Animation.BOUNCE);
-  setTimeout(function(){ notesApp.curMarker.setAnimation(null); }, 750);
+  // Animate the pin. Stop after 1500ms -> 2 bounces
+  app.curMarker.setAnimation(google.maps.Animation.BOUNCE);
+  setTimeout(function(){ app.curMarker.setAnimation(null); }, 1500);
 
   $(document).foundation();
 });
