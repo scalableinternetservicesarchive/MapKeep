@@ -30,3 +30,11 @@ mysql -u root -e 'CREATE DATABASE mapkeep_prod;'
 wget https://raw.githubusercontent.com/scalableinternetservices/MapKeep/master/config/database.yml
 
 mv database.yml ~/app/config/database.yml
+
+# Run the tsung test
+
+cd ~/app/run_tsung 
+
+sh ~/app/run_tsung ~/app/load_test/main_zoom.xml
+sh ~/app/run_tsung ~/app/load_test/notes_listing.xml
+
