@@ -129,11 +129,34 @@ mapkeep.NotesViewer.prototype.updatePin = function() {
 };
 
 /**
+ * Callback for note updates
+ * @param note
+ */
+mapkeep.NotesViewer.prototype.noteUpdated = function(note) {
+  this.updateForm(note);
+  this.formManager.makeReadonly();
+
+  // Select the correct HTML node
+  var tr = $(document).find('a[href="/notes/' + app.curNote.id +  '"]').parentsUntil('tbody');
+  // Update title in table entry of updated note
+  tr.children(':contains("' + this.curNote.title + '")').html(note.title);
+  // Update note data embedded in HTML
+  tr.find('a[data-note]').data('note', note);
+  $(document).foundation();
+
+  this.curNote = note;
+};
+
+
+/**
  * Callback for note deletion
  */
 mapkeep.NotesViewer.prototype.noteDeleted = function() {
+  // Select the correct HTML node
+  var tr = $(document).find('a[href="/notes/' + app.curNote.id +  '"]').parentsUntil('tbody');
+
   // Remove the table entry corresponding to the deleted note
-  $(document).find('a[href="/notes/' + app.curNote.id +  '"]').parentsUntil('tbody').remove();
+  tr.remove();
 
   editModal.foundation('reveal', 'close');
   $(document).foundation();
