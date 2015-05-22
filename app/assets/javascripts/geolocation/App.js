@@ -285,5 +285,4 @@ mapkeep.App.prototype.noteDeleted = function() {
   this.curWindow.close();
   this.curMarker.setMap(null);
   $('#overlay').addClass('hide');
-  alert("note deleted yayay");
 };
