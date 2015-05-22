@@ -601,8 +601,8 @@ mapkeep.FormManager.prototype.resetDefaultValuesTo = function(note) {
     .prop('defaultValue', note.body);
   this.curForm.find('input[name=latitude]')
     .prop('defaultValue', '' + note.latitude);
-  this.curForm.find('input[name=latitude]')
-    .prop('defaultValue', '' + note.latitude);
+  this.curForm.find('input[name=longitude]')
+    .prop('defaultValue', '' + note.longitude);
   this.curForm.find('input[name=note\\[album_ids\\]\\[\\]]').remove();
   this.curForm.append(this.hiddenInput(
     'note[album_ids][]', this.albumIdString(note.albums)));

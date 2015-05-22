@@ -4,7 +4,7 @@ class NotesController < ApplicationController
   # GET /notes
   # GET /notes.json
   def index
-    @notes = current_user.notes
+    @notes = Note.where(user_id: current_user.id).order('updated_at DESC').limit(10)
   end
 
   # GET /notes/1
@@ -101,6 +101,9 @@ class NotesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_note
       @note = Note.find(params[:id])
+      if @note.user_id != current_user.id && @note.private
+        raise 'Invalid permissions'
+      end
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
