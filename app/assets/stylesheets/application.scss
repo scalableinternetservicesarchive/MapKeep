@@ -17,6 +17,10 @@
 
 @import "foundation_and_overrides";
 
+html {
+  overflow: auto !important;
+}
+
 .top-bar .name h1 {
   font-family: 'Lobster', cursive;
 }

@@ -1,3 +1,4 @@
+<!-- Main page, new note, main page, view note view, delete note-->
 <?xml version="1.0" ?><!DOCTYPE tsung  SYSTEM '/home/ec2-user/opt/tsung-1.5.0/share/tsung/tsung-1.0.dtd'><tsung loglevel="notice" version="1.0">
 
   <!-- Client side setup -->
@@ -24,9 +25,6 @@
     <arrivalphase phase="4" duration="30" unit="second">
       <users arrivalrate="8" unit="second"></users>
     </arrivalphase>
-    <arrivalphase phase="5" duration="30" unit="second">
-      <users arrivalrate="16" unit="second"></users>
-    </arrivalphase>
   </load>
 
   <options>
@@ -40,9 +38,30 @@
 
   <sessions>
     <session name="http-example" probability="100" type="ts_http">
+      <!-- Main page -->  
       <request>
-        <http method="GET" url="/" version="1.1"/>
+        <http method="GET" url="/index/update_notes/34.48157841518869/-117.7818450214844/33.613397221927926/-119.10295097851565" version="1.1"/>
       </request>
+
+      <thinktime value="2" random="true"></thinktime>
+
+            <request>
+        <http method="GET" url="/index/update_notes/34.77199835945111/-117.07139580971932/33.03276537941913/-119.71360772378182" version="1.1"/>
+      </request>
+
+      <thinktime value="2" random="true"></thinktime>
+
+            <request>
+        <http method="GET" url="/index/update_notes/35.21076675085051/-116.09544367525166/31.71523753845766/-121.37986750337666" version="1.1"/>
+      </request>
+
+      <thinktime value="2" random="true"></thinktime>
+
+            <request>
+        <http method="GET" url="/index/update_notes/37.283812391789354/-113.86338803912884/30.32657536433711/-124.43223569537884" version="1.1"/>
+      </request>
+
+      <thinktime value="2" random="true"></thinktime>
     </session>
   </sessions>
 </tsung>
