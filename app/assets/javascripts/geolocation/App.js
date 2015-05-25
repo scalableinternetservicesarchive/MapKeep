@@ -244,8 +244,8 @@ mapkeep.App.prototype.noteDeleted = function() {
 };
 
 
-mapkeep.App.prototype.albumCreated = function() {
-  this.albumManager.addAlbum();
+mapkeep.App.prototype.albumCreated = function(album) {
+  this.albumManager.addAlbum(album);
 };
 
 // TODO: change title of album here & albumSize into album id here and in the albumManager.

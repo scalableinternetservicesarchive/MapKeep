@@ -183,9 +183,9 @@ mapkeep.AlbumManager.prototype.closeForm = function() {
     }.bind(this));
 };
 
-mapkeep.AlbumManager.prototype.addAlbum = function() {
-  var href = 'albums/32';
-  var title = 'My Title';
+mapkeep.AlbumManager.prototype.addAlbum = function(album) {
+  var href = '/albums/' + album.id;
+  var title = album.title;
   var htmlAlbum = '<li><a href="' + href + '">' + title + '</a></li>';
 
   var album = $('#side-albums.side-nav')
