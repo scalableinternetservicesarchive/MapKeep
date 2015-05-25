@@ -54,9 +54,11 @@ mapkeep.NotesViewer.prototype.init = function(albums) {
 
     // Confirm if user wants to delete
     var confirmDelete = confirm('Are you sure you want to delete the note?');
-    // Change form method back to post
+    // Change form method back to patch
     if (!confirmDelete)
-      overlay.find('input[name=_method]').val('post');
+      overlay.find('input[name=_method]').val('patch');
+
+    return confirmDelete;
   });
 
   // Album button click
@@ -158,8 +160,8 @@ mapkeep.NotesViewer.prototype.noteDeleted = function() {
   // Remove the table entry corresponding to the deleted note
   tr.remove();
 
-  // Change submit method back to post
-  $('#overlay').find('input[name=_method]').val('post');
+  // Change submit method back to patch
+  $('#overlay').find('input[name=_method]').val('patch');
 
   editModal.foundation('reveal', 'close');
   $(document).foundation();
