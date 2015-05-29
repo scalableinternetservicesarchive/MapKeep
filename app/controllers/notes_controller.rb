@@ -4,9 +4,8 @@ class NotesController < ApplicationController
   # GET /notes
   # GET /notes.json
   def index
-    @notes = Note.where(user_id: current_user.id).order('updated_at DESC').limit(10)
+    @notes = Note.where(user_id: current_user.id).order('updated_at DESC')
   end
-
   # GET /notes/1
   # GET /notes/1.json
   def show
