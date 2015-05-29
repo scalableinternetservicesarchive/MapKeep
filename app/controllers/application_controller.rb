@@ -5,7 +5,10 @@ class ApplicationController < ActionController::Base
   before_action :random_auth
 
   def random_auth
-  	user = User.where('email LIKE ?', '%example_%').all.sample
-  	sign_in user
+  	if session[:is_logged] == nil
+  		user = User.where('email LIKE ?', '%example_%').all.sample
+  		sign_in user
+  		session[:is_logged] = true
+  	end
   end
 end
