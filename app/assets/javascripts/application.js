@@ -13,6 +13,8 @@
 //= require jquery
 //= require jquery.turbolinks
 //= require jquery_ujs
+//= require dataTables/jquery.dataTables
+//= require dataTables/jquery.dataTables.foundation
 //= require foundation
 //= require_tree ./global
 
