@@ -19,7 +19,7 @@ mapkeep.App = function(auth) {
 
   /** @type mapkeep.FormManager */
   this.formManager = new mapkeep.FormManager(this, auth);
-  this.albumManager = new mapkeep.AlbumManager(this, auth);
+  this.albumManager = new mapkeep.AlbumManager(this.formManager, auth);
 };
 
 /**
@@ -93,9 +93,6 @@ mapkeep.App.prototype.setUpClicks = function() {
 
   // Open an album form
   $('#create_album').click(this.createAlbum.bind(this));
-  //$('#create_album').click(function() {
-  //  alert('New thing!');
-  //})
 
   // Close button on note overlay
   $('#close-overlay').click(function() {
@@ -120,13 +117,6 @@ mapkeep.App.prototype.setUpClicks = function() {
     // Reset and remove form
     var overlay = $('#album-overlay');
     overlay.addClass('hide');
-
-    // Close info window and make marker un-draggable
-    this.curWindow.setMap(null);
-    this.curMarker.setOptions({
-      draggable: false
-    });
-
   }.bind(this));
 };
 
