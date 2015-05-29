@@ -38,6 +38,7 @@ mapkeep.NotesViewer.prototype.init = function(albums) {
   }
 
   var overlay = $('#overlay');
+  var self = this;
 
   // Cancel either removes not/marker or undos changes made
   overlay.on('click', '#cancel-button', function() {
@@ -63,7 +64,7 @@ mapkeep.NotesViewer.prototype.init = function(albums) {
 
   // Album button click
   overlay.on('click', '#album-dropdown a', function() {
-    self.albumPrepend($(this).attr('value'));
+    self.formManager.albumPrepend($(this).attr('value'));
   });
 };
 
@@ -196,10 +197,13 @@ $("a.reveal-link").click(function () {
 
   app.curNote = note;
 
+  // Replace album dropdown
+  $("#album-div").replaceWith(app.formManager.createAlbumHtml(note));
+
   editModal.foundation('reveal', 'open');
 });
 
-editModal.bind('opened.fndtn.reveal', function() {
+editModal.bind('opened.fndtn.reveal', '#editModal', function() {
   // Otherwise the map will be off center and the wrong size
   app.centerMap();
 
@@ -208,4 +212,16 @@ editModal.bind('opened.fndtn.reveal', function() {
   setTimeout(function(){ app.curMarker.setAnimation(null); }, 1500);
 
   $(document).foundation();
+});
+
+/*
+  Both are needed to prevent the open and close event for the dropdown
+  from also triggering the reveal modal's. Kind of hacky, but it works.
+  See: https://github.com/zurb/foundation/issues/4576
+ */
+editModal.on('opened.fndtn.dropdown', '#album-dropdown', function() {
+  return false;
+});
+editModal.on('closed.fndtn.dropdown', '#album-dropdown', function() {
+  return false;
 });
