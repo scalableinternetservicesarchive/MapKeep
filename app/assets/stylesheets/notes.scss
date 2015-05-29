@@ -1,0 +1,88 @@
+// Place all the styles related to the notes controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+@import "foundation_and_overrides";
+
+.notes {
+  $topbar-margin-bottom: 0;
+
+  #main {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: $topbar-height;
+  }
+
+  #map-canvas {
+    height: 100%;
+    width: 100%;
+
+    img {
+      max-width: none;
+    }
+  }
+
+  .reveal-modal {
+    overflow-y: auto;
+  }
+
+  .full {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #close-overlay {
+    display: block;
+    margin-top: -0.5em;
+  }
+
+  #overlay {
+    background: white;
+    font-family: $font-family-sans-serif;
+    font-size: 1.5em;
+    line-height: 2;
+
+    input {
+      margin: 0;
+    }
+
+    input[readonly], textarea[readonly] {
+      background:none;
+      border: none;
+      box-shadow: none;
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    .button {
+      margin-bottom: 0;
+    }
+
+    #album-button {
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .group {
+      margin-right: 0.25em;
+      margin-left: 0.25em;
+    }
+
+    .alert, .secondary {
+      cursor: pointer;
+    }
+  }
+
+  #sidebar {
+    margin-top: $topbar-height/2;
+  }
+
+  .alert {
+    margin: 0;
+  }
+}

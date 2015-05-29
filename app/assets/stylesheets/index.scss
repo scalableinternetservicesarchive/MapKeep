@@ -7,16 +7,22 @@
 .index {
   $topbar-margin-bottom: 0;
 
+  .tob-bar {
+    z-index: 2;
+  }
+
   #main {
     bottom: 0;
     left: 0;
     position: absolute;
     right: 0;
     top: $topbar-height;
+    z-index: 1;
   }
 
   #map-canvas {
     height: 100%;
+    min-height: 400px;
     width: 100%;
 
     img {
@@ -75,6 +81,12 @@
 
     .alert, .secondary {
       cursor: pointer;
+    }
+
+    #star {
+      cursor: pointer;
+      float: right;
+      font-size: 1.2em;
     }
   }
 

@@ -8,7 +8,7 @@ sudo yum install -y patch
 sudo mkdir /var/lib/mysql
 
 # Install mysql client
-sudo yum install mysql mysql-server geos geos-devel
+sudo yum install mysql mysql-server geos geos-devel python34
 
 # Configure my.cnf settings using "nano" text editor
 # For example, you can add a line like max_allowed_packet=16M (the default is 1M)

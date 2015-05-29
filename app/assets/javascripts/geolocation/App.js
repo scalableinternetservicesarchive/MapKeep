@@ -10,12 +10,14 @@ mapkeep.App = function(auth) {
   this.curWindow = null;
   /** Last clicked marker */
   this.curMarker = null;
-  /** Markers corresponding to note locations */
-  this.markers = {};
   /** The google map object */
   this.map = null;
   /** The user's current location */
   this.userLoc = null;
+  /** Fully populated notes by id */
+  this.notes = {};
+  /** All markers **/
+  this.markers = {};
 
   /** @type mapkeep.FormManager */
   this.formManager = new mapkeep.FormManager(this, auth);
@@ -23,46 +25,78 @@ mapkeep.App = function(auth) {
 };
 
 /**
+ * Alert user something went wrong
+ */
+mapkeep.App.prototype.tryAgain = function() {
+  alert('Oops! Something went wrong. ' +
+    'Please reload the page and try again.');
+};
+
+/**
  * Initializes map at input coordinates with user's notes
  * Initializes form helper
- * @param location
+ * @param user
  * @param notes
  * @param albums
  */
-mapkeep.App.prototype.init = function(location, notes, albums) {
+mapkeep.App.prototype.init = function(user, notes, albums) {
 
-  if (location.lat && location.lng) {
-    this.userLoc = new google.maps.LatLng(location.lat, location.lng);
+  if (user.location.lat && user.location.lng) {
+    this.userLoc = new google.maps.LatLng(user.location.lat, user.location.lng);
   }
 
   this.formManager.init(albums);
   this.albumManager.init(albums);
   this.initMap();
   this.setUpClicks();
+  this.user = user;
+  // initially just user's notes
+  this.drawNotes(notes);
 
-  // Draw user and public notes on map
-  var allNotes = notes.user_notes.concat(notes.public_notes);
-  for (var i = 0; i < allNotes.length; i++) {
-    var note = allNotes[i];
-    var nonUser = i >= notes.user_notes.length;
-    var marker = new google.maps.Marker({
-      position: new google.maps.LatLng(note.latitude, note.longitude),
-      map: this.map,
-      title: note.title,
-      draggable: false
-    });
-    if (nonUser) {
-      marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
-    }
-    this.formManager.createNoteView(marker, note, nonUser);
-  }
+  google.maps.event.addListener(this.map, 'idle',
+    this.refreshNotes.bind(this));
 
-  //Push the overlay onto the map also.
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
     .push($('#overlay').get(0));
-
   this.map.controls[google.maps.ControlPosition.TOP_LEFT]
     .push($('#album-overlay').get(0));
+};
+
+/**
+ * Draws list of notes on maps, clearing old ones
+ * @param notes
+ */
+mapkeep.App.prototype.drawNotes = function(notes) {
+  this.notes = {}; // TODO: only delete when necessary
+
+  // Draw user and public notes on map
+  var ids = {};
+  for (var i = 0; i < notes.length; i++) {
+    var note = notes[i];
+    if (!this.markers[note.id]) {
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(note.latitude, note.longitude),
+        map: this.map,
+        draggable: false
+      });
+
+      this.markers[note.id] = marker;
+      if (note.user_id != this.user.id) {
+        marker.setIcon('http://www.googlemapsmarkers.com/v1/7777e1/');
+      }
+
+      this.addMarkerListener(marker, note.id);
+    }
+    ids[note.id] = true;
+  }
+
+  // Delete markers we no longer are showing
+  for (var prop in this.markers) {
+    if (this.markers.hasOwnProperty(prop) && !ids[prop]) {
+      this.markers[prop].setMap(null);
+      delete this.markers[prop];
+    }
+  }
 };
 
 /**
@@ -76,12 +110,34 @@ mapkeep.App.prototype.initMap = function() {
   var mapOptions = {
     center: center,
     mapTypeControl: false,
+    minZoom: 4,
     streetViewControl: false,
     zoom: 10
   };
 
   this.map = new google.maps.Map(
     document.getElementById('map-canvas'), mapOptions);
+};
+
+/**
+ * Refresh notes based on map bounds
+ */
+mapkeep.App.prototype.refreshNotes = function() {
+  var self = this;
+  var bounds = this.map.getBounds();
+  var ne = bounds.getNorthEast();
+  var sw = bounds.getSouthWest();
+  $.ajax({
+    url: '/index/update_notes/' + ne.lat() + '/' + ne.lng() +
+    '/' + sw.lat() + '/' + sw.lng(),
+    type: 'GET',
+    success: function(data) {
+      self.drawNotes(data);
+    },
+    error: function() {
+      self.tryAgain();
+    }
+  });
 };
 
 /**
@@ -133,17 +189,14 @@ mapkeep.App.prototype.dropPin = function() {
   }
 
   // Create and drop pin onto map
-  var marker = new google.maps.Marker({
+  this.curMarker = new google.maps.Marker({
     position: this.map.center,
     map: this.map,
     draggable: true,
     animation: google.maps.Animation.DROP
   });
 
-  // Show note in overlay with a new form
-  this.curMarker = marker;
-  var num = this.formManager.createNoteView(marker);
-  this.formManager.showForm(num, 450);
+  this.formManager.showForm(null, 450);
 };
 
 mapkeep.App.prototype.createAlbum = function() {
@@ -172,10 +225,11 @@ mapkeep.App.prototype.openInfoWindow = function(title, marker) {
 
 /**
  * Adds a listener to a marker to open a certain form
- * @param formNum
+ * @param marker
+ * @param noteId
  */
-mapkeep.App.prototype.addMarkerListener = function(formNum) {
-  google.maps.event.addListener(this.markers[formNum], 'click', function() {
+mapkeep.App.prototype.addMarkerListener = function(marker, noteId) {
+  google.maps.event.addListener(marker, 'click', function() {
 
     // Prevent marker click if user currently editing a note
     if (this.formManager.isEditable()) {
@@ -190,9 +244,26 @@ mapkeep.App.prototype.addMarkerListener = function(formNum) {
       });
     }
 
-    this.curMarker = this.markers[formNum];
-    this.formManager.showForm(formNum, 0);
+    this.curMarker = marker;
     this.map.panTo(this.curMarker.getPosition());
+
+    if (this.notes[noteId]) {
+      this.formManager.showForm(this.notes[noteId], 0);
+    } else {
+      var self = this;
+      $.ajax({
+        url: '/notes/' + noteId + '.json',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          self.notes[noteId] = data;
+          self.formManager.showForm(self.notes[noteId], 0);
+        },
+        error: function() {
+          self.tryAgain();
+        }
+      });
+    }
   }.bind(this));
 };
 
@@ -212,6 +283,9 @@ mapkeep.App.prototype.bounceMarker = function(time) {
  * @param note
  */
 mapkeep.App.prototype.noteCreated = function(note) {
+  this.notes[note.id] = note;
+  this.markers[note.id] = this.curMarker;
+  this.addMarkerListener(this.curMarker, note.id);
   this.formManager.updateFormAction(note);
   this.formManager.formSubmitted(note);
 };
@@ -237,5 +311,3 @@ mapkeep.App.prototype.noteDeleted = function() {
 mapkeep.App.prototype.albumCreated = function(album) {
   this.albumManager.addAlbum(album);
 };
-
-// TODO: change title of album here & albumSize into album id here and in the albumManager.

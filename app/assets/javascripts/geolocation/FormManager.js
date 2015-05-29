@@ -7,11 +7,6 @@ var mapkeep = mapkeep || {};
  * @constructor
  */
 mapkeep.FormManager = function(app, auth) {
-  /** Counter for form identification */
-  this.formNum = 0;
-  /** All forms and views created so far */
-  this.forms = {};
-  this.views = {};
   /** List of all user's albums */
   this.albums = {};
   /** Current opened form */
@@ -64,8 +59,25 @@ mapkeep.FormManager.prototype.init = function(albums) {
     overlay.find('input[name=_method]').val('delete');
   });
 
-  // Album button click
+  // Star button click
   var self = this;
+  overlay.on('click', '#star', function() {
+    var span = $(this);
+    var putStar = span.html() === '☆';
+    var noteId = span.parent().attr('id');
+    $.ajax({
+      url: '/notes/' + noteId + '/stars/' + self.app.user.id,
+      type: putStar ? 'PUT' : 'DELETE',
+      success: function() {
+        span.html(putStar ? '★' : '☆');
+      },
+      error: function() {
+        self.app.tryAgain();
+      }
+    });
+  });
+
+  // Album button click
   overlay.on('click', '#album-dropdown a', function() {
     self.albumPrepend($(this).attr('value'));
   });
@@ -107,13 +119,12 @@ mapkeep.FormManager.prototype.albumIdString = function(albums) {
 
 /**
  * Creates a form for a note that is tied to a marker
- * @param marker The note belongs to for coordinates
  * @param note Note to use title and body for if existing
  * @param nonUser Only show the note, no editable features
  * @returns {Number} identifier for form
  */
 mapkeep.FormManager.prototype.createNoteView =
-  function(marker, note, nonUser) {
+  function(note, nonUser) {
     var holder = nonUser ? $('<div/>') : $('<form/>');
     holder
       .attr('id', 'noteView')
@@ -128,31 +139,27 @@ mapkeep.FormManager.prototype.createNoteView =
         .attr('method', 'post')
         .attr('data-remote', 'true')
         .attr('accept-charset', 'UTF-8')
-        .append(this.hiddenInput('note[latitude]', marker.position.lat()))
-        .append(this.hiddenInput('note[longitude]', marker.position.lng()))
+        .append(this.hiddenInput('note[latitude]', note ? note.latitude : ''))
+        .append(this.hiddenInput('note[longitude]', note ? note.longitude : ''))
         .append(this.hiddenInput('authenticity_token', this.authToken))
-        .append(this.hiddenInput('form_id', this.formNum))
         .append(this.hiddenInput('note[album_ids][]',
           note ? this.albumIdString(note.albums) : ''))
         .append(this.createRadioGroup(note))
         .append(this.createFormButtons(note ? true : false))
         .append(this.hiddenInput('_method', note ? 'patch' : 'post'));
+    } else if (note) {
+      var star = note.starred ? '★' : '☆';
+      var span = $('<span/>')
+        .attr('id', note.id)
+        .append($('<span/>').attr('id', 'star').html(star));
+      holder.find('#album-div').append(span);
     }
 
     if (note) {
       holder.find('input, textarea').attr('readonly', 'readonly');
     }
 
-    // Save marker and form for deletion / manipulation
-    this.app.markers[this.formNum] = marker;
-    if (nonUser) {
-      this.views[this.formNum] = holder;
-    } else {
-      this.forms[this.formNum] = holder;
-    }
-
-    this.app.addMarkerListener(this.formNum);
-    return this.formNum++;
+    return holder;
   };
 
 /**
@@ -391,19 +398,28 @@ mapkeep.FormManager.prototype.resetForm = function() {
 
 /**
  * Close last form and open new one as well as info window with title
- * @param formNum Form identifier
+ * @param note
  * @param timeout For info window open
  */
-mapkeep.FormManager.prototype.showForm = function(formNum, timeout) {
+mapkeep.FormManager.prototype.showForm = function(note, timeout) {
   var overlay = $('#overlay');
-  var nonUser = this.forms[formNum] ? false : true;
-  this.curForm = nonUser ? this.views[formNum] : this.forms[formNum];
+
+  // Create note view if we haven't yet
+  if (note && !note.view) {
+    note.view = this.createNoteView(note, note.user_id != this.app.user.id);
+    this.curForm = note.view;
+  } else if (!note) {
+    // This is a new note
+    this.curForm = this.createNoteView(null, false);
+  } else {
+    this.curForm = note.view;
+  }
 
   // Open info window for note title at corresponding marker after timeout
   setTimeout(function() {
     this.app.openInfoWindow(
       this.curForm.find('input[name=note\\[title\\]]').val(),
-      this.app.markers[formNum]
+      this.app.curMarker
     );
   }.bind(this), timeout);
 
@@ -411,10 +427,11 @@ mapkeep.FormManager.prototype.showForm = function(formNum, timeout) {
   overlay.find('#noteView').remove();
   overlay.append(this.curForm).removeClass('hide');
 
-  if (!this.curForm.hasClass('new_note') && !nonUser) {
+  var hasForm = overlay.find('form').length > 0;
+  if (!this.curForm.hasClass('new_note') && hasForm) {
     // Force form to be readonly if not a new note
     this.makeReadonly();
-  } else if (!nonUser) {
+  } else if (hasForm) {
     // Hide delete button if it is a new note
     this.makeEditable();
     this.curForm.find('#delete-button').addClass('hide').removeClass('button');
@@ -432,7 +449,10 @@ mapkeep.FormManager.prototype.albumPrepend = function(albumId) {
   var group = this.curForm.find('span[value=' + albumId + ']');
   if (!group.length) {
     // Append label if it doesn't exist and is not hidden
-    $('#album-button').before(this.makeLabelGroup(albumId, true));
+    $('#album-button').before(this.makeLabelGroup({
+      id: albumId,
+      title: this.albums[albumId]
+    }, true));
   } else {
     // Otherwise just unhide the label
     group.removeClass('hide');
@@ -446,13 +466,12 @@ mapkeep.FormManager.prototype.albumPrepend = function(albumId) {
  * @returns {*|jQuery}
  */
 mapkeep.FormManager.prototype.createAlbumHtml = function(note) {
-  var albumHtml = $('<div/>');
+  var albumHtml = $('<div/>').attr('id', 'album-div');
 
   // Add label groups for albums the note belongs in currently
   if (note && note.albums.length > 0) {
     for (var i = 0; i < note.albums.length; i++) {
-      var albumId = note.albums[i].id;
-      albumHtml.append(this.makeLabelGroup(albumId));
+      albumHtml.append(this.makeLabelGroup(note.albums[i]));
     }
   }
 
@@ -522,14 +541,14 @@ mapkeep.FormManager.prototype.removeAlbumLabels = function() {
  * Creates a label group:
  *    - the album name label (tagged with album id as value)
  *    - a delete X alert label
- * @param albumId For title and id
+ * @param album
  * @param showDelete Whether or not to show the delete button
  * @returns {*|jQuery}
  */
-mapkeep.FormManager.prototype.makeLabelGroup = function(albumId, showDelete) {
+mapkeep.FormManager.prototype.makeLabelGroup = function(album, showDelete) {
   var label = $('<span/>')
     .addClass('label')
-    .html(this.albums[albumId]);
+    .html(album.title);
 
   // Hide label on delete, remove on save
   var deleteLabel = $('<span/>').addClass('alert').html('X');
@@ -548,7 +567,7 @@ mapkeep.FormManager.prototype.makeLabelGroup = function(albumId, showDelete) {
     .addClass('group')
     .append(label)
     .append(deleteLabel)
-    .attr('value', albumId);
+    .attr('value', album.id);
 };
 
 /**
@@ -583,8 +602,8 @@ mapkeep.FormManager.prototype.resetDefaultValuesTo = function(note) {
     .prop('defaultValue', note.body);
   this.curForm.find('input[name=latitude]')
     .prop('defaultValue', '' + note.latitude);
-  this.curForm.find('input[name=latitude]')
-    .prop('defaultValue', '' + note.latitude);
+  this.curForm.find('input[name=longitude]')
+    .prop('defaultValue', '' + note.longitude);
   this.curForm.find('input[name=note\\[album_ids\\]\\[\\]]').remove();
   this.curForm.append(this.hiddenInput(
     'note[album_ids][]', this.albumIdString(note.albums)));

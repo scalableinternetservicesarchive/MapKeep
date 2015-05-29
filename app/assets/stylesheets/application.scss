@@ -13,9 +13,14 @@
  *= require_tree .
  *= require_self
  *= require foundation_and_overrides
+ *= require dataTables/jquery.dataTables.foundation
  */
 
 @import "foundation_and_overrides";
+
+html {
+  overflow: auto !important;
+}
 
 .top-bar .name h1 {
   font-family: 'Lobster', cursive;

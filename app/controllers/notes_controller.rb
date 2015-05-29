@@ -4,7 +4,7 @@ class NotesController < ApplicationController
   # GET /notes
   # GET /notes.json
   def index
-    @notes = current_user.notes
+    @notes = Note.where(user_id: current_user.id).order('updated_at DESC').limit(10)
   end
 
   # GET /notes/1
@@ -36,6 +36,35 @@ class NotesController < ApplicationController
       else
         format.html { render :new }
         format.json { render json: @note.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # PUT /notes/stars
+  def add_star
+    note_id = params[:id]
+    note = Note.find(note_id)
+    respond_to do |format|
+      if note.stars.create!(note_id: note_id, user_id: params[:user_id])
+        note.star_count = note.star_count + 1
+        note.save
+        format.json { render json: params, status: :ok }
+      else
+        format.json { render json: params, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /notes/stars
+  def delete_star
+    note = Note.find(params[:id])
+    respond_to do |format|
+      if note.stars.where(user_id: params[:user_id]).destroy_all
+        note.star_count = note.star_count - 1
+        note.save
+        format.json { render json: params, status: :ok }
+      else
+        format.json { render json: params, status: :unprocessable_entity }
       end
     end
   end
@@ -72,6 +101,9 @@ class NotesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_note
       @note = Note.find(params[:id])
+      if @note.user_id != current_user.id && @note.private
+        raise 'Invalid permissions'
+      end
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
