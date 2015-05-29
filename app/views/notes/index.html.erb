@@ -1,14 +1,16 @@
 <script>
   $(document).ready(function() {
-    $('#notes-table').DataTable();
-} );
+    var table = $('#notes-table');
+    table.DataTable();
+    table.removeClass('hide');
+});
 </script>
 
 <% cache(cache_key_for_notes) do %>
 
   <h1>Listing Notes</h1>
   <% unless @notes.empty? %>
-    <table id="notes-table">
+    <table id="notes-table" class="hide">
       <thead>
       <tr>
       <% 5.times do %>
