@@ -1,11 +1,19 @@
+<script>
+  $(document).ready(function() {
+    $('#notes-table').DataTable();
+} );
+</script
+
 <% cache(cache_key_for_notes) do %>
 
   <h1>Listing Notes</h1>
   <% unless @notes.empty? %>
-    <table>
+    <table id="notes-table">
       <thead>
       <tr>
-        <th colspan="3"></th>
+      <% 5.times do %>
+        <th></th>
+      <% end %>
       </tr>
       </thead>
 
