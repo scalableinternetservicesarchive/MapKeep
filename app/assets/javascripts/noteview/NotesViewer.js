@@ -185,11 +185,25 @@ $(window).resize(function() {
 
 $("a.reveal-link").click(function () {
   var note = $(this).data('note');
-  app.updateForm(note);
-  app.updatePin();
-  app.formManager.makeReadonly();
+  //app.updateForm(note);
+  //app.updatePin();
+  //app.formManager.makeReadonly();
+  //
+  //app.curNote = note;
 
-  app.curNote = note;
+  $.ajax({
+    url: '/notes/' + note.id + '.json',
+    type: 'GET',
+    dataType: 'json',
+    success: function(data) {
+      app.updateForm(data);
+      app.updatePin();
+      app.formManager.makeReadonly();
+      app.curNote = data;
+    },
+    error: function() {
+    }
+  });
 
   editModal.foundation('reveal', 'open');
 });
