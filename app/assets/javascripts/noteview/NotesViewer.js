@@ -4,7 +4,7 @@ var editModal = $('#editModal');
 
 var app = null;
 
-mapkeep.NotesViewer = function(userid, auth) {
+mapkeep.NotesViewer = function(auth) {
   /** The google map object */
   this.map = null;
   /** Last clicked marker */
@@ -13,8 +13,6 @@ mapkeep.NotesViewer = function(userid, auth) {
   this.curNote = null;
   /** The note form */
   this.noteForm = $('#noteView');
-  /** The user id */
-  this.userid = userid;
   /** The current note's location */
   this.curLoc = null;
   /** The current session token */
@@ -177,9 +175,8 @@ $(document).ready(function() {
   $('.reveal-modal').css('height', $('html').height() - 120 + 'px'); // 100+20px to keep modal effect visible
 
   var auth = editModal.data('session');
-  var userid = editModal.data('userid');
   var albums = editModal.data('albums');
-  app = new mapkeep.NotesViewer(userid, auth);
+  app = new mapkeep.NotesViewer(auth);
 
   google.maps.event.addDomListener(window, 'load', app.init(albums));
 });
