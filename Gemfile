@@ -36,6 +36,7 @@ gem 'rgeo-activerecord'
 gem 'activerecord-mysql2spatial-adapter', :git => 'https://github.com/fjl82/activerecord-mysql2spatial-adapter.git'
 
 gem 'faker'
+gem 'jquery-datatables-rails'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

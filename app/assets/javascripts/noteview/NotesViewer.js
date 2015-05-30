@@ -191,14 +191,28 @@ $(window).resize(function() {
 
 $("a.reveal-link").click(function () {
   var note = $(this).data('note');
-  app.updateForm(note);
-  app.updatePin();
-  app.formManager.makeReadonly();
+  //app.updateForm(note);
+  //app.updatePin();
+  //app.formManager.makeReadonly();
+  //
+  //app.curNote = note;
 
-  app.curNote = note;
+  $.ajax({
+    url: '/notes/' + note.id + '.json',
+    type: 'GET',
+    dataType: 'json',
+    success: function(data) {
+      app.updateForm(data);
+      app.updatePin();
+      app.formManager.makeReadonly();
+      app.curNote = data;
 
-  // Replace album dropdown
-  $("#album-div").replaceWith(app.formManager.createAlbumHtml(note));
+      // Replace album dropdown
+      $("#album-div").replaceWith(app.formManager.createAlbumHtml(data));
+    },
+    error: function() {
+    }
+  });
 
   editModal.foundation('reveal', 'open');
 });
@@ -216,8 +230,8 @@ editModal.bind('opened.fndtn.reveal', '#editModal', function() {
 
 /*
   Both are needed to prevent the open and close event for the dropdown
-  from also triggering the reveal modal's. Kind of hacky, but it works.
-  See: https://github.com/zurb/foundation/issues/4576
+  from also triggering the reveal modal's. Kind of hacky, but it seems
+  to work. See: https://github.com/zurb/foundation/issues/4576
  */
 editModal.on('opened.fndtn.dropdown', '#album-dropdown', function() {
   return false;
