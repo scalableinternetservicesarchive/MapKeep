@@ -12,17 +12,18 @@ def main():
     parser = argparse.ArgumentParser(description='Run a tsung test')
     parser.add_argument('filename', metavar='filename', type=str,
                         help='filename to a valid tsung xml test instance')
+    parser.add_argument('server_ip', metavar='server_ip', type=str, help='server ip')
     parser.add_argument('--no-replace', action='store_true', dest='no_replace',
                         help='do not replace the server xml attribute to the current hostname')
     args = parser.parse_args()
     
-    logging.debug('Filename: {0}, no_replace: {1}'.format(args.filename, args.no_replace))
+    logging.debug('Filename: {0}, ip: {1}, no_replace: {2}'.format(args.filename, args.server_ip, args.no_replace))
 
     if not os.path.exists(args.filename):
         logging.error('Not a valid tsung test case: {0}'.format(args.filename))
         sys.exit(2)
 
-    hostname = get_public_hostname()
+    hostname = args.server_ip
 
     if not args.no_replace:
         logging.info('Replace server name attribute with {0}'.format(hostname))
