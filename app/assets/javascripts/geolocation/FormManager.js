@@ -31,7 +31,7 @@ mapkeep.FormManager.prototype.init = function(albums) {
 
   var overlay = $('#overlay');
 
-  // Cancel either removes note/marker or undoes changes made
+  // Cancel either removes not/marker or undos changes made
   overlay.on('click', '#cancel-button', function() {
     if (this.curForm.hasClass('new_note')) {
       // Remove note and marker
@@ -181,7 +181,6 @@ mapkeep.FormManager.prototype.createTextGroup = function(note) {
     .text(note ? note.body : '');
 
   return $('<div/>')
-    .attr('id', 'form-box')
     .append(title)
     .append('<br/>')
     .append(textarea);
