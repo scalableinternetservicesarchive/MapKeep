@@ -4,7 +4,7 @@ var editModal = $('#editModal');
 
 var app = null;
 
-mapkeep.NotesViewer = function(userid, auth) {
+mapkeep.NotesViewer = function(auth) {
   /** The google map object */
   this.map = null;
   /** Last clicked marker */
@@ -13,8 +13,6 @@ mapkeep.NotesViewer = function(userid, auth) {
   this.curNote = null;
   /** The note form */
   this.noteForm = $('#noteView');
-  /** The user id */
-  this.userid = userid;
   /** The current note's location */
   this.curLoc = null;
   /** The current session token */
@@ -38,6 +36,7 @@ mapkeep.NotesViewer.prototype.init = function(albums) {
   }
 
   var overlay = $('#overlay');
+  var self = this;
 
   // Cancel either removes not/marker or undos changes made
   overlay.on('click', '#cancel-button', function() {
@@ -54,14 +53,16 @@ mapkeep.NotesViewer.prototype.init = function(albums) {
 
     // Confirm if user wants to delete
     var confirmDelete = confirm('Are you sure you want to delete the note?');
-    // Change form method back to post
+    // Change form method back to patch
     if (!confirmDelete)
-      overlay.find('input[name=_method]').val('post');
+      overlay.find('input[name=_method]').val('patch');
+
+    return confirmDelete;
   });
 
   // Album button click
   overlay.on('click', '#album-dropdown a', function() {
-    self.albumPrepend($(this).attr('value'));
+    self.formManager.albumPrepend($(this).attr('value'));
   });
 };
 
@@ -158,6 +159,9 @@ mapkeep.NotesViewer.prototype.noteDeleted = function() {
   // Remove the table entry corresponding to the deleted note
   tr.remove();
 
+  // Change submit method back to patch
+  $('#overlay').find('input[name=_method]').val('patch');
+
   editModal.foundation('reveal', 'close');
   $(document).foundation();
 };
@@ -171,9 +175,8 @@ $(document).ready(function() {
   $('.reveal-modal').css('height', $('html').height() - 120 + 'px'); // 100+20px to keep modal effect visible
 
   var auth = editModal.data('session');
-  var userid = editModal.data('userid');
   var albums = editModal.data('albums');
-  app = new mapkeep.NotesViewer(userid, auth);
+  app = new mapkeep.NotesViewer(auth);
 
   google.maps.event.addDomListener(window, 'load', app.init(albums));
 });
@@ -200,6 +203,9 @@ $("a.reveal-link").click(function () {
       app.updatePin();
       app.formManager.makeReadonly();
       app.curNote = data;
+
+      // Replace album dropdown
+      $("#album-div").replaceWith(app.formManager.createAlbumHtml(data));
     },
     error: function() {
     }
@@ -208,7 +214,7 @@ $("a.reveal-link").click(function () {
   editModal.foundation('reveal', 'open');
 });
 
-editModal.bind('opened.fndtn.reveal', function() {
+editModal.bind('opened.fndtn.reveal', '#editModal', function() {
   // Otherwise the map will be off center and the wrong size
   app.centerMap();
 
@@ -217,4 +223,16 @@ editModal.bind('opened.fndtn.reveal', function() {
   setTimeout(function(){ app.curMarker.setAnimation(null); }, 1500);
 
   $(document).foundation();
+});
+
+/*
+  Both are needed to prevent the open and close event for the dropdown
+  from also triggering the reveal modal's. Kind of hacky, but it seems
+  to work. See: https://github.com/zurb/foundation/issues/4576
+ */
+editModal.on('opened.fndtn.dropdown', '#album-dropdown', function() {
+  return false;
+});
+editModal.on('closed.fndtn.dropdown', '#album-dropdown', function() {
+  return false;
 });
