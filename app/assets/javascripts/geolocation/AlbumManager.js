@@ -96,7 +96,6 @@ mapkeep.AlbumManager.prototype.createFormButtons = function() {
 
   var cancel = $('<button/>')
     .text('Cancel')
-    .attr('type', 'button')
     .addClass('album secondary tiny right')
     .attr('id', 'album-cancel-button');
 
@@ -157,7 +156,6 @@ mapkeep.AlbumManager.prototype.closeForm = function() {
       overlay.find('#albumView').remove();
       overlay.addClass('hide');
     }.bind(this));
-  return false;
 };
 
 /**
