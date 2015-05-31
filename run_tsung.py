@@ -23,11 +23,11 @@ def main():
         logging.error('Not a valid tsung test case: {0}'.format(args.filename))
         sys.exit(2)
 
-    hostname = args.server_ip
+    servername = args.server_ip
 
     if not args.no_replace:
-        logging.info('Replace server name attribute with {0}'.format(hostname))
-        replace_tsung_server(args.filename, hostname)
+        logging.info('Replace server name attribute with {0}'.format(servername))
+        replace_tsung_server(args.filename, servername)
 
     # Start the script
     log_path = start_tsung(args.filename)
@@ -41,6 +41,7 @@ def main():
 
     zip_directory(log_path)
 
+    hostname = get_public_hostname()
     print('Tsung succesfully ran. The report and zip can be found at:')
     print(os.path.join(hostname, os.path.split(log_path)[1], 'report.html'))
     print(os.path.join(hostname, os.path.split(log_path.rstrip('\\'))[1] + '.zip'))
