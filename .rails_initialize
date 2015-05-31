@@ -1,6 +1,1 @@
 rake db:seed
-
-# Run the tsung test
-
-~/app/run_tsung ~/app/load_test/main_zoom.xml
-~/app/run_tsung ~/app/load_test/notes_listing.xml
