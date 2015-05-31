@@ -21,6 +21,7 @@ mapkeep.App = function(auth) {
 
   /** @type mapkeep.FormManager */
   this.formManager = new mapkeep.FormManager(this, auth);
+  this.albumManager = new mapkeep.AlbumManager(this.formManager, auth);
 };
 
 /**
@@ -45,6 +46,7 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
   }
 
   this.formManager.init(albums);
+  this.albumManager.init(albums);
   this.initMap();
   this.setUpClicks();
   this.user = user;
@@ -56,6 +58,8 @@ mapkeep.App.prototype.init = function(user, notes, albums) {
 
   this.map.controls[google.maps.ControlPosition.TOP_RIGHT]
     .push($('#overlay').get(0));
+  this.map.controls[google.maps.ControlPosition.TOP_LEFT]
+    .push($('#album-overlay').get(0));
 };
 
 /**
@@ -143,6 +147,9 @@ mapkeep.App.prototype.setUpClicks = function() {
   // Drop pin button
   $('#create_note').click(this.dropPin.bind(this));
 
+  // Open an album form
+  $('#create_album').click(this.createAlbum.bind(this));
+
   // Close button on note overlay
   $('#close-overlay').click(function() {
     // Reset and remove form
@@ -159,6 +166,13 @@ mapkeep.App.prototype.setUpClicks = function() {
     if (overlay.find('form').hasClass('new_note')) {
       this.curMarker.setMap(null);
     }
+  }.bind(this));
+
+  // Close button on note album overlay
+  $('#album-close-overlay').click(function() {
+    // Reset and remove form
+    var overlay = $('#album-overlay');
+    overlay.addClass('hide');
   }.bind(this));
 };
 
@@ -183,6 +197,12 @@ mapkeep.App.prototype.dropPin = function() {
   });
 
   this.formManager.showForm(null, 450);
+};
+
+mapkeep.App.prototype.createAlbum = function() {
+  // Show album in overlay with a new form
+  var num = this.albumManager.createAlbumView();
+  this.albumManager.showForm(num);
 };
 
 /**
@@ -285,4 +305,9 @@ mapkeep.App.prototype.noteDeleted = function() {
   this.curWindow.close();
   this.curMarker.setMap(null);
   $('#overlay').addClass('hide');
+};
+
+
+mapkeep.App.prototype.albumCreated = function(album) {
+  this.albumManager.addAlbum(album);
 };

@@ -36,18 +36,19 @@
     padding: 0;
   }
 
-  #close-overlay {
+  #close-overlay, #close-album-overlay {
     display: block;
     margin-top: -0.5em;
   }
 
-  #overlay {
+  #overlay, #album-overlay {
     background: white;
     font-family: $font-family-sans-serif;
     font-size: 1.5em;
     line-height: 2;
     margin: 1em;
     padding: 1em;
+    //padding-right: 15em;
     width: 20em;
 
     input {
@@ -95,5 +96,35 @@
 
   .alert {
     margin: 0;
+  }
+
+  #create_album {
+    display: block;
+    color: #008CBA;
+    margin: 0px;
+    padding: 0.4375rem 0.875rem;
+    text-decoration: none;
+    line-height: inherit;
+    box-sizing: border-box;
+    font-size: 0.875rem;
+    font-weight: normal;
+    list-style-type: none;
+    list-style-position: outside;
+    font-family: "Open Sans",Roboto,Arial,sans-serif;
+    font-style: normal;
+    cursor: auto;
+    border-style: none;
+    background-color: #FFFFFF;
+  }
+
+  #create_album:hover {
+    color: #E0FFFF;
+    background-color: #008CBA;
+  }
+
+  #form-box, #album-box {
+    margin: 0px;
+    padding: 0px;
+    padding-right: 15px;
   }
 }
