@@ -2,6 +2,9 @@
 <div id="overlay" class="hide">
   <a id="close-overlay" class="right">X</a>
 </div>
+<div id="album-overlay" class="hide">
+  <a id="album-close-overlay" class="right">X</a>
+</div>
 
 <%= javascript_include_tag 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBTrBJkp-8i6MZKKotUoTnzoUiXV_zlIVg' %>
 <%= javascript_include_tag 'geolocation' %>
@@ -9,10 +12,11 @@
   var app = new mapkeep.App('<%= session[:_csrf_token] %>');
   google.maps.event.addDomListener(window, 'load', function() {
     app.init(
-      { lat: '<%= @location.lat %>', lng: '<%= @location.lng %>' },
-      <%= raw @notes.to_json(
-                  :include => { :albums => { :only => :id }},
-                  :except => [:user_id, :latlon]) %>,
+      {
+        location: { lat: '<%= @location.lat %>', lng: '<%= @location.lng %>' },
+        id: <%= current_user.id %>
+      },
+      <%= raw @notes.to_json %>,
       <%= raw current_user.albums.to_json(:only => [:title, :id]) %>);
   });
 <% end %>

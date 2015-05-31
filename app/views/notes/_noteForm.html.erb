@@ -1,0 +1,30 @@
+<div id="overlay" class="">
+  <form id="noteView" action="/notes/" method="post" data-remote="true" accept-charset="UTF-8">
+    <div>
+      <input type="text" name="note[title]" placeholder="Title" value="">
+      <br>
+      <textarea name="note[body]" rows="10" placeholder="Write anything you want about this location!"></textarea>
+    </div>
+    <div id="album-div">
+      <button id="album-button" class="secondary tiny dropdown button" data-dropdown="album-dropdown"
+              aria-controls="album-dropdown" aria-expanded="false" type="button" href="#">+ Album</button>
+      <ul id="album-dropdown" class="f-dropdown" data-dropdown-content="" aria-hidden="true"></ul>
+    </div>
+    <input type="hidden" name="note[latitude]" value="" readonly="readonly">
+    <input type="hidden" name="note[longitude]" value="" readonly="readonly">
+    <input type="hidden" name="authenticity_token" value="" readonly="readonly">
+    <input type="hidden" name="note[album_ids][]" value="" readonly="readonly">
+    <div id="radio-group" class="">
+      <input id="privateTrue" type="radio" name="note[private]" value="" readonly="readonly">
+      <label for="privateTrue">Private</label>
+      <input id="privateFalse" type="radio" checked="" name="note[private]" value="" readonly="readonly">
+      <label for="privateFalse">Public</label>
+    </div>
+    <div>
+      <button id="submit-edit-button" class="button tiny right" type="submit">Edit</button>
+      <button id="delete-button" class="alert tiny right hide" type="submit">Delete</button>
+      <button id="cancel-button" class="secondary tiny right hide" type="button">Cancel</button>
+    </div>
+    <input type="hidden" name="_method" value="patch" readonly="readonly">
+  </form>
+</div>
