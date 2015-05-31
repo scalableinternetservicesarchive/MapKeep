@@ -1,4 +1,3 @@
-<!-- Main page, new note, main page, view note view, delete note-->
 <?xml version="1.0" ?><!DOCTYPE tsung  SYSTEM '/home/ec2-user/opt/tsung-1.5.0/share/tsung/tsung-1.0.dtd'><tsung loglevel="notice" version="1.0">
 
   <!-- Client side setup -->
