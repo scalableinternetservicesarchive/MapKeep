@@ -66,12 +66,15 @@
           <li><%= link_to 'Notes', notes_path %></li>
           <li><%= link_to 'Albums', albums_path %></li>
         </ul>
+        <% if controller.controller_name == 'index'  %>
+          <button class="button tiny" id="create_note">Drop Note</button>
+        <% end %>
         <% unless current_user.nil? %>
           <h4>Albums</h4>
-          <ul class="side-nav" id="side-albums">
           <% if controller.controller_name == 'index'  %>
-            <li><button class="button" id="create_album">Create Album</button></li>
+            <button class="button tiny" id="create_album">Create Album</button>
           <% end %>
+          <ul class="side-nav" id="side-albums">
           <% current_user.albums.each do |album| %>
             <li><%= link_to album.title, album %></li>
           <% end %>
@@ -80,9 +83,6 @@
             You currently have no albums.<br/><br/>
           <% end %>
         <%end %>
-        <% if controller.controller_name == 'index'  %>
-          <button class="button" id="create_note">Drop Note</button>
-        <% end %>
       </div>
 
       <div class="large-10 columns full">
