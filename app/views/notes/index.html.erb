@@ -6,7 +6,6 @@
 });
 </script>
 
-<% cache(cache_key_for_notes) do %>
 
   <h1>Listing Notes</h1>
   <% unless @notes.empty? %>
@@ -20,8 +19,8 @@
       </thead>
 
       <tbody>
+      <% cache do %>
       <% @notes.each do |note| %>
-        <% cache(note) do %>
           <tr>
             <td><%= note.title %></td>
             <td><%= link_to 'Show', note %></td>
@@ -40,7 +39,6 @@
     <br>
   <% end %>
 
-<% end %>
 
 <br>
 
