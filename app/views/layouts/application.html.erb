@@ -74,7 +74,7 @@
           <% end %>
           </ul>
           <% if current_user.albums.length == 0 %>
-            You currently have no albums.<br/><br/>
+            <p id='no-album'>You currently have no albums.<br/></p>
           <% end %>
         <%end %>
         <% if controller.controller_name == 'index'  %>

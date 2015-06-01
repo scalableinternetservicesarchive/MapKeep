@@ -286,3 +286,11 @@ mapkeep.App.prototype.noteDeleted = function() {
   this.curMarker.setMap(null);
   $('#overlay').addClass('hide');
 };
+
+
+mapkeep.App.prototype.albumCreated = function(album) {
+  this.albumManager.addAlbum(album);
+  this.formManager.updateAlbums(album);
+  $('#no-album').addClass('hide');
+};
+

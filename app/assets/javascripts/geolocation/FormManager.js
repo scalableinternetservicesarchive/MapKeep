@@ -611,3 +611,10 @@ mapkeep.FormManager.prototype.resetDefaultValuesTo = function(note) {
   this.curForm.find('#privateFalse')
     .prop('defaultChecked', !note.private);
 };
+
+/**
+ *  Upon creation of a new album, update the list of albums. 
+ */
+mapkeep.FormManager.prototype.updateAlbums = function(newAlbum) {
+  this.albums[newAlbum.id] = newAlbum.title;
+};
