@@ -51,7 +51,9 @@
     </nav>
 
     <div id="main">
-      <% if controller.controller_name != 'index' %>
+      <% if controller.controller_name != 'index' and
+            controller.controller_name != 'notes' and
+            controller.controller_name != 'albums' %>
         <% if notice %>
           <div class="notice notice-success"><%= notice %></div>
         <% end %>
