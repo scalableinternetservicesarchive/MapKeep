@@ -27,7 +27,11 @@ mapkeep.AlbumManager = function(formMan, auth) {
  */
 mapkeep.AlbumManager.prototype.init = function(albums) {
   // Index albums by id to name
-  this.curAlbumId = albums[albums.length-1].id + 1;
+  if (albums.length > 0) {
+    this.curAlbumId = albums[albums.length-1].id + 1;
+  } else {
+    this.curAlbumId = 1;
+  }
 };
 
 /**

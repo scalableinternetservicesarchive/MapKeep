@@ -310,4 +310,6 @@ mapkeep.App.prototype.noteDeleted = function() {
 
 mapkeep.App.prototype.albumCreated = function(album) {
   this.albumManager.addAlbum(album);
+  this.formManager.updateAlbums(album);
+  $('#no-album').addClass('hide');
 };
