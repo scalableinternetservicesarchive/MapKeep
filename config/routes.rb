@@ -21,6 +21,7 @@ Rails.application.routes.draw do
 
   put 'notes/:id/stars/:user_id' => 'notes#add_star'
   delete 'notes/:id/stars/:user_id' => 'notes#delete_star'
+  get 'notes/show_rand' => 'notes#show_rand'
 
   resources :notes
   resources :albums

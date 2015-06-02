@@ -11,6 +11,10 @@ class NotesController < ApplicationController
   def show
   end
 
+  def show_rand
+      redirect_to action: "show", id: Note.where(user_id: current_user.id).sample.id
+  end
+
   # GET /notes/new
   def new
     @note = Note.new
