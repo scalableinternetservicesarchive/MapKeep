@@ -1,4 +1,6 @@
 class Note < ActiveRecord::Base
+  include Geokit::Geocoders
+
   belongs_to :user
   has_many :collections, :dependent => :destroy
   has_many :albums, :through => :collections
@@ -59,6 +61,9 @@ class Note < ActiveRecord::Base
 
   # Gets text representation of linestring centered around location
   def Note.get_linestring__by_loc(location)
+    unless location and location.lng and location.lat
+      location = MultiGeocoder.geocode('75.82.170.180')
+    end
     "LINESTRING(#{location.lng - 1} #{location.lat - 0.5},
                 #{location.lng + 1} #{location.lat + 0.5})"
   end

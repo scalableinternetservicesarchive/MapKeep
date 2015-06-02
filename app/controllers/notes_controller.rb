@@ -4,7 +4,7 @@ class NotesController < ApplicationController
   # GET /notes
   # GET /notes.json
   def index
-    @notes = Note.where(user_id: current_user.id).order('updated_at DESC')
+    @notes = Note.find_by_sql("SELECT title, id FROM notes WHERE user_id=#{current_user.id}")
   end
   # GET /notes/1
   # GET /notes/1.json
