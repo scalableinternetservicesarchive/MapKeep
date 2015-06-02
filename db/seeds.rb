@@ -34,7 +34,8 @@ ActiveRecord::Base.transaction do
 				body: Faker::Lorem.paragraph,
 				user_id: user.id,
 				latitude: lat,
-				longitude: lon
+				longitude: lon,
+				private: 0
 				)
 		end
 		
