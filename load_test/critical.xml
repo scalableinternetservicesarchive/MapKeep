@@ -51,11 +51,33 @@
     <session name="http-example" probability="100" type="ts_http">
       <!-- Main page -->  
       <request>
+        <http method="GET" url="/index/update_notes/34.48157841518869/-117.7818450214844/33.613397221927926/-119.10295097851565" version="1.1"/>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+            <request>
+        <http method="GET" url="/index/update_notes/34.77199835945111/-117.07139580971932/33.03276537941913/-119.71360772378182" version="1.1"/>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request>
         <http method="GET" url="/notes" version="1.1"/>
       </request>
 
       <thinktime value="5" random="true"></thinktime>
-    
+
+      <request>
+        <http method="GET" url="/notes/show_random" version="1.1"/>
+      </request>
+
+      <thinktime value="5" random="true"></thinktime>
+
+      <request>
+        <http method="GET" url="/albums" version="1.1"/>
+      </request>  
+
     </session>
   </sessions>
 </tsung>

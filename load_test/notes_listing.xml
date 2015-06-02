@@ -55,7 +55,11 @@
       </request>
 
       <thinktime value="5" random="true"></thinktime>
-    
+
+      <request>
+        <http method="GET" url="/notes/show_random" version="1.1"/>
+      </request>
+
     </session>
   </sessions>
 </tsung>
