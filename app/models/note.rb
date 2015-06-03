@@ -25,7 +25,6 @@ class Note < ActiveRecord::Base
             pub_notes = Note.find_by_sql("
             SELECT id, latitude, longitude, user_id
             FROM notes
-            FORCE INDEX (index_notes_on_latlon)
             WHERE
               private=false AND user_id!=#{current_user.id} AND
               MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)
@@ -36,7 +35,6 @@ class Note < ActiveRecord::Base
           user_notes = Note.find_by_sql("
             SELECT id, latitude, longitude, user_id
             FROM notes
-            FORCE INDEX (index_notes_on_latlon)
             WHERE
               user_id=#{current_user.id} AND
               MBRContains(GeomFromText( '#{linestring_text}' ), notes.latlon)")
