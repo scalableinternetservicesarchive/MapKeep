@@ -26,12 +26,14 @@ mapkeep.AlbumManager = function(formMan, auth) {
  * @param albums - All of the user's albums
  */
 mapkeep.AlbumManager.prototype.init = function(albums) {
+  // TODO: Find the next id that albums' link_to will create.
   // Index albums by id to name
   if (albums.length > 0) {
     this.curAlbumId = albums[albums.length-1].id + 1;
   } else {
     this.curAlbumId = 1;
   }
+  console.log(this.curAlbumId);
 };
 
 /**
@@ -121,6 +123,7 @@ mapkeep.AlbumManager.prototype.showForm = function(formNum) {
   // Show specified form
   overlay.append(this.curForm).removeClass('hide');
 
+  console.log(this.curAlbumId);
   this.submitForm();
   this.closeForm();
 
