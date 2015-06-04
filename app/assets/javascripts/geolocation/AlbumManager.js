@@ -2,8 +2,8 @@ var mapkeep = mapkeep || {};
 
 /**
  * A form helper for form creation and dom manipulation
- * @param app Mapkeep app, map manipulation
- * @param auth
+ * @param formMan An instance of the Form Manager for fn calls
+ * @param auth Mapkeep authorization token
  * @constructor
  */
 mapkeep.AlbumManager = function(formMan, auth) {
@@ -33,7 +33,6 @@ mapkeep.AlbumManager.prototype.init = function(albums) {
   } else {
     this.curAlbumId = 1;
   }
-  console.log(this.curAlbumId);
 };
 
 /**
@@ -123,7 +122,6 @@ mapkeep.AlbumManager.prototype.showForm = function(formNum) {
   // Show specified form
   overlay.append(this.curForm).removeClass('hide');
 
-  console.log(this.curAlbumId);
   this.submitForm();
   this.closeForm();
 

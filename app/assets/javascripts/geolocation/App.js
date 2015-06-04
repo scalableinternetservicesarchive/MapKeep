@@ -199,6 +199,10 @@ mapkeep.App.prototype.dropPin = function() {
   this.formManager.showForm(null, 450);
 };
 
+/**
+ * Sets up the form for album creation by initializing the album-overlay
+ * view
+ */
 mapkeep.App.prototype.createAlbum = function() {
   // Show album in overlay with a new form
   var num = this.albumManager.createAlbumView();
