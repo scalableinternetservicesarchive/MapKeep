@@ -31,7 +31,7 @@ mapkeep.FormManager.prototype.init = function(albums) {
 
   var overlay = $('#overlay');
 
-  // Cancel either removes not/marker or undos changes made
+  // Cancel either removes note/marker or undoes changes made
   overlay.on('click', '#cancel-button', function() {
     if (this.curForm.hasClass('new_note')) {
       // Remove note and marker
@@ -181,6 +181,7 @@ mapkeep.FormManager.prototype.createTextGroup = function(note) {
     .text(note ? note.body : '');
 
   return $('<div/>')
+    .attr('id', 'form-box')
     .append(title)
     .append('<br/>')
     .append(textarea);
@@ -486,7 +487,7 @@ mapkeep.FormManager.prototype.createAlbumHtml = function(note) {
     .attr('href', '#')
     .html('+ Album');
   albumHtml.append(dropDownButton);
-  albumHtml.append(this.createAlbumDropDown());
+  albumHtml.append(this.createAlbumDropDown(false));
 
   return albumHtml;
 };
@@ -496,8 +497,8 @@ mapkeep.FormManager.prototype.createAlbumHtml = function(note) {
  * Re-uses dropdown since it will never change functionality
  * @returns {*|jQuery}
  */
-mapkeep.FormManager.prototype.createAlbumDropDown = function() {
-  if (!this.dropDown) {
+mapkeep.FormManager.prototype.createAlbumDropDown = function(recreate) {
+  if (!this.dropDown || recreate) {
     this.dropDown = ($('<ul data-dropdown-content/>')
       .addClass('f-dropdown')
       .attr('id', 'album-dropdown')
@@ -610,4 +611,15 @@ mapkeep.FormManager.prototype.resetDefaultValuesTo = function(note) {
     .prop('defaultChecked', note.private);
   this.curForm.find('#privateFalse')
     .prop('defaultChecked', !note.private);
+};
+
+/**
+ * Upon creation of a new album, update the list of albums, then
+ * recreate the album drop down list.
+ */
+mapkeep.FormManager.prototype.updateAlbums = function(newAlbum) {
+  this.albums[newAlbum.id] = newAlbum.title;
+  // The following line will change album drop down despite no reloading.
+  this.createAlbumDropDown(true);
+  // NOTE: If currently viewing note, will still need to close and reopen.
 };
