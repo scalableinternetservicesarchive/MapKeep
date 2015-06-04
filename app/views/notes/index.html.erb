@@ -6,22 +6,20 @@
 });
 </script>
 
-<% cache(cache_key_for_notes) do %>
+<h1>Listing Notes</h1>
+<% if !@notes.empty? %>
+  <table id="notes-table" class="hide">
+    <thead>
+    <tr>
+    <% 5.times do %>
+      <th></th>
+    <% end %>
+    </tr>
+    </thead>
 
-  <h1>Listing Notes</h1>
-  <% unless @notes.empty? %>
-    <table id="notes-table" class="hide">
-      <thead>
-      <tr>
-      <% 5.times do %>
-        <th></th>
-      <% end %>
-      </tr>
-      </thead>
-
-      <tbody>
+    <tbody>
+    <% cache(cache_key_for_notes) do %>
       <% @notes.each do |note| %>
-        <% cache(note) do %>
           <tr>
             <td><%= note.title %></td>
             <td><%= link_to 'Show', note %></td>
@@ -31,15 +29,13 @@
                 >Show/Edit</a></td>
             <td><%= link_to 'Delete', note, method: :delete, data: { confirm: 'Are you sure?' } %></td>
         </tr>
-        <% end %>
       <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    Nothing yet!
-    <br>
-  <% end %>
-
+    <% end %>
+    </tbody>
+  </table>
+<% else %>
+  Nothing yet!
+  <br>
 <% end %>
 
 <br>
