@@ -102,6 +102,7 @@ mapkeep.AlbumManager.prototype.createFormButtons = function() {
   var cancel = $('<button/>')
     .text('Cancel')
     .addClass('album secondary tiny right')
+    .attr('type', 'button')
     .attr('id', 'album-cancel-button');
 
   return holder

@@ -73,9 +73,6 @@
         <% end %>
         <% unless current_user.nil? %>
           <h4>Albums</h4>
-          <% if controller.controller_name == 'index'  %>
-            <br><button class="button tiny" id="create_album">Create Album</button>
-          <% end %>
           <ul class="side-nav" id="side-albums">
           <% current_user.albums.each do |album| %>
             <li><%= link_to album.title, album %></li>
@@ -83,6 +80,9 @@
           </ul>
           <% if current_user.albums.length == 0 %>
             <p id='no-album'>You currently have no albums.<br/></p>
+          <% end %>
+          <% if controller.controller_name == 'index'  %>
+            <button class="button tiny" id="create_album">Create Album</button>
           <% end %>
         <%end %>
       </div>
